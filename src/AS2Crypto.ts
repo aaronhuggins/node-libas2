@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 export class AS2Crypto {
   public Constants = {
     SIGNATURE_HEADER: '-----BEGIN PKCS7-----\r\n',

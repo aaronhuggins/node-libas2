@@ -1,15 +1,14 @@
 import 'mocha'
-import { AS2Crypto, AS2MimeSection, AS2MimeMultipartSigned } from '../core'
+import { AS2MimeSection, AS2MimeMultipartSigned } from '../core'
 
 import fs = require('fs')
 
 const data = fs.readFileSync('test/test-data/content.txt', 'utf8')
 const cert = fs.readFileSync('test/test-data/sample_cert.cer', 'utf8')
 const key = fs.readFileSync('test/test-data/sample_priv.key', 'utf8')
-const run = function run (command: string): Promise<string> {
-
+const run = async function run (command: string): Promise<string> {
   return new Promise((resolve, reject) => {
-    const cp = require('child_process')
+    const cp = require('child_process') // eslint-disable-line @typescript-eslint/no-var-requires
     const output: string[] = []
     const error: string[] = []
     const child = cp.exec(command)
