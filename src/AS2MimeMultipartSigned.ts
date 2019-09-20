@@ -44,6 +44,20 @@ export class AS2MimeMultipartSigned extends AS2MimeMultipart {
     }
   }
 
+  protected _writeHeaders (multipart: string[]): void {
+    if (this._useHeaders) {
+      Object.keys(this._headers).forEach((header) => {
+        if (Object.prototype.hasOwnProperty.call(this._headers, header) as boolean) {
+          multipart.push(`${header}: ${this._headers[header]}`)
+        }
+      })
+      multipart.push('')
+    }
+
+    multipart.push('This is an S/MIME signed message')
+    multipart.push('')
+  }
+
   protected _setHeaders (): void {
     const algorithm: string = this._algorithm === 'sha256'
       ? 'sha-256'

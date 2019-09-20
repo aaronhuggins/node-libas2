@@ -1,6 +1,4 @@
 export class AS2Crypto {
-  readonly forge = require('node-forge')
-  readonly crypto = require('crypto')
   public Constants = {
     SIGNATURE_HEADER: '-----BEGIN PKCS7-----\r\n',
     SIGNATURE_FOOTER: '-----END PKCS7-----\r\n'
@@ -19,8 +17,10 @@ export class AS2Crypto {
       signature = `${this.Constants.SIGNATURE_HEADER}${signature}${this.Constants.SIGNATURE_FOOTER}`
     }
 
-    const msg = this.forge.pkcs7.messageFromPem(signature)
-    const verifier = this.crypto.createVerify(algorithm)
+    const forge = require('node-forge')
+    const crypto = require('crypto')
+    const msg = forge.pkcs7.messageFromPem(signature)
+    const verifier = crypto.createVerify(algorithm)
 
     verifier.update(Buffer.from(data))
 
@@ -37,18 +37,19 @@ export class AS2Crypto {
    * @returns {string} The signature of the data.
    */
   public sign (data: string | any, publicCert: string, privateKey: string, algorithm: string = 'sha1'): string {
-    const p7 = this.forge.pkcs7.createSignedData()
+    const forge = require('node-forge')
+    const p7 = forge.pkcs7.createSignedData()
 
-    p7.content = this.forge.util.createBuffer(data)
+    p7.content = forge.util.createBuffer(data)
     p7.addCertificate(publicCert)
     p7.addSigner({
-      key: this.forge.pki.privateKeyFromPem(privateKey),
+      key: forge.pki.privateKeyFromPem(privateKey),
       certificate: publicCert,
-      digestAlgorithm: this.forge.pki.oids[algorithm]
+      digestAlgorithm: forge.pki.oids[algorithm]
     })
     p7.sign()
 
-    return this.forge.pkcs7.messageToPem(p7).replace(this.Constants.SIGNATURE_HEADER, '').replace(this.Constants.SIGNATURE_FOOTER, '')
+    return forge.pkcs7.messageToPem(p7).replace(this.Constants.SIGNATURE_HEADER, '').replace(this.Constants.SIGNATURE_FOOTER, '')
   }
 
   /**
@@ -57,8 +58,9 @@ export class AS2Crypto {
    * @returns {object} The public key, private key, and the certificate.
    */
   public createSimpleX509v3 (options: SimpleX509v3Options): any {
-    const keys = this.forge.pki.rsa.generateKeyPair(2048)
-    const cert = this.forge.pki.createCertificate()
+    const forge = require('node-forge')
+    const keys = forge.pki.rsa.generateKeyPair(2048)
+    const cert = forge.pki.createCertificate()
 
     cert.publicKey = keys.publicKey
     cert.serialNumber = options.serial === undefined
@@ -136,16 +138,16 @@ export class AS2Crypto {
     }])
 
     // self-sign certificate
-    const digest = this.forge.md[options.digest] === undefined
-      ? this.forge.md.sha256
-      : this.forge.md[options.digest]
+    const digest = forge.md[options.digest] === undefined
+      ? forge.md.sha256
+      : forge.md[options.digest]
 
     cert.sign(keys.privateKey, digest.create())
 
     return {
-      publicKey: this.forge.pki.publicKeyToPem(keys.publicKey),
-      privateKey: this.forge.pki.privateKeyToPem(keys.privateKey),
-      certificate: this.forge.pki.certificateToPem(cert)
+      publicKey: forge.pki.publicKeyToPem(keys.publicKey),
+      privateKey: forge.pki.privateKeyToPem(keys.privateKey),
+      certificate: forge.pki.certificateToPem(cert)
     }
   }
 }

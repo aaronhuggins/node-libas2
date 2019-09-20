@@ -21,6 +21,25 @@ export class AS2MimeMultipart {
   getMultipart (): string {
     const multipart: string[] = []
 
+    this._writeHeaders(multipart)
+
+    this._mime.forEach((mime) => {
+      multipart.push(`--${this._boundary}`)
+      multipart.push(mime.getMime())
+    })
+
+    multipart.push(`--${this._boundary}--`)
+    multipart.push('')
+    multipart.push('')
+
+    return multipart.join(this.Constants.CONTROL_CHAR)
+  }
+
+  toString (): string {
+    return this.getMultipart()
+  }
+
+  protected _writeHeaders (multipart: string[]): void {
     if (this._useHeaders) {
       Object.keys(this._headers).forEach((header) => {
         if (Object.prototype.hasOwnProperty.call(this._headers, header) as boolean) {
@@ -29,20 +48,6 @@ export class AS2MimeMultipart {
       })
       multipart.push('')
     }
-
-    this._mime.forEach((mime) => {
-      multipart.push(this._boundary)
-      multipart.push(mime.getMime())
-    })
-
-    multipart.push(this._boundary)
-    multipart.push('')
-
-    return multipart.join(this.Constants.CONTROL_CHAR)
-  }
-
-  toString (): string {
-    return this.getMultipart()
   }
 
   protected _setBoundary (): void {
