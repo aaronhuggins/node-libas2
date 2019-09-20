@@ -1,0 +1,12 @@
+{
+  "extends": [
+    "standard-with-typescript",
+    "standard-jsdoc"
+  ],
+  "parserOptions": {
+      "project": "./tsconfig.json"
+  },
+  "globals": {
+      "mocha": "readonly"
+  }
+}

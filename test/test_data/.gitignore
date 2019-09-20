@@ -1,0 +1,2 @@
+## Ignore private keys matching this pattern.
+**.priv.key

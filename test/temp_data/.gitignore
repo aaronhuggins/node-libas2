@@ -1,0 +1,5 @@
+## Ignore data written to this directory.
+**
+
+## Include this gitignore.
+!.gitignore
