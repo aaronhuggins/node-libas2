@@ -1,4 +1,6 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
+import forge = require('node-forge')
+import crypto = require('crypto')
+
 export class AS2Crypto {
   public Constants = {
     SIGNATURE_HEADER: '-----BEGIN PKCS7-----\r\n',
@@ -18,8 +20,6 @@ export class AS2Crypto {
       signature = `${this.Constants.SIGNATURE_HEADER}${signature}${this.Constants.SIGNATURE_FOOTER}`
     }
 
-    const forge = require('node-forge')
-    const crypto = require('crypto')
     const msg = forge.pkcs7.messageFromPem(signature)
     const verifier = crypto.createVerify(algorithm)
 
@@ -38,7 +38,6 @@ export class AS2Crypto {
    * @returns {string} The signature of the data.
    */
   public sign (data: string | any, publicCert: string, privateKey: string, algorithm: string = 'sha1'): string {
-    const forge = require('node-forge')
     const p7 = forge.pkcs7.createSignedData()
 
     p7.content = forge.util.createBuffer(data)
@@ -59,17 +58,16 @@ export class AS2Crypto {
    * @returns {object} The public key, private key, and the certificate.
    */
   public createSimpleX509v3 (options: SimpleX509v3Options): any {
-    const forge = require('node-forge')
     const keys = forge.pki.rsa.generateKeyPair(2048)
     const cert = forge.pki.createCertificate()
 
     cert.publicKey = keys.publicKey
     cert.serialNumber = options.serial === undefined
-      ? Math.floor(Math.random() * 1000000000000000000).toString().padStart(18, '0')
-      : options.serial
+      ? `${Math.floor(Math.random() * 1000000000000000000).toString().padStart(18, '0')}`
+      : `${options.serial}`
     cert.validity.notBefore = new Date()
     cert.validity.notAfter = new Date()
-    cert.validity.notAfter.setFullYear(cert.validity.notBefore.getFullYear() as number + options.years)
+    cert.validity.notAfter.setFullYear(cert.validity.notBefore.getFullYear() + options.years)
 
     const attrs = [{
       name: 'commonName',
