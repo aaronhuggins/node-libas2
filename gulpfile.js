@@ -59,7 +59,7 @@ gulp.task('eslint:xunit', shell.task([
 }))
 
 gulp.task('codecov', shell.task([
-  'codecov -t 710da1b2-17ab-40d3-86e3-d8cbce8b8ce3'
+  'codecov -t FOOBAR'
 ]))
 
 gulp.task('test', gulp.parallel(

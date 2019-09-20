@@ -22,7 +22,7 @@ module.exports = {
   },
   plugins: [
     new DtsBundleWebpack({
-      name: 'node-x12',
+      name: 'libas2',
       baseDir: './',
       main: 'dist/core.d.ts',
       out: 'index.d.ts'
