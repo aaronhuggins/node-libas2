@@ -1,5 +1,5 @@
 import 'mocha'
-import { AS2MimeSection, AS2MimeMultipartSigned } from '../core'
+import { AS2MimePart, AS2MimeMultipartSigned } from '../core'
 
 import fs = require('fs')
 
@@ -24,7 +24,7 @@ const run = async function run (command: string): Promise<string> {
 
 describe('AS2Encoder', () => {
   it('should match makemime output.', async () => {
-    const mime = new AS2MimeSection(data)
+    const mime = new AS2MimePart(data)
     const makemime = await run('bash -c "makemime -c "text/plain" -e 8bit test/test-data/content.txt"')
 
     // Command 'makemime' encodes using lf instead of crlf; need to investigate as this is not per rfc, I think.
@@ -34,7 +34,7 @@ describe('AS2Encoder', () => {
   })
 
   it('should be verified by openssl.', async () => {
-    const mime = new AS2MimeSection(data)
+    const mime = new AS2MimePart(data)
     const smime = new AS2MimeMultipartSigned(mime, cert, key, 'sha256')
 
     fs.writeFileSync('test/temp-data/multipart.txt', smime.toString())

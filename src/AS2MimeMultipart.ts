@@ -1,7 +1,7 @@
-import { AS2MimeSection, MimeHeaders } from './AS2MimeSection'
+import { AS2MimePart, MimeHeaders } from './AS2MimePart'
 
 export class AS2MimeMultipart {
-  constructor (mime: AS2MimeSection[], useHeaders: boolean = true) {
+  constructor (mime: AS2MimePart[], useHeaders: boolean = true) {
     this._mime = mime
     this._useHeaders = useHeaders
     this._setBoundary()
@@ -9,7 +9,7 @@ export class AS2MimeMultipart {
   }
 
   readonly uuidv4 = require('uuid/v4')
-  readonly _mime: AS2MimeSection[]
+  readonly _mime: AS2MimePart[]
   readonly _useHeaders: boolean
   protected _boundary: string
   protected _headers: MimeHeaders

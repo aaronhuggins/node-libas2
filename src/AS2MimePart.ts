@@ -1,4 +1,4 @@
-export class AS2MimeSection {
+export class AS2MimePart {
   constructor (data: string | Uint8Array | Buffer, mimeType?: MimeType, name?: string, headers?: MimeHeaders, encoding?: '8bit' | 'binary' | 'base64') {
     this._data = data
     this._mimeType = mimeType

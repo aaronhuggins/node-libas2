@@ -1,9 +1,9 @@
 import { AS2MimeMultipart } from './AS2MimeMultipart'
-import { AS2MimeSection } from './AS2MimeSection'
+import { AS2MimePart } from './AS2MimePart'
 import { AS2Crypto } from './AS2Crypto'
 
 export class AS2MimeMultipartSigned extends AS2MimeMultipart {
-  constructor (mime: AS2MimeSection, publicCert: string, privateKey: string, algorithm: 'sha1' | 'sha256' = 'sha1', useHeaders: boolean = true) {
+  constructor (mime: AS2MimePart, publicCert: string, privateKey: string, algorithm: 'sha1' | 'sha256' = 'sha1', useHeaders: boolean = true) {
     super([mime], useHeaders)
     this._publicCert = publicCert
     this._privateKey = privateKey
@@ -31,7 +31,7 @@ export class AS2MimeMultipartSigned extends AS2MimeMultipart {
       const as2Crypto = new AS2Crypto()
       const mime = this._mime[0]
       const signature = as2Crypto.sign(mime.getMime(), this._publicCert, this._privateKey, this._algorithm)
-      const mimeSignature = new AS2MimeSection(
+      const mimeSignature = new AS2MimePart(
         signature,
         'application/x-pkcs7-signature',
         'smime.p7s',
