@@ -1,8 +1,9 @@
 import * as AS2Constants from './AS2Constants'
 
 export class AS2MimePart {
-  constructor (data: string | Uint8Array | Buffer, mimeType?: AS2Constants.MimeType, name?: string, headers?: AS2Constants.MimeHeaders, encoding?: AS2Constants.AS2Encoding) {
+  constructor (data: string | Uint8Array | Buffer, attachHeaders: boolean = true, mimeType?: AS2Constants.MimeType, name?: string, headers?: AS2Constants.MimeHeaders, encoding?: AS2Constants.AS2Encoding) {
     this._data = data
+    this._attachHeaders = attachHeaders
     this._mimeType = mimeType
     this._name = name
     this._headers = headers
@@ -11,6 +12,7 @@ export class AS2MimePart {
   }
 
   readonly _data: string | Uint8Array | Buffer
+  protected _attachHeaders: boolean
   protected _mimeType: AS2Constants.MimeType
   protected _name: string
   protected _headers: AS2Constants.MimeHeaders
@@ -33,29 +35,31 @@ export class AS2MimePart {
 
   getMime (): string {
     const mime: string[] = []
-    let contentType = `${this._mimeType}`
     let content = this._data
+    let contentType = `${this._mimeType}`
 
-    if (this._headers['Content-Type'] !== undefined) {
-      contentType = this._headers['Content-Type']
-    } else if (this._headers['content-type'] !== undefined) {
-      contentType = this._headers['content-type']
-    }
-
-    if (this._name !== undefined) {
-      contentType = `${contentType}; name="${this._name}"`
-    }
-
-    mime.push(`Content-Type: ${contentType}`)
-
-    Object.keys(this._headers).forEach((header) => {
-      if (Object.prototype.hasOwnProperty.call(this._headers, header) as boolean && header.toLowerCase() !== 'content-type' && header.toLowerCase() !== 'content-transfer-encoding') {
-        mime.push(`${header}: ${this._headers[header]}`)
+    if (this._attachHeaders) {
+      if (this._headers['Content-Type'] !== undefined) {
+        contentType = this._headers['Content-Type']
+      } else if (this._headers['content-type'] !== undefined) {
+        contentType = this._headers['content-type']
       }
-    })
 
-    mime.push(`Content-Transfer-Encoding: ${this._encoding}`)
-    mime.push('')
+      if (this._name !== undefined) {
+        contentType = `${contentType}; name="${this._name}"`
+      }
+
+      mime.push(`Content-Type: ${contentType}`)
+
+      Object.keys(this._headers).forEach((header) => {
+        if (Object.prototype.hasOwnProperty.call(this._headers, header) as boolean && header.toLowerCase() !== 'content-type' && header.toLowerCase() !== 'content-transfer-encoding') {
+          mime.push(`${header}: ${this._headers[header]}`)
+        }
+      })
+
+      mime.push(`Content-Transfer-Encoding: ${this._encoding}`)
+      mime.push('')
+    }
 
     if (typeof this._data !== 'string') {
       const buffer = Buffer.from(this._data.buffer)

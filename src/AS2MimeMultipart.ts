@@ -3,15 +3,15 @@ import { AS2MimePart } from './AS2MimePart'
 import uuidv4 = require('uuid/v4')
 
 export class AS2MimeMultipart {
-  constructor (mime: AS2MimePart[], useHeaders: boolean = true) {
+  constructor (mime: AS2MimePart[], attachHeaders: boolean = true) {
     this._mime = mime
-    this._useHeaders = useHeaders
+    this._attachHeaders = attachHeaders
     this._setBoundary()
     this._setHeaders()
   }
 
   readonly _mime: AS2MimePart[]
-  readonly _useHeaders: boolean
+  protected _attachHeaders: boolean
   protected _boundary: string
   protected _headers: AS2Constants.MimeHeaders
   protected Constants = {
@@ -41,7 +41,7 @@ export class AS2MimeMultipart {
   }
 
   protected _writeHeaders (multipart: string[]): void {
-    if (this._useHeaders) {
+    if (this._attachHeaders) {
       Object.keys(this._headers).forEach((header) => {
         if (Object.prototype.hasOwnProperty.call(this._headers, header) as boolean) {
           multipart.push(`${header}: ${this._headers[header]}`)

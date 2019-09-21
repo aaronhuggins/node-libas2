@@ -4,8 +4,8 @@ import { AS2MimePart } from './AS2MimePart'
 import { AS2Crypto } from './AS2Crypto'
 
 export class AS2MimeMultipartSigned extends AS2MimeMultipart {
-  constructor (mime: AS2MimePart, publicCert: string, privateKey: string, algorithm: AS2Constants.AS2Algorithm = AS2Constants.CRYPTO_ALGORITHM.SHA1, useHeaders: boolean = true) {
-    super([mime], useHeaders)
+  constructor (mime: AS2MimePart, publicCert: string, privateKey: string, algorithm: AS2Constants.AS2Algorithm = AS2Constants.CRYPTO_ALGORITHM.SHA1, attachHeaders: boolean = true) {
+    super([mime], attachHeaders)
     this._publicCert = publicCert
     this._privateKey = privateKey
     this._algorithm = algorithm
@@ -34,6 +34,7 @@ export class AS2MimeMultipartSigned extends AS2MimeMultipart {
       const signature = as2Crypto.sign(mime.getMime(), this._publicCert, this._privateKey, this._algorithm)
       const mimeSignature = new AS2MimePart(
         signature,
+        true,
         this.Constants.PROTOCOL_TYPE,
         AS2Constants.SIGNATURE_FILENAME,
         { 'Content-Disposition': `attachment; filename="${AS2Constants.SIGNATURE_FILENAME}"` },
@@ -46,7 +47,7 @@ export class AS2MimeMultipartSigned extends AS2MimeMultipart {
   }
 
   protected _writeHeaders (multipart: string[]): void {
-    if (this._useHeaders) {
+    if (this._attachHeaders) {
       Object.keys(this._headers).forEach((header) => {
         if (Object.prototype.hasOwnProperty.call(this._headers, header) as boolean) {
           multipart.push(`${header}: ${this._headers[header]}`)
