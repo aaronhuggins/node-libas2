@@ -45,10 +45,10 @@ export class AS2Crypto {
     p7.addCertificate(publicCert)
     p7.addSigner({
       key: forge.pki.privateKeyFromPem(privateKey),
-      certificate: publicCert,
+      certificate: forge.pki.certificateFromPem(publicCert),
       digestAlgorithm: forge.pki.oids[algorithm]
     })
-    p7.sign()
+    p7.sign({detached: true})
 
     return forge.pkcs7.messageToPem(p7).replace(this.Constants.SIGNATURE_HEADER, '').replace(this.Constants.SIGNATURE_FOOTER, '')
   }
@@ -156,7 +156,7 @@ interface SimpleX509v3Options {
   city?: string
   commonName: string
   countryName: string
-  digest?: 'sha256' | 'sha384' | 'sha512'
+  digest?: 'sha1' | 'sha256' | 'sha384' | 'sha512'
   IP: string
   localityName?: string
   organizationName?: string

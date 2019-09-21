@@ -2,7 +2,9 @@ import * as AS2Constants from './AS2Constants'
 
 export class AS2MimePart {
   constructor (data: string | Uint8Array | Buffer, attachHeaders: boolean = true, mimeType?: AS2Constants.MimeType, name?: string, headers?: AS2Constants.MimeHeaders, encoding?: AS2Constants.AS2Encoding) {
-    this._data = data
+    this._data = typeof data === 'string'
+      ? this._cleanNewlines(data)
+      : data
     this._attachHeaders = attachHeaders
     this._mimeType = mimeType
     this._name = name
@@ -66,6 +68,7 @@ export class AS2MimePart {
 
       if (AS2Constants.GUARANTEED_TEXT.includes(contentType) && this._encoding !== AS2Constants.ENCODING.BASE64) {
         content = buffer.toString('utf8')
+        content = this._cleanNewlines(content)
       } else if (this._encoding === AS2Constants.ENCODING.BASE64) {
         content = buffer.toString(AS2Constants.ENCODING.BASE64)
       } else {
@@ -92,5 +95,24 @@ export class AS2MimePart {
     this._encoding = this._encoding === undefined
       ? '8bit'
       : this._encoding
+  }
+
+  private _cleanNewlines(data: string): string {
+    let clean = ''
+
+    for (var i = 0; i < data.length; i++) {
+      // Find and replace MAC OS line endings; they do not conform to MIME standard.
+      if (data.charAt(i) === '\r' && data.charAt(i + 1) !== '\n') {
+        clean += this.Constants.CONTROL_CHAR
+
+      // Find and replace POSIX line endings; they do not conform to MIME standard.
+      } else if (data.charAt(i - 1) !== '\r' && data.charAt(i) === '\n') {
+        clean += this.Constants.CONTROL_CHAR
+      } else {
+        clean += data.charAt(i)
+      }
+    }
+
+    return clean
   }
 }
