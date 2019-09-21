@@ -1,4 +1,6 @@
-import { AS2MimePart, MimeHeaders } from './AS2MimePart'
+import * as AS2Constants from './AS2Constants'
+import { AS2MimePart } from './AS2MimePart'
+import uuidv4 = require('uuid/v4')
 
 export class AS2MimeMultipart {
   constructor (mime: AS2MimePart[], useHeaders: boolean = true) {
@@ -8,14 +10,13 @@ export class AS2MimeMultipart {
     this._setHeaders()
   }
 
-  readonly uuidv4 = require('uuid/v4')
   readonly _mime: AS2MimePart[]
   readonly _useHeaders: boolean
   protected _boundary: string
-  protected _headers: MimeHeaders
+  protected _headers: AS2Constants.MimeHeaders
   protected Constants = {
-    MULTIPART_TYPE: 'multipart/mixed',
-    CONTROL_CHAR: '\r\n'
+    MULTIPART_TYPE: AS2Constants.MULTIPART_TYPE.MIXED,
+    CONTROL_CHAR: AS2Constants.CONTROL_CHAR
   }
 
   getMultipart (): string {
@@ -51,12 +52,12 @@ export class AS2MimeMultipart {
   }
 
   protected _setBoundary (): void {
-    this._boundary = `----${this.uuidv4().replace(/-/gu, '').toUpperCase()}`
+    this._boundary = `----${uuidv4().replace(/-/gu, '').toUpperCase()}`
   }
 
   protected _setHeaders (): void {
     this._headers = {
-      'MIME-Version': '1.0',
+      'MIME-Version': AS2Constants.MIME_VERSION,
       'Content-Type': `${this.Constants.MULTIPART_TYPE}; boundary="${this._boundary}"`
     }
   }

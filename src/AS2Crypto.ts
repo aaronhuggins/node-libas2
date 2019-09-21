@@ -1,10 +1,11 @@
+import * as AS2Constants from './AS2Constants'
 import forge = require('node-forge')
 import crypto = require('crypto')
 
 export class AS2Crypto {
   public Constants = {
-    SIGNATURE_HEADER: '-----BEGIN PKCS7-----\r\n',
-    SIGNATURE_FOOTER: '-----END PKCS7-----\r\n'
+    SIGNATURE_HEADER: `-----BEGIN PKCS7-----${AS2Constants.CONTROL_CHAR}`,
+    SIGNATURE_FOOTER: `-----END PKCS7-----${AS2Constants.CONTROL_CHAR}`
   }
 
   /**
@@ -15,7 +16,7 @@ export class AS2Crypto {
    * @param {string} [algorithm='sha1'] - The algorithm for verification.
    * @returns {boolean} True when data matches signature.
    */
-  public verify (data: string | any, signature: string, publicCert: string, algorithm: string = 'sha1'): boolean {
+  public verify (data: string | any, signature: string, publicCert: string, algorithm: string = AS2Constants.CRYPTO_ALGORITHM.SHA1): boolean {
     if (!signature.includes(this.Constants.SIGNATURE_HEADER)) {
       signature = `${this.Constants.SIGNATURE_HEADER}${signature}${this.Constants.SIGNATURE_FOOTER}`
     }
@@ -37,7 +38,7 @@ export class AS2Crypto {
    * @param {string} [algorithm='sha1'] - The algorithm for signing.
    * @returns {string} The signature of the data.
    */
-  public sign (data: string | any, publicCert: string, privateKey: string, algorithm: string = 'sha1'): string {
+  public sign (data: string | any, publicCert: string, privateKey: string, algorithm: string = AS2Constants.CRYPTO_ALGORITHM.SHA1): string {
     const p7 = forge.pkcs7.createSignedData()
 
     p7.content = forge.util.createBuffer(data)

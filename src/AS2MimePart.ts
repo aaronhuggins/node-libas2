@@ -1,5 +1,7 @@
+import * as AS2Constants from './AS2Constants'
+
 export class AS2MimePart {
-  constructor (data: string | Uint8Array | Buffer, mimeType?: MimeType, name?: string, headers?: MimeHeaders, encoding?: '8bit' | 'binary' | 'base64') {
+  constructor (data: string | Uint8Array | Buffer, mimeType?: AS2Constants.MimeType, name?: string, headers?: AS2Constants.MimeHeaders, encoding?: AS2Constants.AS2Encoding) {
     this._data = data
     this._mimeType = mimeType
     this._name = name
@@ -9,23 +11,23 @@ export class AS2MimePart {
   }
 
   readonly _data: string | Uint8Array | Buffer
-  protected _mimeType: MimeType
+  protected _mimeType: AS2Constants.MimeType
   protected _name: string
-  protected _headers: MimeHeaders
-  protected _encoding: '8bit' | 'binary' | 'base64'
+  protected _headers: AS2Constants.MimeHeaders
+  protected _encoding: AS2Constants.AS2Encoding
   protected Constants = {
-    CONTROL_CHAR: '\r\n'
+    CONTROL_CHAR: AS2Constants.CONTROL_CHAR
   }
 
   setName (name: string): void {
     this._name = name
   }
 
-  setHeaders (headers: MimeHeaders): void {
+  setHeaders (headers: AS2Constants.MimeHeaders): void {
     this._headers = headers
   }
 
-  setEncoding (encoding: '8bit' | 'binary' | 'base64'): void {
+  setEncoding (encoding: AS2Constants.AS2Encoding): void {
     this._encoding = encoding
   }
 
@@ -56,25 +58,14 @@ export class AS2MimePart {
     mime.push('')
 
     if (typeof this._data !== 'string') {
-      const guaranteedText = [
-        'text/plain',
-        'application/edi-x12',
-        'application/EDI-X12',
-        'application/edifact',
-        'application/EDIFACT',
-        'application/edi-consent',
-        'application/EDI-Consent',
-        'application/xml',
-        'application/XML'
-      ]
       const buffer = Buffer.from(this._data.buffer)
 
-      if (guaranteedText.includes(contentType) && this._encoding !== 'base64') {
+      if (AS2Constants.GUARANTEED_TEXT.includes(contentType) && this._encoding !== AS2Constants.ENCODING.BASE64) {
         content = buffer.toString('utf8')
-      } else if (this._encoding === 'base64') {
-        content = buffer.toString('base64')
+      } else if (this._encoding === AS2Constants.ENCODING.BASE64) {
+        content = buffer.toString(AS2Constants.ENCODING.BASE64)
       } else {
-        content = buffer.toString('binary')
+        content = buffer.toString(AS2Constants.ENCODING.BINARY)
       }
     }
 
@@ -89,7 +80,7 @@ export class AS2MimePart {
 
   private _setDefaults (): void {
     this._mimeType = this._mimeType === undefined
-      ? 'text/plain'
+      ? 'text/plain' as AS2Constants.MimeType
       : this._mimeType
     this._headers = this._headers === undefined
       ? {}
@@ -98,33 +89,4 @@ export class AS2MimePart {
       ? '8bit'
       : this._encoding
   }
-}
-
-export type MimeType =
-'text/plain' |
-'application/edi-x12' |
-'application/EDI-X12' |
-'application/edifact' |
-'application/EDIFACT' |
-'application/edi-consent' |
-'application/EDI-Consent' |
-'application/pkcs7-signature' |
-'application/pkcs7-mime' |
-'application/x-pkcs7-signature' |
-'application/xml' |
-'application/XML' |
-'message/disposition-notification' |
-'multipart/mixed' |
-'multipart/report' |
-'multipart/signed'
-
-export interface MimeHeaders {
-  'MIME-Version'?: '1.0'
-  'mime-version'?: '1.0'
-  'Content-Type'?: string
-  'content-type'?: string
-  'Content-Disposition'?: string
-  'content-disposition'?: string
-  'Content-Transfer-Encoding'?: '8bit' | 'binary' | 'base64'
-  'content-transfer-encoding'?: '8bit' | 'binary' | 'base64'
 }

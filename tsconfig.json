@@ -16,7 +16,8 @@
     "types": [
       "node-forge",
       "mocha",
-      "node"
+      "node",
+      "uuid"
     ]
   },
 

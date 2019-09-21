@@ -1,9 +1,10 @@
+import * as AS2Constants from './AS2Constants'
 import { AS2MimeMultipart } from './AS2MimeMultipart'
 import { AS2MimePart } from './AS2MimePart'
 import { AS2Crypto } from './AS2Crypto'
 
 export class AS2MimeMultipartSigned extends AS2MimeMultipart {
-  constructor (mime: AS2MimePart, publicCert: string, privateKey: string, algorithm: 'sha1' | 'sha256' = 'sha1', useHeaders: boolean = true) {
+  constructor (mime: AS2MimePart, publicCert: string, privateKey: string, algorithm: AS2Constants.AS2Algorithm = AS2Constants.CRYPTO_ALGORITHM.SHA1, useHeaders: boolean = true) {
     super([mime], useHeaders)
     this._publicCert = publicCert
     this._privateKey = privateKey
@@ -14,12 +15,12 @@ export class AS2MimeMultipartSigned extends AS2MimeMultipart {
 
   protected _publicCert: string
   protected _privateKey: string
-  protected _algorithm: 'sha1' | 'sha256'
+  protected _algorithm: AS2Constants.AS2Algorithm
   protected _signed: boolean = false
   protected Constants = {
-    MULTIPART_TYPE: 'multipart/signed',
-    CONTROL_CHAR: '\r\n',
-    PROTOCOL_TYPE: 'application/x-pkcs7-signature'
+    MULTIPART_TYPE: AS2Constants.MULTIPART_TYPE.SIGNED,
+    CONTROL_CHAR: AS2Constants.CONTROL_CHAR,
+    PROTOCOL_TYPE: AS2Constants.PROTOCOL_TYPE.PKCS7
   }
 
   protected _signMime (): void {
@@ -33,10 +34,10 @@ export class AS2MimeMultipartSigned extends AS2MimeMultipart {
       const signature = as2Crypto.sign(mime.getMime(), this._publicCert, this._privateKey, this._algorithm)
       const mimeSignature = new AS2MimePart(
         signature,
-        'application/x-pkcs7-signature',
-        'smime.p7s',
-        { 'Content-Disposition': 'attachment; filename="smime.p7s"' },
-        'base64'
+        this.Constants.PROTOCOL_TYPE,
+        AS2Constants.SIGNATURE_FILENAME,
+        { 'Content-Disposition': `attachment; filename="${AS2Constants.SIGNATURE_FILENAME}"` },
+        AS2Constants.ENCODING.BASE64
       )
 
       this._mime.push(mimeSignature)
@@ -54,17 +55,17 @@ export class AS2MimeMultipartSigned extends AS2MimeMultipart {
       multipart.push('')
     }
 
-    multipart.push('This is an S/MIME signed message')
+    multipart.push(AS2Constants.SMIME_DESC)
     multipart.push('')
   }
 
   protected _setHeaders (): void {
-    const algorithm: string = this._algorithm === 'sha256'
-      ? 'sha-256'
-      : 'sha1'
+    const algorithm: string = this._algorithm === AS2Constants.CRYPTO_ALGORITHM.SHA256
+      ? AS2Constants.MIC_ALGORITHM.SHA256
+      : AS2Constants.MIC_ALGORITHM.SHA1
 
     this._headers = {
-      'MIME-Version': '1.0',
+      'MIME-Version': AS2Constants.MIME_VERSION,
       'Content-Type': `${this.Constants.MULTIPART_TYPE}; protocol="${this.Constants.PROTOCOL_TYPE}"; micalg="${algorithm}"; boundary="${this._boundary}"`
     }
   }
