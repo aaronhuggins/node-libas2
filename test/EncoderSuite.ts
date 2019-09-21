@@ -25,7 +25,7 @@ const run = async function run (command: string): Promise<string> {
 describe('AS2Encoder', () => {
   it('should match makemime output.', async () => {
     const mime = new AS2MimePart(data)
-    const makemime = await run('bash -c "makemime -c "text/plain" -e 8bit test/temp-data/content2.edi"')
+    const makemime = await run('bash -c "makemime -c "text/plain" -e 8bit test/test-data/content.txt"')
 
     // Command 'makemime' encodes using lf instead of crlf; this is non-standard MIME.
     if (mime.toString().replace(/\r\n/gu, '\n') !== makemime) {
