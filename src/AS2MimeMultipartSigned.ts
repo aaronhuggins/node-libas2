@@ -46,8 +46,8 @@ export class AS2MimeMultipartSigned extends AS2MimeMultipart {
     }
   }
 
-  protected _writeHeaders (multipart: string[]): void {
-    if (this._attachHeaders) {
+  protected _writeHeaders (multipart: string[], attachHeaders?: boolean): void {
+    if (this._attachHeaders || attachHeaders) {
       Object.keys(this._headers).forEach((header) => {
         if (Object.prototype.hasOwnProperty.call(this._headers, header) as boolean) {
           multipart.push(`${header}: ${this._headers[header]}`)

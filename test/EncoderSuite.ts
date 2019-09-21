@@ -1,5 +1,5 @@
 import 'mocha'
-import { AS2MimePart, AS2MimeMultipartSigned } from '../core'
+import { AS2MimePart, AS2MimeMultipartSigned, AS2MimeEncrypted } from '../core'
 
 import fs = require('fs')
 
@@ -34,7 +34,7 @@ describe('AS2Encoder', () => {
   })
 
   it('should be verified by openssl.', async () => {
-    const mime = new AS2MimePart(data, false, 'application/edi-x12', 'message.edi', { 'Content-Disposition': 'attachment; filename="message.edi"'}, 'binary')
+    const mime = new AS2MimePart(data, false, 'application/edi-x12', 'message.edi', { 'Content-Disposition': 'attachment; filename="message.edi"' }, 'binary')
     const smime = new AS2MimeMultipartSigned(mime, cert, key)
 
     fs.writeFileSync('test/temp-data/multipart.txt', smime.toString())
@@ -42,7 +42,21 @@ describe('AS2Encoder', () => {
     const openssl = await run('bash -c "openssl smime -verify -noverify -in test/temp-data/multipart.txt -signer test/test-data/sample_cert.cer"')
 
     if (mime.toString() !== openssl) {
-      throw new Error(`Mime section not correctly constructed.\nExpected: '${'openssl'}'\nReceived: '${'mime.toString()'}'`)
+      throw new Error(`Mime section not correctly signed.\nExpected: '${mime.toString()}'\nReceived: '${openssl}'`)
+    }
+  })
+
+  it('should be decrypted by openssl', async () => {
+    const mime = new AS2MimePart(data, false, 'application/edi-x12', 'message.edi', { 'Content-Disposition': 'attachment; filename="message.edi"' }, 'binary')
+    const smime = new AS2MimeMultipartSigned(mime, cert, key)
+    const encrypted = new AS2MimeEncrypted(smime, cert)
+
+    fs.writeFileSync('test/temp-data/encrypted.txt', encrypted.toString())
+
+    const openssl = await run('bash -c "openssl smime -decrypt -in test/temp-data/encrypted.txt -recip test/test-data/sample_cert.cer  -inkey test/test-data/sample_priv.key -des3"')
+
+    if (smime.toString() !== openssl) {
+      throw new Error(`Mime section not correctly encrypted.\nExpected: '${smime.toString()}'\nReceived: '${openssl}'`)
     }
   })
 })

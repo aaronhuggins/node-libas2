@@ -19,10 +19,10 @@ export class AS2MimeMultipart {
     CONTROL_CHAR: AS2Constants.CONTROL_CHAR
   }
 
-  getMultipart (): string {
+  getMultipart (attachHeaders?: boolean): string {
     const multipart: string[] = []
 
-    this._writeHeaders(multipart)
+    this._writeHeaders(multipart, attachHeaders)
 
     this._mime.forEach((mime) => {
       multipart.push(`--${this._boundary}`)
@@ -36,12 +36,12 @@ export class AS2MimeMultipart {
     return multipart.join(this.Constants.CONTROL_CHAR)
   }
 
-  toString (): string {
+  toString (attachHeaders?: boolean): string {
     return this.getMultipart()
   }
 
-  protected _writeHeaders (multipart: string[]): void {
-    if (this._attachHeaders) {
+  protected _writeHeaders (multipart: string[], attachHeaders?: boolean): void {
+    if (this._attachHeaders || attachHeaders) {
       Object.keys(this._headers).forEach((header) => {
         if (Object.prototype.hasOwnProperty.call(this._headers, header) as boolean) {
           multipart.push(`${header}: ${this._headers[header]}`)

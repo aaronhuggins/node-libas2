@@ -8,7 +8,7 @@ export class AS2Crypto {
     SIGNATURE_FOOTER: `-----END PKCS7-----${AS2Constants.CONTROL_CHAR}`
   }
 
-    /**
+  /**
    * @description Method to decrypt data from a PKCS7 3DES string in base64.
    * @param {string} data - The data to decrypt from PKCS7 3DES.
    * @param {string} publicCert - The public certificate in PEM format to verify.
@@ -84,7 +84,7 @@ export class AS2Crypto {
       certificate: forge.pki.certificateFromPem(publicCert),
       digestAlgorithm: forge.pki.oids[algorithm]
     })
-    p7.sign({detached: true})
+    p7.sign({ detached: true })
 
     return forge.pkcs7.messageToPem(p7).replace(this.Constants.SIGNATURE_HEADER, '').replace(this.Constants.SIGNATURE_FOOTER, '')
   }

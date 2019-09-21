@@ -13,7 +13,7 @@ export class AS2MimePart {
     this._setDefaults()
   }
 
-  readonly _data: string | Uint8Array | Buffer
+  protected _data: string | Uint8Array | Buffer
   protected _attachHeaders: boolean
   protected _mimeType: AS2Constants.MimeType
   protected _name: string
@@ -97,7 +97,7 @@ export class AS2MimePart {
       : this._encoding
   }
 
-  private _cleanNewlines(data: string): string {
+  private _cleanNewlines (data: string): string {
     let clean = ''
 
     for (var i = 0; i < data.length; i++) {

@@ -3,6 +3,7 @@ export const CONTROL_CHAR = '\r\n'
 export const MIME_VERSION = '1.0'
 export const SMIME_DESC = 'This is an S/MIME signed message'
 export const SIGNATURE_FILENAME = 'smime.p7s'
+export const ENCRYPTION_FILENAME = 'smime.p7m'
 
 // ENUMERABLES
 export const GUARANTEED_TEXT = [
@@ -60,6 +61,7 @@ export type MimeType =
 'application/pkcs7-signature' |
 'application/pkcs7-mime' |
 'application/x-pkcs7-signature' |
+'application/x-pkcs7-mime' |
 'application/xml' |
 'application/XML' |
 'message/disposition-notification' |
