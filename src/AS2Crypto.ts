@@ -8,6 +8,29 @@ export class AS2Crypto {
     SIGNATURE_FOOTER: `-----END PKCS7-----${AS2Constants.CONTROL_CHAR}`
   }
 
+  public decrypt (data: string, publicCert: string, privateKey: string): string {
+    if (!data.includes(this.Constants.SIGNATURE_HEADER)) {
+      data = `${this.Constants.SIGNATURE_HEADER}${data}${this.Constants.SIGNATURE_FOOTER}`
+    }
+
+    const p7 = forge.pkcs7.messageFromPem(data)
+    const recipient = p7.findRecipient(forge.pki.certificateFromPem(publicCert))
+
+    p7.decrypt(recipient, forge.pki.privateKeyFromPem(privateKey))
+
+    return p7.content.toString('utf8')
+  }
+
+  public encrypt (data: string, publicCert: string): string {
+    const p7 = forge.pkcs7.createEnvelopedData()
+
+    p7.addRecipient(forge.pki.certificateFromPem(publicCert))
+    p7.content = forge.util.createBuffer(data)
+    p7.encrypt(undefined, forge.pki.oids['des-EDE3-CBC'])
+
+    return forge.pkcs7.messageToPem(p7).replace(this.Constants.SIGNATURE_HEADER, '').replace(this.Constants.SIGNATURE_FOOTER, '')
+  }
+
   /**
    * @description Method to verify data has not been modified from a signature.
    * @param {string|any} data - The data to verify.
