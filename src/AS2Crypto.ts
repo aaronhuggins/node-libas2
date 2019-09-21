@@ -8,6 +8,13 @@ export class AS2Crypto {
     SIGNATURE_FOOTER: `-----END PKCS7-----${AS2Constants.CONTROL_CHAR}`
   }
 
+    /**
+   * @description Method to decrypt data from a PKCS7 3DES string in base64.
+   * @param {string} data - The data to decrypt from PKCS7 3DES.
+   * @param {string} publicCert - The public certificate in PEM format to verify.
+   * @param {string} privateKey - The private key to decrypt with.
+   * @returns {string} The decrypted data.
+   */
   public decrypt (data: string, publicCert: string, privateKey: string): string {
     if (!data.includes(this.Constants.SIGNATURE_HEADER)) {
       data = `${this.Constants.SIGNATURE_HEADER}${data}${this.Constants.SIGNATURE_FOOTER}`
@@ -21,6 +28,12 @@ export class AS2Crypto {
     return p7.content.toString('utf8')
   }
 
+  /**
+   * @description Method to encrypt data into a PKCS7 3DES string in base64.
+   * @param {string} data - The data to encrypt into PKCS7 3DES.
+   * @param {string} publicCert - The public certificate in PEM format to encrypt with.
+   * @returns {string} The encrypted data.
+   */
   public encrypt (data: string, publicCert: string): string {
     const p7 = forge.pkcs7.createEnvelopedData()
 
