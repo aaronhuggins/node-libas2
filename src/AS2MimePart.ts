@@ -1,11 +1,23 @@
 import * as AS2Constants from './AS2Constants'
+import uuidv4 = require('uuid/v4')
 
 export class AS2MimePart {
-  constructor (data: string | Uint8Array | Buffer, attachHeaders: boolean = true, mimeType?: AS2Constants.MimeType, name?: string, headers?: AS2Constants.MimeHeaders, encoding?: AS2Constants.AS2Encoding) {
-    this._data = typeof data === 'string'
-      ? this._cleanNewlines(data)
-      : data
+  constructor (
+    content: string | Uint8Array | Buffer,
+    {
+      attachHeaders = true,
+      attachMessageId = false,
+      mimeType,
+      name,
+      headers,
+      encoding
+    }: AS2MimePartOptions
+  ) {
+    this._content = typeof content === 'string'
+      ? this._cleanNewlines(content)
+      : content
     this._attachHeaders = attachHeaders
+    this._attachMessageId = attachMessageId
     this._mimeType = mimeType
     this._name = name
     this._headers = headers
@@ -13,8 +25,9 @@ export class AS2MimePart {
     this._setDefaults()
   }
 
-  protected _data: string | Uint8Array | Buffer
+  protected _content: string | Uint8Array | Buffer
   protected _attachHeaders: boolean
+  protected _attachMessageId: boolean
   protected _mimeType: AS2Constants.MimeType
   protected _name: string
   protected _headers: AS2Constants.MimeHeaders
@@ -35,9 +48,9 @@ export class AS2MimePart {
     this._encoding = encoding
   }
 
-  getMime (): string {
+  toString (): string {
     const mime: string[] = []
-    let content = this._data
+    let content = this._content
     let contentType = `${this._mimeType}`
 
     if (this._attachHeaders) {
@@ -63,26 +76,26 @@ export class AS2MimePart {
       mime.push('')
     }
 
-    if (typeof this._data !== 'string') {
-      const buffer = Buffer.from(this._data.buffer)
+    if (typeof this._content !== 'string') {
+      const buffer = Buffer.from(this._content)
 
       if (AS2Constants.GUARANTEED_TEXT.includes(contentType) && this._encoding !== AS2Constants.ENCODING.BASE64) {
         content = buffer.toString('utf8')
         content = this._cleanNewlines(content)
+
+      // Conversion requires control char; add trailing crlf to conform to MIME standard.
       } else if (this._encoding === AS2Constants.ENCODING.BASE64) {
-        content = buffer.toString(AS2Constants.ENCODING.BASE64)
+        content = buffer.toString(AS2Constants.ENCODING.BASE64 as string)
+        content = `${content}${this.Constants.CONTROL_CHAR}`
       } else {
-        content = buffer.toString(AS2Constants.ENCODING.BINARY)
+        content = buffer.toString(AS2Constants.ENCODING.BINARY as string)
+        content = `${content}${this.Constants.CONTROL_CHAR}`
       }
     }
 
     mime.push(content as string)
 
     return mime.join(this.Constants.CONTROL_CHAR)
-  }
-
-  toString (): string {
-    return this.getMime()
   }
 
   private _setDefaults (): void {
@@ -95,6 +108,10 @@ export class AS2MimePart {
     this._encoding = this._encoding === undefined
       ? '8bit'
       : this._encoding
+
+    if (this._attachMessageId) {
+      this._headers['Message-ID'] = `<${uuidv4().replace(/-/gu, '').toUpperCase()}@libas2.node>`
+    }
   }
 
   private _cleanNewlines (data: string): string {
@@ -115,4 +132,13 @@ export class AS2MimePart {
 
     return clean
   }
+}
+
+export interface AS2MimePartOptions {
+  attachHeaders?: boolean
+  mimeType?: AS2Constants.MimeType
+  name?: string
+  headers?: AS2Constants.MimeHeaders
+  encoding?: AS2Constants.AS2Encoding
+  attachMessageId?: boolean
 }

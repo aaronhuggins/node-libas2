@@ -4,17 +4,27 @@ import { AS2MimePart } from './AS2MimePart'
 import { AS2Crypto } from './AS2Crypto'
 
 export class AS2MimeMultipartSigned extends AS2MimeMultipart {
-  constructor (mime: AS2MimePart, publicCert: string, privateKey: string, algorithm: AS2Constants.AS2Algorithm = AS2Constants.CRYPTO_ALGORITHM.SHA1, attachHeaders: boolean = true) {
-    super([mime], attachHeaders)
+  constructor (
+    content: AS2MimePart,
+    {
+      publicCert,
+      algorithm = AS2Constants.CRYPTO_ALGORITHM.SHA1,
+      attachHeaders = true,
+      attachMessageId = true
+    }: AS2MimeMultipartSignedOptions,
+    privateKey?: string
+  ) {
+    super([content], { attachHeaders, attachMessageId })
     this._publicCert = publicCert
-    this._privateKey = privateKey
     this._algorithm = algorithm
     this._setHeaders()
-    this._signMime()
+
+    if (typeof privateKey === 'string') {
+      this.sign(privateKey)
+    }
   }
 
   protected _publicCert: string
-  protected _privateKey: string
   protected _algorithm: AS2Constants.AS2Algorithm
   protected _signed: boolean = false
   protected Constants = {
@@ -23,27 +33,51 @@ export class AS2MimeMultipartSigned extends AS2MimeMultipart {
     PROTOCOL_TYPE: AS2Constants.PROTOCOL_TYPE.PKCS7
   }
 
-  protected _signMime (): void {
-    if (this._mime.length > 1 && !this._signed) {
-      throw new Error(`Cannot sign more than one message/attachment. Number of messages/attachments: ${this._mime.length}`)
+  isSigned (): boolean {
+    return this._signed
+  }
+
+  sign (privateKey: string): void {
+    if (this._content.length > 1 && !this._signed) {
+      throw new Error(`Cannot sign more than one message/attachment. Number of messages/attachments: ${this._content.length}`)
     }
 
-    if (!this._signed) {
-      const as2Crypto = new AS2Crypto()
-      const mime = this._mime[0]
-      const signature = as2Crypto.sign(mime.getMime(), this._publicCert, this._privateKey, this._algorithm)
-      const mimeSignature = new AS2MimePart(
-        signature,
-        true,
-        this.Constants.PROTOCOL_TYPE,
-        AS2Constants.SIGNATURE_FILENAME,
-        { 'Content-Disposition': `attachment; filename="${AS2Constants.SIGNATURE_FILENAME}"` },
-        AS2Constants.ENCODING.BASE64
-      )
+    const as2Crypto = new AS2Crypto()
+    const mime = this._content[0]
+    const signature = as2Crypto.sign(mime.toString(), this._publicCert, privateKey, this._algorithm)
+    const mimeSignature = new AS2MimePart(
+      signature,
+      {
+        mimeType: this.Constants.PROTOCOL_TYPE,
+        name: AS2Constants.SIGNATURE_FILENAME,
+        headers: { 'Content-Disposition': `attachment; filename="${AS2Constants.SIGNATURE_FILENAME}"` },
+        encoding: AS2Constants.ENCODING.BASE64
+      }
+    )
 
-      this._mime.push(mimeSignature)
-      this._signed = true
+    this._content[1] = mimeSignature
+    this._signed = true
+  }
+
+  toString (attachHeaders?: boolean | string, privateKey?: string): string {
+    if (typeof attachHeaders === 'string') {
+      privateKey = `${attachHeaders}`
+      attachHeaders = this._attachHeaders
     }
+
+    if (attachHeaders === undefined) {
+      attachHeaders = this._attachHeaders
+    }
+
+    if (privateKey === undefined) {
+      if (!this._signed) {
+        throw new Error('Message not signed.\nPlease sign before returning string or else provide a private key as the second parameter of toString()')
+      }
+    } else {
+      this.sign(privateKey)
+    }
+
+    return super.toString(attachHeaders);
   }
 
   protected _writeHeaders (multipart: string[], attachHeaders?: boolean): void {
@@ -70,4 +104,11 @@ export class AS2MimeMultipartSigned extends AS2MimeMultipart {
       'Content-Type': `${this.Constants.MULTIPART_TYPE}; protocol="${this.Constants.PROTOCOL_TYPE}"; micalg="${algorithm}"; boundary="${this._boundary}"`
     }
   }
+}
+
+export interface AS2MimeMultipartSignedOptions {
+  publicCert: string,
+  algorithm?: AS2Constants.AS2Algorithm,
+  attachHeaders?: boolean
+  attachMessageId?: boolean
 }

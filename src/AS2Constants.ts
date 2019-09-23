@@ -70,6 +70,8 @@ export type MimeType =
 'multipart/signed'
 
 export interface MimeHeaders {
+  'Message-ID'?: string
+  'message-id'?: string
   'MIME-Version'?: '1.0'
   'mime-version'?: '1.0'
   'Content-Type'?: string

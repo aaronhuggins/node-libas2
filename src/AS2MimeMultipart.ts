@@ -3,15 +3,17 @@ import { AS2MimePart } from './AS2MimePart'
 import uuidv4 = require('uuid/v4')
 
 export class AS2MimeMultipart {
-  constructor (mime: AS2MimePart[], attachHeaders: boolean = true) {
-    this._mime = mime
+  constructor (content: AS2MimePart[], { attachHeaders = true, attachMessageId = true }: AS2MimeMultipartOptions) {
+    this._content = content
     this._attachHeaders = attachHeaders
+    this._attachMessageId = attachMessageId
     this._setBoundary()
     this._setHeaders()
   }
 
-  readonly _mime: AS2MimePart[]
+  readonly _content: AS2MimePart[]
   protected _attachHeaders: boolean
+  protected _attachMessageId: boolean
   protected _boundary: string
   protected _headers: AS2Constants.MimeHeaders
   protected Constants = {
@@ -19,14 +21,14 @@ export class AS2MimeMultipart {
     CONTROL_CHAR: AS2Constants.CONTROL_CHAR
   }
 
-  getMultipart (attachHeaders?: boolean): string {
+  toString (attachHeaders?: boolean): string {
     const multipart: string[] = []
 
     this._writeHeaders(multipart, attachHeaders)
 
-    this._mime.forEach((mime) => {
+    this._content.forEach((mime) => {
       multipart.push(`--${this._boundary}`)
-      multipart.push(mime.getMime())
+      multipart.push(mime.toString())
     })
 
     multipart.push(`--${this._boundary}--`)
@@ -34,10 +36,6 @@ export class AS2MimeMultipart {
     multipart.push('')
 
     return multipart.join(this.Constants.CONTROL_CHAR)
-  }
-
-  toString (attachHeaders?: boolean): string {
-    return this.getMultipart()
   }
 
   protected _writeHeaders (multipart: string[], attachHeaders?: boolean): void {
@@ -60,5 +58,14 @@ export class AS2MimeMultipart {
       'MIME-Version': AS2Constants.MIME_VERSION,
       'Content-Type': `${this.Constants.MULTIPART_TYPE}; boundary="${this._boundary}"`
     }
+
+    if (this._attachMessageId) {
+      this._headers['Message-ID'] = `<${uuidv4().replace(/-/gu, '').toUpperCase()}@libas2.node>`
+    }
   }
+}
+
+export interface AS2MimeMultipartOptions {
+  attachHeaders?: boolean
+  attachMessageId?: boolean
 }
