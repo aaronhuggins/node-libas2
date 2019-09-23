@@ -1,5 +1,5 @@
 import 'mocha'
-import { AS2MimePart, AS2MimeMultipartSigned, AS2MimeEncrypted } from '../core'
+import { AS2Constants, AS2MimePart, AS2MimeMultipartSigned, AS2MimeEncrypted, AS2Message } from '../core'
 
 import fs = require('fs')
 
@@ -29,7 +29,7 @@ describe('AS2Encoder', () => {
       {
         mimeType: 'application/edi-x12'
       }
-    ) //new AS2MimePart(content)
+    ) // new AS2MimePart(content)
     const makemime = await run('bash -c "makemime -c "application/edi-x12" -e 8bit test/test-data/sample_edi.edi"')
 
     // Command 'makemime' encodes using lf instead of crlf; this is non-standard MIME, which requires crlf for control char.
@@ -81,5 +81,35 @@ describe('AS2Encoder', () => {
     if (smime.toString() !== openssl) {
       throw new Error(`Mime section not correctly encrypted.\nExpected: '${smime.toString()}'\nReceived: '${openssl}'`)
     }
+  })
+
+  it('should produce an empty AS2 message', () => {
+    const as2message = new AS2Message()
+
+    if (as2message.getHeaders() !== undefined) {
+      throw new Error('AS2Message should be empty.')
+    }
+
+    const message = new AS2Message(Buffer.from(content), {
+      receipt: AS2Constants.RECEIPT.SEND_SIGNED,
+      algorithm: AS2Constants.SIGNING.SHA256,
+      encryption: AS2Constants.ENCRYPTION.DES3,
+      senderCert: cert,
+      receiverCert: cert,
+      privateKey: key,
+      message: {
+        mimeType: 'application/edi-x12',
+        name: 'message.edi',
+        headers: { 'Content-Disposition': 'attachment; filename="message.edi"' },
+        encoding: 'base64'
+      },
+      agreement: {
+        as2From: '112084681T',
+        as2To: 'NETHEALTHCG',
+        email: 'WHATEVER@WHATWHAT.EXAMPLE'
+      }
+    })
+
+    fs.writeFileSync('test/temp-data/as2message.txt', message.toString())
   })
 })

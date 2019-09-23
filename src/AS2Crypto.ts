@@ -32,14 +32,15 @@ export class AS2Crypto {
    * @description Method to encrypt data into a PKCS7 3DES string in base64.
    * @param {string} data - The data to encrypt into PKCS7 3DES.
    * @param {string} publicCert - The public certificate in PEM format to encrypt with.
+   * @param {string} encryption - The encryption algorithm to use.
    * @returns {string} The encrypted data.
    */
-  public encrypt (data: string, publicCert: string): string {
+  public encrypt (data: string, publicCert: string, encryption: string = AS2Constants.ENCRYPTION._3DES): string {
     const p7 = forge.pkcs7.createEnvelopedData()
 
     p7.addRecipient(forge.pki.certificateFromPem(publicCert))
     p7.content = forge.util.createBuffer(data)
-    p7.encrypt(undefined, forge.pki.oids['des-EDE3-CBC'])
+    p7.encrypt(undefined, forge.pki.oids[encryption])
 
     return forge.pkcs7.messageToPem(p7).replace(this.Constants.SIGNATURE_HEADER, '').replace(this.Constants.SIGNATURE_FOOTER, '')
   }
@@ -52,7 +53,7 @@ export class AS2Crypto {
    * @param {string} [algorithm='sha1'] - The algorithm for verification.
    * @returns {boolean} True when data matches signature.
    */
-  public verify (data: string | any, signature: string, publicCert: string, algorithm: string = AS2Constants.CRYPTO_ALGORITHM.SHA1): boolean {
+  public verify (data: string | any, signature: string, publicCert: string, algorithm: string = AS2Constants.SIGNING.SHA256): boolean {
     if (!signature.includes(this.Constants.SIGNATURE_HEADER)) {
       signature = `${this.Constants.SIGNATURE_HEADER}${signature}${this.Constants.SIGNATURE_FOOTER}`
     }
@@ -74,7 +75,7 @@ export class AS2Crypto {
    * @param {string} [algorithm='sha1'] - The algorithm for signing.
    * @returns {string} The signature of the data.
    */
-  public sign (data: string | any, publicCert: string, privateKey: string, algorithm: string = AS2Constants.CRYPTO_ALGORITHM.SHA1): string {
+  public sign (data: string | any, publicCert: string, privateKey: string, algorithm: string = AS2Constants.SIGNING.SHA256): string {
     const p7 = forge.pkcs7.createSignedData()
 
     p7.content = forge.util.createBuffer(data)

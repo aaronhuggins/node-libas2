@@ -2,13 +2,14 @@ import * as AS2Constants from './AS2Constants'
 import { AS2MimeMultipart } from './AS2MimeMultipart'
 import { AS2MimePart } from './AS2MimePart'
 import { AS2Crypto } from './AS2Crypto'
+import uuidv4 = require('uuid/v4')
 
 export class AS2MimeMultipartSigned extends AS2MimeMultipart {
   constructor (
     content: AS2MimePart,
     {
       publicCert,
-      algorithm = AS2Constants.CRYPTO_ALGORITHM.SHA1,
+      algorithm = AS2Constants.SIGNING.SHA256,
       attachHeaders = true,
       attachMessageId = true
     }: AS2MimeMultipartSignedOptions,
@@ -17,6 +18,7 @@ export class AS2MimeMultipartSigned extends AS2MimeMultipart {
     super([content], { attachHeaders, attachMessageId })
     this._publicCert = publicCert
     this._algorithm = algorithm
+    this._micalg = AS2Constants.MICALG[algorithm.toUpperCase()]
     this._setHeaders()
 
     if (typeof privateKey === 'string') {
@@ -25,7 +27,8 @@ export class AS2MimeMultipartSigned extends AS2MimeMultipart {
   }
 
   protected _publicCert: string
-  protected _algorithm: AS2Constants.AS2Algorithm
+  protected _algorithm: AS2Constants.AS2Signing
+  protected _micalg: string
   protected _signed: boolean = false
   protected Constants = {
     MULTIPART_TYPE: AS2Constants.MULTIPART_TYPE.SIGNED,
@@ -77,7 +80,7 @@ export class AS2MimeMultipartSigned extends AS2MimeMultipart {
       this.sign(privateKey)
     }
 
-    return super.toString(attachHeaders);
+    return super.toString(attachHeaders)
   }
 
   protected _writeHeaders (multipart: string[], attachHeaders?: boolean): void {
@@ -95,20 +98,20 @@ export class AS2MimeMultipartSigned extends AS2MimeMultipart {
   }
 
   protected _setHeaders (): void {
-    const algorithm: string = this._algorithm === AS2Constants.CRYPTO_ALGORITHM.SHA256
-      ? AS2Constants.MIC_ALGORITHM.SHA256
-      : AS2Constants.MIC_ALGORITHM.SHA1
-
     this._headers = {
       'MIME-Version': AS2Constants.MIME_VERSION,
-      'Content-Type': `${this.Constants.MULTIPART_TYPE}; protocol="${this.Constants.PROTOCOL_TYPE}"; micalg="${algorithm}"; boundary="${this._boundary}"`
+      'Content-Type': `${this.Constants.MULTIPART_TYPE}; protocol="${this.Constants.PROTOCOL_TYPE}"; micalg="${this._micalg}"; boundary="${this._boundary}"`
+    }
+
+    if (this._attachMessageId) {
+      this._headers['Message-ID'] = `<${uuidv4().replace(/-/gu, '').toUpperCase()}@libas2.node>`
     }
   }
 }
 
 export interface AS2MimeMultipartSignedOptions {
-  publicCert: string,
-  algorithm?: AS2Constants.AS2Algorithm,
+  publicCert: string
+  algorithm?: AS2Constants.AS2Signing
   attachHeaders?: boolean
   attachMessageId?: boolean
 }

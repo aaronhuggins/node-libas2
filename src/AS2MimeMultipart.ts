@@ -15,10 +15,14 @@ export class AS2MimeMultipart {
   protected _attachHeaders: boolean
   protected _attachMessageId: boolean
   protected _boundary: string
-  protected _headers: AS2Constants.MimeHeaders
+  protected _headers: AS2Constants.AS2Headers
   protected Constants = {
     MULTIPART_TYPE: AS2Constants.MULTIPART_TYPE.MIXED,
     CONTROL_CHAR: AS2Constants.CONTROL_CHAR
+  }
+
+  getHeaders (): AS2Constants.AS2Headers {
+    return this._headers
   }
 
   toString (attachHeaders?: boolean): string {

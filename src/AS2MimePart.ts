@@ -30,30 +30,22 @@ export class AS2MimePart {
   protected _attachMessageId: boolean
   protected _mimeType: AS2Constants.MimeType
   protected _name: string
-  protected _headers: AS2Constants.MimeHeaders
+  protected _headers: AS2Constants.AS2Headers
   protected _encoding: AS2Constants.AS2Encoding
   protected Constants = {
     CONTROL_CHAR: AS2Constants.CONTROL_CHAR
   }
 
-  setName (name: string): void {
-    this._name = name
+  getHeaders (): AS2Constants.AS2Headers {
+    return this._headers
   }
 
-  setHeaders (headers: AS2Constants.MimeHeaders): void {
-    this._headers = headers
-  }
-
-  setEncoding (encoding: AS2Constants.AS2Encoding): void {
-    this._encoding = encoding
-  }
-
-  toString (): string {
+  toString (attachHeaders?: boolean): string {
     const mime: string[] = []
     let content = this._content
     let contentType = `${this._mimeType}`
 
-    if (this._attachHeaders) {
+    if (this._attachHeaders || attachHeaders) {
       if (this._headers['Content-Type'] !== undefined) {
         contentType = this._headers['Content-Type']
       } else if (this._headers['content-type'] !== undefined) {
@@ -138,7 +130,7 @@ export interface AS2MimePartOptions {
   attachHeaders?: boolean
   mimeType?: AS2Constants.MimeType
   name?: string
-  headers?: AS2Constants.MimeHeaders
+  headers?: AS2Constants.AS2Headers
   encoding?: AS2Constants.AS2Encoding
   attachMessageId?: boolean
 }
