@@ -13,9 +13,8 @@ export class AS2MimePart {
       encoding
     }: AS2MimePartOptions
   ) {
-    this._content = typeof content === 'string'
-      ? this._cleanNewlines(content)
-      : content
+    this._content =
+      typeof content === 'string' ? this._cleanNewlines(content) : content
     this._attachHeaders = attachHeaders
     this._attachMessageId = attachMessageId
     this._mimeType = mimeType
@@ -58,8 +57,15 @@ export class AS2MimePart {
 
       mime.push(`Content-Type: ${contentType}`)
 
-      Object.keys(this._headers).forEach((header) => {
-        if (Object.prototype.hasOwnProperty.call(this._headers, header) as boolean && header.toLowerCase() !== 'content-type' && header.toLowerCase() !== 'content-transfer-encoding') {
+      Object.keys(this._headers).forEach(header => {
+        if (
+          (Object.prototype.hasOwnProperty.call(
+            this._headers,
+            header
+          ) as boolean) &&
+          header.toLowerCase() !== 'content-type' &&
+          header.toLowerCase() !== 'content-transfer-encoding'
+        ) {
           mime.push(`${header}: ${this._headers[header]}`)
         }
       })
@@ -71,11 +77,14 @@ export class AS2MimePart {
     if (typeof this._content !== 'string') {
       const buffer = Buffer.from(this._content)
 
-      if (AS2Constants.GUARANTEED_TEXT.includes(contentType) && this._encoding !== AS2Constants.ENCODING.BASE64) {
+      if (
+        AS2Constants.GUARANTEED_TEXT.includes(contentType) &&
+        this._encoding !== AS2Constants.ENCODING.BASE64
+      ) {
         content = buffer.toString('utf8')
         content = this._cleanNewlines(content)
 
-      // Conversion requires control char; add trailing crlf to conform to MIME standard.
+        // Conversion requires control char; add trailing crlf to conform to MIME standard.
       } else if (this._encoding === AS2Constants.ENCODING.BASE64) {
         content = buffer.toString(AS2Constants.ENCODING.BASE64 as string)
         content = `${content}${this.Constants.CONTROL_CHAR}`
@@ -91,18 +100,17 @@ export class AS2MimePart {
   }
 
   private _setDefaults (): void {
-    this._mimeType = this._mimeType === undefined
-      ? 'text/plain' as AS2Constants.MimeType
-      : this._mimeType
-    this._headers = this._headers === undefined
-      ? {}
-      : this._headers
-    this._encoding = this._encoding === undefined
-      ? '8bit'
-      : this._encoding
+    this._mimeType =
+      this._mimeType === undefined
+        ? ('text/plain' as AS2Constants.MimeType)
+        : this._mimeType
+    this._headers = this._headers === undefined ? {} : this._headers
+    this._encoding = this._encoding === undefined ? '8bit' : this._encoding
 
     if (this._attachMessageId) {
-      this._headers['Message-ID'] = `<${uuidv4().replace(/-/gu, '').toUpperCase()}@libas2.node>`
+      this._headers['Message-ID'] = `<${uuidv4()
+        .replace(/-/gu, '')
+        .toUpperCase()}@libas2.node>`
     }
   }
 
@@ -114,7 +122,7 @@ export class AS2MimePart {
       if (data.charAt(i) === '\r' && data.charAt(i + 1) !== '\n') {
         clean += this.Constants.CONTROL_CHAR
 
-      // Find and replace POSIX line endings; they do not conform to MIME standard.
+        // Find and replace POSIX line endings; they do not conform to MIME standard.
       } else if (data.charAt(i - 1) !== '\r' && data.charAt(i) === '\n') {
         clean += this.Constants.CONTROL_CHAR
       } else {

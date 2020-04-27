@@ -3,7 +3,10 @@ import { AS2MimePart } from './AS2MimePart'
 import uuidv4 = require('uuid/v4')
 
 export class AS2MimeMultipart {
-  constructor (content: AS2MimePart[], { attachHeaders = true, attachMessageId = true }: AS2MimeMultipartOptions) {
+  constructor (
+    content: AS2MimePart[],
+    { attachHeaders = true, attachMessageId = true }: AS2MimeMultipartOptions
+  ) {
     this._content = content
     this._attachHeaders = attachHeaders
     this._attachMessageId = attachMessageId
@@ -30,7 +33,7 @@ export class AS2MimeMultipart {
 
     this._writeHeaders(multipart, attachHeaders)
 
-    this._content.forEach((mime) => {
+    this._content.forEach(mime => {
       multipart.push(`--${this._boundary}`)
       multipart.push(mime.toString())
     })
@@ -44,8 +47,10 @@ export class AS2MimeMultipart {
 
   protected _writeHeaders (multipart: string[], attachHeaders?: boolean): void {
     if (this._attachHeaders || attachHeaders) {
-      Object.keys(this._headers).forEach((header) => {
-        if (Object.prototype.hasOwnProperty.call(this._headers, header) as boolean) {
+      Object.keys(this._headers).forEach(header => {
+        if (
+          Object.prototype.hasOwnProperty.call(this._headers, header) as boolean
+        ) {
           multipart.push(`${header}: ${this._headers[header]}`)
         }
       })
@@ -54,7 +59,9 @@ export class AS2MimeMultipart {
   }
 
   protected _setBoundary (): void {
-    this._boundary = `----${uuidv4().replace(/-/gu, '').toUpperCase()}`
+    this._boundary = `----${uuidv4()
+      .replace(/-/gu, '')
+      .toUpperCase()}`
   }
 
   protected _setHeaders (): void {
@@ -64,7 +71,9 @@ export class AS2MimeMultipart {
     }
 
     if (this._attachMessageId) {
-      this._headers['Message-ID'] = `<${uuidv4().replace(/-/gu, '').toUpperCase()}@libas2.node>`
+      this._headers['Message-ID'] = `<${uuidv4()
+        .replace(/-/gu, '')
+        .toUpperCase()}@libas2.node>`
     }
   }
 }

@@ -15,7 +15,11 @@ export class AS2Crypto {
    * @param {string} privateKey - The private key to decrypt with.
    * @returns {string} The decrypted data.
    */
-  public decrypt (data: string, publicCert: string, privateKey: string): string {
+  public decrypt (
+    data: string,
+    publicCert: string,
+    privateKey: string
+  ): string {
     if (!data.includes(this.Constants.SIGNATURE_HEADER)) {
       data = `${this.Constants.SIGNATURE_HEADER}${data}${this.Constants.SIGNATURE_FOOTER}`
     }
@@ -35,14 +39,21 @@ export class AS2Crypto {
    * @param {string} encryption - The encryption algorithm to use.
    * @returns {string} The encrypted data.
    */
-  public encrypt (data: string, publicCert: string, encryption: string = AS2Constants.ENCRYPTION._3DES): string {
+  public encrypt (
+    data: string,
+    publicCert: string,
+    encryption: string = AS2Constants.ENCRYPTION._3DES
+  ): string {
     const p7 = forge.pkcs7.createEnvelopedData()
 
     p7.addRecipient(forge.pki.certificateFromPem(publicCert))
     p7.content = forge.util.createBuffer(data)
     p7.encrypt(undefined, forge.pki.oids[encryption])
 
-    return forge.pkcs7.messageToPem(p7).replace(this.Constants.SIGNATURE_HEADER, '').replace(this.Constants.SIGNATURE_FOOTER, '')
+    return forge.pkcs7
+      .messageToPem(p7)
+      .replace(this.Constants.SIGNATURE_HEADER, '')
+      .replace(this.Constants.SIGNATURE_FOOTER, '')
   }
 
   /**
@@ -53,7 +64,12 @@ export class AS2Crypto {
    * @param {string} [algorithm='sha1'] - The algorithm for verification.
    * @returns {boolean} True when data matches signature.
    */
-  public verify (data: string | any, signature: string, publicCert: string, algorithm: string = AS2Constants.SIGNING.SHA256): boolean {
+  public verify (
+    data: string | any,
+    signature: string,
+    publicCert: string,
+    algorithm: string = AS2Constants.SIGNING.SHA256
+  ): boolean {
     if (!signature.includes(this.Constants.SIGNATURE_HEADER)) {
       signature = `${this.Constants.SIGNATURE_HEADER}${signature}${this.Constants.SIGNATURE_FOOTER}`
     }
@@ -75,7 +91,12 @@ export class AS2Crypto {
    * @param {string} [algorithm='sha1'] - The algorithm for signing.
    * @returns {string} The signature of the data.
    */
-  public sign (data: string | any, publicCert: string, privateKey: string, algorithm: string = AS2Constants.SIGNING.SHA256): string {
+  public sign (
+    data: string | any,
+    publicCert: string,
+    privateKey: string,
+    algorithm: string = AS2Constants.SIGNING.SHA256
+  ): string {
     const p7 = forge.pkcs7.createSignedData()
 
     p7.content = forge.util.createBuffer(data)
@@ -87,7 +108,10 @@ export class AS2Crypto {
     })
     p7.sign({ detached: true })
 
-    return forge.pkcs7.messageToPem(p7).replace(this.Constants.SIGNATURE_HEADER, '').replace(this.Constants.SIGNATURE_FOOTER, '')
+    return forge.pkcs7
+      .messageToPem(p7)
+      .replace(this.Constants.SIGNATURE_HEADER, '')
+      .replace(this.Constants.SIGNATURE_FOOTER, '')
   }
 
   /**
@@ -100,84 +124,104 @@ export class AS2Crypto {
     const cert = forge.pki.createCertificate()
 
     cert.publicKey = keys.publicKey
-    cert.serialNumber = options.serial === undefined
-      ? `${Math.floor(Math.random() * 1000000000000000000).toString().padStart(18, '0')}`
-      : `${options.serial}`
+    cert.serialNumber =
+      options.serial === undefined
+        ? `${Math.floor(Math.random() * 1000000000000000000)
+            .toString()
+            .padStart(18, '0')}`
+        : `${options.serial}`
     cert.validity.notBefore = new Date()
     cert.validity.notAfter = new Date()
-    cert.validity.notAfter.setFullYear(cert.validity.notBefore.getFullYear() + options.years)
+    cert.validity.notAfter.setFullYear(
+      cert.validity.notBefore.getFullYear() + options.years
+    )
 
-    const attrs = [{
-      name: 'commonName',
-      value: options.commonName
-    }, {
-      name: 'countryName',
-      value: options.countryName
-    }, {
-      shortName: 'ST',
-      value: options.state === undefined
-        ? options.ST
-        : options.state
-    }, {
-      name: 'localityName',
-      value: options.city === undefined
-        ? options.localityName
-        : options.city
-    }, {
-      name: 'organizationName',
-      value: options.organizationName === undefined
-        ? options.OU
-        : options.organizationName
-    }, {
-      shortName: 'OU',
-      value: options.OU
-    }]
+    const attrs = [
+      {
+        name: 'commonName',
+        value: options.commonName
+      },
+      {
+        name: 'countryName',
+        value: options.countryName
+      },
+      {
+        shortName: 'ST',
+        value: options.state === undefined ? options.ST : options.state
+      },
+      {
+        name: 'localityName',
+        value: options.city === undefined ? options.localityName : options.city
+      },
+      {
+        name: 'organizationName',
+        value:
+          options.organizationName === undefined
+            ? options.OU
+            : options.organizationName
+      },
+      {
+        shortName: 'OU',
+        value: options.OU
+      }
+    ]
 
     cert.setSubject(attrs)
     cert.setIssuer(attrs)
-    cert.setExtensions([{
-      name: 'basicConstraints',
-      cA: true
-    }, {
-      name: 'keyUsage',
-      keyCertSign: true,
-      digitalSignature: true,
-      nonRepudiation: true,
-      keyEncipherment: true,
-      dataEncipherment: true
-    }, {
-      name: 'extKeyUsage',
-      serverAuth: true,
-      clientAuth: true,
-      codeSigning: true,
-      emailProtection: true,
-      timeStamping: true
-    }, {
-      name: 'nsCertType',
-      client: true,
-      server: true,
-      email: true,
-      objsign: true,
-      sslCA: true,
-      emailCA: true,
-      objCA: true
-    }, {
-      name: 'subjectAltName',
-      altNames: [{
-        type: 6, // URI
-        value: options.URI
-      }, {
-        type: 7, // IP
-        ip: options.IP
-      }]
-    }, {
-      name: 'subjectKeyIdentifier'
-    }])
+    cert.setExtensions([
+      {
+        name: 'basicConstraints',
+        cA: true
+      },
+      {
+        name: 'keyUsage',
+        keyCertSign: true,
+        digitalSignature: true,
+        nonRepudiation: true,
+        keyEncipherment: true,
+        dataEncipherment: true
+      },
+      {
+        name: 'extKeyUsage',
+        serverAuth: true,
+        clientAuth: true,
+        codeSigning: true,
+        emailProtection: true,
+        timeStamping: true
+      },
+      {
+        name: 'nsCertType',
+        client: true,
+        server: true,
+        email: true,
+        objsign: true,
+        sslCA: true,
+        emailCA: true,
+        objCA: true
+      },
+      {
+        name: 'subjectAltName',
+        altNames: [
+          {
+            type: 6, // URI
+            value: options.URI
+          },
+          {
+            type: 7, // IP
+            ip: options.IP
+          }
+        ]
+      },
+      {
+        name: 'subjectKeyIdentifier'
+      }
+    ])
 
     // self-sign certificate
-    const digest = forge.md[options.digest] === undefined
-      ? forge.md.sha256
-      : forge.md[options.digest]
+    const digest =
+      forge.md[options.digest] === undefined
+        ? forge.md.sha256
+        : forge.md[options.digest]
 
     cert.sign(keys.privateKey, digest.create())
 

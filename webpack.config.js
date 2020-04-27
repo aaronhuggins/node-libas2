@@ -12,9 +12,7 @@ module.exports = {
     extensions: ['.ts']
   },
   module: {
-    rules: [
-      { test: /\.tsx?$/, loader: 'ts-loader' }
-    ]
+    rules: [{ test: /\.tsx?$/, loader: 'ts-loader' }]
   },
   target: 'node',
   optimization: {

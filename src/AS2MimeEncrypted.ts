@@ -15,21 +15,18 @@ export class AS2MimeEncrypted extends AS2MimePart {
       encryption = AS2Constants.ENCRYPTION._3DES
     }: AS2MimeEncryptedOptions
   ) {
-    super(
-      content.toString(true),
-      {
-        attachHeaders,
-        mimeType,
-        name: AS2Constants.ENCRYPTION_FILENAME,
-        headers: {
-          'MIME-Version': AS2Constants.MIME_VERSION,
-          'Content-Disposition': `attachment; filename="${AS2Constants.ENCRYPTION_FILENAME}"`,
-          'Content-Type': `${mimeType}; smime-type=enveloped-data`
-        },
-        encoding: AS2Constants.ENCODING.BASE64,
-        attachMessageId
-      }
-    )
+    super(content.toString(true), {
+      attachHeaders,
+      mimeType,
+      name: AS2Constants.ENCRYPTION_FILENAME,
+      headers: {
+        'MIME-Version': AS2Constants.MIME_VERSION,
+        'Content-Disposition': `attachment; filename="${AS2Constants.ENCRYPTION_FILENAME}"`,
+        'Content-Type': `${mimeType}; smime-type=enveloped-data`
+      },
+      encoding: AS2Constants.ENCODING.BASE64,
+      attachMessageId
+    })
     this._publicCert = publicCert
     this._encryption = encryption
     this._encrypt()
@@ -47,7 +44,11 @@ export class AS2MimeEncrypted extends AS2MimePart {
     if (!this._encrypted) {
       const as2Crypto = new AS2Crypto()
       const data = this._content
-      const encryptedData = as2Crypto.encrypt(data as string, this._publicCert, this._encryption)
+      const encryptedData = as2Crypto.encrypt(
+        data as string,
+        this._publicCert,
+        this._encryption
+      )
 
       this._content = encryptedData
       this._encrypted = true

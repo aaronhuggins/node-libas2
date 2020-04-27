@@ -35,8 +35,10 @@ export class AS2Message {
   toString (): string {
     const message: string[] = []
 
-    Object.keys(this._headers).forEach((header) => {
-      if (Object.prototype.hasOwnProperty.call(this._headers, header) as boolean) {
+    Object.keys(this._headers).forEach(header => {
+      if (
+        Object.prototype.hasOwnProperty.call(this._headers, header) as boolean
+      ) {
         message.push(`${header}: ${this._headers[header]}`)
       }
     })
@@ -48,11 +50,17 @@ export class AS2Message {
   }
 
   protected _setMime (): void {
-    if (this._options.algorithm === undefined && this._options.encryption === undefined) {
+    if (
+      this._options.algorithm === undefined &&
+      this._options.encryption === undefined
+    ) {
       this._options.message.attachMessageId = true
     }
 
-    if (this._options.algorithm !== undefined || this._options.encryption !== undefined) {
+    if (
+      this._options.algorithm !== undefined ||
+      this._options.encryption !== undefined
+    ) {
       this._options.message.attachHeaders = true
     }
 
@@ -64,11 +72,15 @@ export class AS2Message {
 
     if (this._options.algorithm !== undefined) {
       // Sign content
-      smime = new AS2MimeMultipartSigned(mime, {
-        publicCert: this._options.senderCert,
-        algorithm: this._options.algorithm,
-        attachMessageId: this._options.encryption === undefined
-      }, this._options.privateKey)
+      smime = new AS2MimeMultipartSigned(
+        mime,
+        {
+          publicCert: this._options.senderCert,
+          algorithm: this._options.algorithm,
+          attachMessageId: this._options.encryption === undefined
+        },
+        this._options.privateKey
+      )
 
       this._mime = smime
     }
@@ -87,33 +99,51 @@ export class AS2Message {
 
   protected _setHeaders (): void {
     this._headers = {}
-    const optionHeaders = this._options.headers === undefined ? {} : this._options.headers
+    const optionHeaders =
+      this._options.headers === undefined ? {} : this._options.headers
     const mimeHeaders = this._mime.getHeaders()
 
     switch (this._options.receipt) {
       case AS2Constants.RECEIPT.SEND:
-        this._headers['Disposition-Notification-To'] = this._options.agreement.email
+        this._headers[
+          'Disposition-Notification-To'
+        ] = this._options.agreement.email
         if (this._options.agreement.asyncUrl !== undefined) {
-          this._headers['Receipt-Delivery-Option'] = this._options.agreement.asyncUrl
+          this._headers[
+            'Receipt-Delivery-Option'
+          ] = this._options.agreement.asyncUrl
         }
         break
       case AS2Constants.RECEIPT.SEND_SIGNED:
-        this._headers['Disposition-Notification-To'] = this._options.agreement.email
+        this._headers[
+          'Disposition-Notification-To'
+        ] = this._options.agreement.email
         if (this._options.agreement.asyncUrl !== undefined) {
-          this._headers['Receipt-Delivery-Option'] = this._options.agreement.asyncUrl
+          this._headers[
+            'Receipt-Delivery-Option'
+          ] = this._options.agreement.asyncUrl
         }
-        this._headers['Disposition-Notification-Options'] = 'signed-receipt-protocol=required,pkcs7-signature; signed-receipt-micalg=required,sha1'
+        this._headers['Disposition-Notification-Options'] =
+          'signed-receipt-protocol=required,pkcs7-signature; signed-receipt-micalg=required,sha1'
         break
     }
 
-    Object.keys(optionHeaders).forEach((header) => {
-      if (Object.prototype.hasOwnProperty.call(optionHeaders, header) as boolean && !(Object.prototype.hasOwnProperty.call(mimeHeaders, header) as boolean)) {
+    Object.keys(optionHeaders).forEach(header => {
+      if (
+        (Object.prototype.hasOwnProperty.call(
+          optionHeaders,
+          header
+        ) as boolean) &&
+        !(Object.prototype.hasOwnProperty.call(mimeHeaders, header) as boolean)
+      ) {
         this._headers[header] = optionHeaders[header]
       }
     })
 
-    Object.keys(mimeHeaders).forEach((header) => {
-      if (Object.prototype.hasOwnProperty.call(mimeHeaders, header) as boolean) {
+    Object.keys(mimeHeaders).forEach(header => {
+      if (
+        Object.prototype.hasOwnProperty.call(mimeHeaders, header) as boolean
+      ) {
         this._headers[header] = mimeHeaders[header]
       }
     })

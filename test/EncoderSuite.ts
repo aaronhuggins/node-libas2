@@ -1,5 +1,11 @@
 import 'mocha'
-import { AS2Constants, AS2MimePart, AS2MimeMultipartSigned, AS2MimeEncrypted, AS2Message } from '../core'
+import {
+  AS2Constants,
+  AS2MimePart,
+  AS2MimeMultipartSigned,
+  AS2MimeEncrypted,
+  AS2Message
+} from '../core'
 
 import fs = require('fs')
 
@@ -24,62 +30,65 @@ const run = async function run (command: string): Promise<string> {
 
 describe('AS2Encoder', () => {
   it('should match makemime output.', async () => {
-    const mime = new AS2MimePart(
-      content,
-      {
-        mimeType: 'application/edi-x12'
-      }
-    ) // new AS2MimePart(content)
-    const makemime = await run('bash -c "makemime -c "application/edi-x12" -e 8bit test/test-data/sample_edi.edi"')
+    const mime = new AS2MimePart(content, {
+      mimeType: 'application/edi-x12'
+    }) // new AS2MimePart(content)
+    const makemime = await run(
+      'bash -c "makemime -c "application/edi-x12" -e 8bit test/test-data/sample_edi.edi"'
+    )
 
     // Command 'makemime' encodes using lf instead of crlf; this is non-standard MIME, which requires crlf for control char.
     if (mime.toString() !== makemime.replace(/\n/gu, '\r\n')) {
-      throw new Error(`Mime section not correctly constructed.\nExpected: '${makemime}'\nReceived: '${mime.toString()}'`)
+      throw new Error(
+        `Mime section not correctly constructed.\nExpected: '${makemime}'\nReceived: '${mime.toString()}'`
+      )
     }
   })
 
   it('should be verified by openssl.', async () => {
-    const mime = new AS2MimePart(
-      Buffer.from(content),
-      {
-        mimeType: 'application/edi-x12',
-        name: 'message.edi',
-        headers: { 'Content-Disposition': 'attachment; filename="message.edi"' },
-        encoding: 'base64'
-      }
-    )
+    const mime = new AS2MimePart(Buffer.from(content), {
+      mimeType: 'application/edi-x12',
+      name: 'message.edi',
+      headers: { 'Content-Disposition': 'attachment; filename="message.edi"' },
+      encoding: 'base64'
+    })
     const smime = new AS2MimeMultipartSigned(mime, { publicCert: cert })
 
     fs.writeFileSync('test/temp-data/multipart.txt', smime.toString(key))
 
-    const openssl = await run('bash -c "openssl smime -verify -noverify -in test/temp-data/multipart.txt -signer test/test-data/sample_cert.cer"')
+    const openssl = await run(
+      'bash -c "openssl smime -verify -noverify -in test/temp-data/multipart.txt -signer test/test-data/sample_cert.cer"'
+    )
 
     if (mime.toString() !== openssl) {
-      throw new Error(`Mime section not correctly signed.\nExpected: '${mime.toString()}'\nReceived: '${openssl}'`)
+      throw new Error(
+        `Mime section not correctly signed.\nExpected: '${mime.toString()}'\nReceived: '${openssl}'`
+      )
     }
   })
 
   it('should be decrypted by openssl', async () => {
-    const mime = new AS2MimePart(
-      content,
-      {
-        attachHeaders: false,
-        mimeType: 'application/edi-x12',
-        name: 'message.edi',
-        headers: { 'Content-Disposition': 'attachment; filename="message.edi"' },
-        encoding: 'binary'
-      }
-    )
+    const mime = new AS2MimePart(content, {
+      attachHeaders: false,
+      mimeType: 'application/edi-x12',
+      name: 'message.edi',
+      headers: { 'Content-Disposition': 'attachment; filename="message.edi"' },
+      encoding: 'binary'
+    })
     const smime = new AS2MimeMultipartSigned(mime, { publicCert: cert }, key)
 
     const encrypted = new AS2MimeEncrypted(smime, { publicCert: cert })
 
     fs.writeFileSync('test/temp-data/encrypted.txt', encrypted.toString())
 
-    const openssl = await run('bash -c "openssl smime -decrypt -in test/temp-data/encrypted.txt -recip test/test-data/sample_cert.cer  -inkey test/test-data/sample_priv.key -des3"')
+    const openssl = await run(
+      'bash -c "openssl smime -decrypt -in test/temp-data/encrypted.txt -recip test/test-data/sample_cert.cer  -inkey test/test-data/sample_priv.key -des3"'
+    )
 
     if (smime.toString() !== openssl) {
-      throw new Error(`Mime section not correctly encrypted.\nExpected: '${smime.toString()}'\nReceived: '${openssl}'`)
+      throw new Error(
+        `Mime section not correctly encrypted.\nExpected: '${smime.toString()}'\nReceived: '${openssl}'`
+      )
     }
   })
 
@@ -100,7 +109,9 @@ describe('AS2Encoder', () => {
       message: {
         mimeType: 'application/edi-x12',
         name: 'message.edi',
-        headers: { 'Content-Disposition': 'attachment; filename="message.edi"' },
+        headers: {
+          'Content-Disposition': 'attachment; filename="message.edi"'
+        },
         encoding: 'base64'
       },
       agreement: {

@@ -42,21 +42,27 @@ export class AS2MimeMultipartSigned extends AS2MimeMultipart {
 
   sign (privateKey: string): void {
     if (this._content.length > 1 && !this._signed) {
-      throw new Error(`Cannot sign more than one message/attachment. Number of messages/attachments: ${this._content.length}`)
+      throw new Error(
+        `Cannot sign more than one message/attachment. Number of messages/attachments: ${this._content.length}`
+      )
     }
 
     const as2Crypto = new AS2Crypto()
     const mime = this._content[0]
-    const signature = as2Crypto.sign(mime.toString(), this._publicCert, privateKey, this._algorithm)
-    const mimeSignature = new AS2MimePart(
-      signature,
-      {
-        mimeType: this.Constants.PROTOCOL_TYPE,
-        name: AS2Constants.SIGNATURE_FILENAME,
-        headers: { 'Content-Disposition': `attachment; filename="${AS2Constants.SIGNATURE_FILENAME}"` },
-        encoding: AS2Constants.ENCODING.BASE64
-      }
+    const signature = as2Crypto.sign(
+      mime.toString(),
+      this._publicCert,
+      privateKey,
+      this._algorithm
     )
+    const mimeSignature = new AS2MimePart(signature, {
+      mimeType: this.Constants.PROTOCOL_TYPE,
+      name: AS2Constants.SIGNATURE_FILENAME,
+      headers: {
+        'Content-Disposition': `attachment; filename="${AS2Constants.SIGNATURE_FILENAME}"`
+      },
+      encoding: AS2Constants.ENCODING.BASE64
+    })
 
     this._content[1] = mimeSignature
     this._signed = true
@@ -74,7 +80,9 @@ export class AS2MimeMultipartSigned extends AS2MimeMultipart {
 
     if (privateKey === undefined) {
       if (!this._signed) {
-        throw new Error('Message not signed.\nPlease sign before returning string or else provide a private key as the second parameter of toString()')
+        throw new Error(
+          'Message not signed.\nPlease sign before returning string or else provide a private key as the second parameter of toString()'
+        )
       }
     } else {
       this.sign(privateKey)
@@ -85,8 +93,10 @@ export class AS2MimeMultipartSigned extends AS2MimeMultipart {
 
   protected _writeHeaders (multipart: string[], attachHeaders?: boolean): void {
     if (this._attachHeaders || attachHeaders) {
-      Object.keys(this._headers).forEach((header) => {
-        if (Object.prototype.hasOwnProperty.call(this._headers, header) as boolean) {
+      Object.keys(this._headers).forEach(header => {
+        if (
+          Object.prototype.hasOwnProperty.call(this._headers, header) as boolean
+        ) {
           multipart.push(`${header}: ${this._headers[header]}`)
         }
       })
@@ -104,7 +114,9 @@ export class AS2MimeMultipartSigned extends AS2MimeMultipart {
     }
 
     if (this._attachMessageId) {
-      this._headers['Message-ID'] = `<${uuidv4().replace(/-/gu, '').toUpperCase()}@libas2.node>`
+      this._headers['Message-ID'] = `<${uuidv4()
+        .replace(/-/gu, '')
+        .toUpperCase()}@libas2.node>`
     }
   }
 }
