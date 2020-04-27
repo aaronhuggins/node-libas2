@@ -2,7 +2,7 @@ import * as AS2Constants from './AS2Constants'
 import { AS2MimeMultipart } from './AS2MimeMultipart'
 import { AS2MimePart } from './AS2MimePart'
 import { AS2Crypto } from './AS2Crypto'
-import uuidv4 = require('uuid/v4')
+import { v4 as uuidv4 } from 'uuid'
 
 export class AS2MimeMultipartSigned extends AS2MimeMultipart {
   constructor (

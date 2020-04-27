@@ -1,5 +1,5 @@
 import * as AS2Constants from './AS2Constants'
-import uuidv4 = require('uuid/v4')
+import { v4 as uuidv4 } from 'uuid'
 
 export class AS2MimePart {
   constructor (
