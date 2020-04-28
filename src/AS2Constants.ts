@@ -65,6 +65,15 @@ export const RECEIPT = {
   SEND_SIGNED: 2 as AS2Receipt
 }
 
+export const STANDARD_HEADER = {
+  VERSION: 'AS2-Version',
+  TO: 'AS2-To',
+  FROM: 'AS2-From',
+  MDN_TO: 'Disposition-Notification-To',
+  MDN_OPTIONS: 'Disposition-Notification-Options',
+  MDN_URL: 'Receipt-Delivery-Option'
+}
+
 // TYPES
 export type AS2Encoding = '8bit' | 'binary' | 'base64'
 

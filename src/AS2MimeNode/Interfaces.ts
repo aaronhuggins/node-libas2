@@ -1,12 +1,6 @@
 import { Readable } from 'stream'
 import { AS2Encryption, AS2Signing } from '../AS2Constants'
-
-export type AS2MimeNodeHeaders =
-  | Array<{
-      key: string
-      value: string
-    }>
-  | { [key: string]: string }
+import { AS2Headers } from '../Interfaces'
 
 export interface AS2MimeNodeOptions {
   /** Filename for the node. */
@@ -19,8 +13,10 @@ export interface AS2MimeNodeOptions {
   contentType?: string
   /** The content disposition of the node. */
   contentDisposition?: 'inline' | 'attachment'
+  /** Optional message ID; if not provided, one will be generated. */
+  messageId?: string
   /** Additional headers for the node. */
-  headers?: AS2MimeNodeHeaders
+  headers?: AS2Headers
   /** Options for signing the node. */
   sign?: SigningOptions
   /** Options for encrypting the node. */

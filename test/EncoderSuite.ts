@@ -1,15 +1,8 @@
 import 'mocha'
-import {
-  AS2Constants,
-  AS2MimePart,
-  AS2MimeMultipartSigned,
-  AS2MimeEncrypted,
-  AS2Message
-} from '../core'
+import { AS2Constants, AS2MimeNode, AS2Composer } from '../core'
 
 import fs = require('fs')
 import { simpleParser } from 'mailparser'
-import { AS2MimeNode } from '../src/AS2MimNode'
 
 const content = fs.readFileSync('test/test-data/sample_edi.edi', 'utf8')
 const cert = fs.readFileSync('test/test-data/sample_cert.cer', 'utf8')
@@ -80,35 +73,31 @@ describe('AS2Encoder', async () => {
     }
   })
 
-  it('should produce an empty AS2 message', () => {
-    const as2message = new AS2Message()
-
-    if (as2message.getHeaders() !== undefined) {
-      throw new Error('AS2Message should be empty.')
-    }
-
-    const message = new AS2Message(Buffer.from(content), {
-      receipt: AS2Constants.RECEIPT.SEND_SIGNED,
-      algorithm: AS2Constants.SIGNING.SHA256,
-      encryption: AS2Constants.ENCRYPTION.DES3,
-      senderCert: cert,
-      receiverCert: cert,
-      privateKey: key,
+  it('should produce a valid AS2 message', async () => {
+    const composer = new AS2Composer({
       message: {
-        mimeType: 'application/edi-x12',
-        name: 'message.edi',
-        headers: {
-          'Content-Disposition': 'attachment; filename="message.edi"'
-        },
-        encoding: 'base64'
+        filename: 'message.edi',
+        contentType: 'application/edi-x12',
+        content
       },
       agreement: {
-        as2From: '112084681T',
-        as2To: 'NETHEALTHCG',
-        email: 'WHATEVER@WHATWHAT.EXAMPLE'
+        recipient: '112084681T',
+        sender: 'NETHEALTHCG',
+        sign: { cert, key },
+        encrypt: { cert, encryption: AS2Constants.ENCRYPTION._3DES },
+        mdn: {
+          to: 'WHATEVER@WHATWHAT.EXAMPLE',
+          sign: {
+            importance: 'required',
+            protocol: 'pkcs7-signature',
+            micalg: 'sha256'
+          }
+        }
       }
     })
+    const compiled = await composer.compile()
+    const message = await compiled.build()
 
-    fs.writeFileSync('test/temp-data/as2message.txt', message.toString())
+    fs.writeFileSync('test/temp-data/as2message.txt', message.toString('utf8'))
   })
 })
