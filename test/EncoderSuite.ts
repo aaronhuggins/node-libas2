@@ -8,6 +8,8 @@ import {
 } from '../core'
 
 import fs = require('fs')
+import { simpleParser } from 'mailparser'
+import { AS2MimeNode } from '../src/AS2MimeNode'
 
 const content = fs.readFileSync('test/test-data/sample_edi.edi', 'utf8')
 const cert = fs.readFileSync('test/test-data/sample_cert.cer', 'utf8')
@@ -28,64 +30,50 @@ const run = async function run (command: string): Promise<string> {
   })
 }
 
-describe('AS2Encoder', () => {
-  it('should match makemime output.', async () => {
-    const mime = new AS2MimePart(content, {
-      mimeType: 'application/edi-x12'
-    }) // new AS2MimePart(content)
-    const makemime = await run(
-      'bash -c "makemime -c "application/edi-x12" -e 8bit test/test-data/sample_edi.edi"'
-    )
-
-    // Command 'makemime' encodes using lf instead of crlf; this is non-standard MIME, which requires crlf for control char.
-    if (mime.toString() !== makemime.replace(/\n/gu, '\r\n')) {
-      throw new Error(
-        `Mime section not correctly constructed.\nExpected: '${makemime}'\nReceived: '${mime.toString()}'`
-      )
-    }
-  })
-
+describe('AS2Encoder', async () => {
   it('should be verified by openssl.', async () => {
-    const mime = new AS2MimePart(Buffer.from(content), {
-      mimeType: 'application/edi-x12',
-      name: 'message.edi',
-      headers: { 'Content-Disposition': 'attachment; filename="message.edi"' },
-      encoding: 'base64'
+    const smime = new AS2MimeNode({
+      filename: 'message.edi',
+      contentType: 'application/edi-x12',
+      sign: { cert, key },
+      content
     })
-    const smime = new AS2MimeMultipartSigned(mime, { publicCert: cert })
+    const signed = await smime.build()
 
-    fs.writeFileSync('test/temp-data/multipart.txt', smime.toString(key))
+    fs.writeFileSync('test/temp-data/multipart.txt', signed.toString('utf8'))
 
     const openssl = await run(
-      'bash -c "openssl smime -verify -noverify -in test/temp-data/multipart.txt -signer test/test-data/sample_cert.cer"'
+      'bash -c "openssl smime -verify -noverify -in test/temp-data/smime2.txt -signer test/test-data/sample_cert.cer"'
     )
+    const parsed = await simpleParser(openssl)
+    const opensslContent = parsed.attachments[0].content.toString('utf8')
 
-    if (mime.toString() !== openssl) {
+    if (opensslContent !== content) {
       throw new Error(
-        `Mime section not correctly signed.\nExpected: '${mime.toString()}'\nReceived: '${openssl}'`
+        `Mime section not correctly signed.\nExpected: '${content}'\nReceived: '${opensslContent}'`
       )
     }
   })
 
   it('should be decrypted by openssl', async () => {
-    const mime = new AS2MimePart(content, {
-      attachHeaders: false,
-      mimeType: 'application/edi-x12',
-      name: 'message.edi',
-      headers: { 'Content-Disposition': 'attachment; filename="message.edi"' },
-      encoding: 'binary'
+    const smime = new AS2MimeNode({
+      filename: 'message.edi',
+      contentType: 'application/edi-x12',
+      sign: { cert, key },
+      encrypt: { cert, encryption: AS2Constants.ENCRYPTION._3DES },
+      content
     })
-    const smime = new AS2MimeMultipartSigned(mime, { publicCert: cert }, key)
+    const encrypted = await smime.build()
 
-    const encrypted = new AS2MimeEncrypted(smime, { publicCert: cert })
-
-    fs.writeFileSync('test/temp-data/encrypted.txt', encrypted.toString())
+    fs.writeFileSync('test/temp-data/encrypted.txt', encrypted.toString('utf8'))
 
     const openssl = await run(
       'bash -c "openssl smime -decrypt -in test/temp-data/encrypted.txt -recip test/test-data/sample_cert.cer  -inkey test/test-data/sample_priv.key -des3"'
     )
+    const parsed = await simpleParser(openssl)
+    const opensslContent = parsed.attachments[0].content.toString('utf8')
 
-    if (smime.toString() !== openssl) {
+    if (opensslContent !== content) {
       throw new Error(
         `Mime section not correctly encrypted.\nExpected: '${smime.toString()}'\nReceived: '${openssl}'`
       )
