@@ -1,85 +1,11 @@
 import { Readable } from 'stream'
-import * as AS2Constants from './AS2Constants'
 import MimeNode = require('nodemailer/lib/mime-node')
 import forge = require('node-forge')
-
-const newline = /\r\n|\r|\n/g
-
-const isNullOrUndefined = function isNullOrUndefined (value: any): boolean {
-  return value === undefined || value === null
-}
-
-const canonicalTransform = function canonicalTransform (
-  node: AS2MimeNode
-): void {
-  if (
-    node.getHeader('content-type').slice(0, 5) === 'text/' &&
-    !isNullOrUndefined(node.content)
-  ) {
-    node.content = (node.content as string).replace(newline, '\r\n')
-  }
-
-  node.childNodes.forEach(canonicalTransform)
-}
-
-const signingOptions = function signingOptions (
-  sign: SigningOptions
-): SigningOptions {
-  return { cert: '', key: '', chain: [], micalg: AS2Constants.SIGNING.SHA256, ...sign }
-}
-
-const encryptionOptions = function encryptionOptions (
-  encrypt: EncryptionOptions
-): EncryptionOptions {
-  return { cert: '', encryption: AS2Constants.ENCRYPTION._3DES, ...encrypt }
-}
-
-export type Headers =
-  | Array<{
-      key: string
-      value: string
-    }>
-  | { [key: string]: string }
-
-export interface Options {
-  /** Filename for the node. */
-  filename?: string
-  /** Content of the node. */
-  content?: string | Buffer | Readable
-  /** Shared part of the unique multipart boundary. */
-  baseBoundary?: string
-  /** Content type of the node; will be auto-calculated from the filename if not set. */
-  contentType?: string
-  /** The content disposition of the node. */
-  contentDisposition?: 'inline' | 'attachment'
-  /** Additional headers for the node. */
-  headers?: Headers
-  /** Options for signing the node. */
-  sign?: SigningOptions
-  /** Options for encrypting the node. */
-  encrypt?: EncryptionOptions
-}
-
-export interface EncryptionOptions {
-  /** PEM-based public certificate contents. */
-  cert: string
-  /** A valid type of encryption. */
-  encryption: AS2Constants.AS2Encryption
-}
-
-export interface SigningOptions {
-  /** PEM-based public certificate contents. */
-  cert: string
-  /** PEM-based private certificate contents. */
-  key: string
-  /** Array of PEM-based certificate chain contents. */
-  chain?: string[],
-  /** Algorithm of secure signature hash to use. */
-  micalg?: AS2Constants.AS2Signing
-}
+import { isNullOrUndefined, signingOptions, encryptionOptions, canonicalTransform } from './AS2Helpers'
+import { AS2MimeNodeOptions, SigningOptions, EncryptionOptions } from './AS2MimeNodeInterfaces'
 
 export class AS2MimeNode extends MimeNode {
-  constructor (options: Options) {
+  constructor (options: AS2MimeNodeOptions) {
     const {
       filename,
       content,
