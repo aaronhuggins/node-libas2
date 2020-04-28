@@ -6,7 +6,7 @@ import {
 import { AS2MimeNodeOptions, AS2MimeNode } from '../AS2MimeNode'
 import { isNullOrUndefined, agreementOptions } from '../Helpers'
 import { AS2Headers } from '../Interfaces'
-import { STANDARD_HEADER } from '../AS2Constants'
+import { STANDARD_HEADER } from '../Constants'
 
 export class AS2Composer {
   constructor (options: AS2ComposerOptions) {
@@ -26,10 +26,6 @@ export class AS2Composer {
 
   setAgreement (agreement: AgreementOptions): void {
     this._agreement = agreementOptions(agreement)
-  }
-
-  getAgreement (): AgreementOptions {
-    return this._agreement
   }
 
   setHeaders (headers: AS2Headers | AgreementOptions) {

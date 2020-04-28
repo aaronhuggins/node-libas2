@@ -1,4 +1,4 @@
-import * as AS2Constants from '../AS2Constants'
+import * as AS2Constants from '../Constants'
 import forge = require('node-forge')
 import crypto = require('crypto')
 import { AS2MimeNode } from '../AS2MimeNode'

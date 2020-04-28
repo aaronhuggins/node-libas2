@@ -208,17 +208,13 @@ export class AS2MimeNode extends MimeNode {
   }
 
   async sign (options?: SigningOptions): Promise<AS2MimeNode> {
-    options = isNullOrUndefined(options)
-      ? this._sign
-      : options
+    options = isNullOrUndefined(options) ? this._sign : options
 
     return AS2Crypto.sign(this, options)
   }
 
   async encrypt (options?: EncryptionOptions): Promise<AS2MimeNode> {
-    options = isNullOrUndefined(options)
-      ? this._encrypt
-      : options
+    options = isNullOrUndefined(options) ? this._encrypt : options
 
     return AS2Crypto.encrypt(this, options)
   }

@@ -1,4 +1,4 @@
-import { AS2Encryption, AS2Signing } from "./AS2Crypto"
+import { AS2Encryption, AS2Signing } from './AS2Crypto'
 
 // STRINGS
 export const CONTROL_CHAR = '\r\n'

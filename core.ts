@@ -1,4 +1,4 @@
-import * as constants from './src/AS2Constants'
+import * as constants from './src/Constants'
 
 export const AS2Constants = constants
 export * from './src/AS2MimeNode'
