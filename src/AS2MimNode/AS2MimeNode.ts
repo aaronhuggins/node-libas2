@@ -6,12 +6,12 @@ import {
   signingOptions,
   encryptionOptions,
   canonicalTransform
-} from './AS2Helpers'
+} from '../Helpers'
 import {
   AS2MimeNodeOptions,
   SigningOptions,
   EncryptionOptions
-} from './AS2MimeNodeInterfaces'
+} from './Interfaces'
 
 export class AS2MimeNode extends MimeNode {
   constructor (options: AS2MimeNodeOptions) {
