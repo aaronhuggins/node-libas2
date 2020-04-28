@@ -1,5 +1,5 @@
 import { Readable } from 'stream'
-import { AS2Encryption, AS2Signing } from './AS2Constants'
+import { AS2Encryption, AS2Signing } from '../AS2Constants'
 
 export type AS2MimeNodeHeaders =
   | Array<{
