@@ -1,3 +1,5 @@
+import { AS2Encryption, AS2Signing } from "./AS2Crypto"
+
 // STRINGS
 export const CONTROL_CHAR = '\r\n'
 export const MIME_VERSION = '1.0'
@@ -76,14 +78,6 @@ export const STANDARD_HEADER = {
 
 // TYPES
 export type AS2Encoding = '8bit' | 'binary' | 'base64'
-
-export type AS2Signing = 'sha1' | 'sha256' | 'sha384' | 'sha512'
-
-export type AS2Encryption =
-  | 'des-EDE3-CBC'
-  | 'aes128-CBC'
-  | 'aes192-CBC'
-  | 'aes256-CBC'
 
 export type AS2Receipt = 0 | 1 | 2
 

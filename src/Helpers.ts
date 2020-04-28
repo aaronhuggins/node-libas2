@@ -1,6 +1,7 @@
 import { AgreementOptions } from './AS2Composer'
 import { SIGNING, ENCRYPTION } from './AS2Constants'
-import { AS2MimeNode, SigningOptions, EncryptionOptions } from './AS2MimeNode'
+import { AS2MimeNode } from './AS2MimeNode'
+import { SigningOptions, EncryptionOptions } from './AS2Crypto'
 
 /** Convenience method for null-checks */
 export const isNullOrUndefined = function isNullOrUndefined (

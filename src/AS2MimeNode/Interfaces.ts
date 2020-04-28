@@ -1,6 +1,6 @@
 import { Readable } from 'stream'
-import { AS2Encryption, AS2Signing } from '../AS2Constants'
 import { AS2Headers } from '../Interfaces'
+import { SigningOptions, EncryptionOptions } from '../AS2Crypto'
 
 export interface AS2MimeNodeOptions {
   /** Filename for the node. */
@@ -21,22 +21,4 @@ export interface AS2MimeNodeOptions {
   sign?: SigningOptions
   /** Options for encrypting the node. */
   encrypt?: EncryptionOptions
-}
-
-export interface EncryptionOptions {
-  /** PEM-based public certificate contents. */
-  cert: string
-  /** A valid type of encryption. */
-  encryption: AS2Encryption
-}
-
-export interface SigningOptions {
-  /** PEM-based public certificate contents. */
-  cert: string
-  /** PEM-based private certificate contents. */
-  key: string
-  /** Array of PEM-based certificate chain contents. */
-  chain?: string[]
-  /** Algorithm of secure signature hash to use. */
-  micalg?: AS2Signing
 }

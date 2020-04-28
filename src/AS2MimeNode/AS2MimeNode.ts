@@ -8,12 +8,9 @@ import {
   encryptionOptions,
   canonicalTransform
 } from '../Helpers'
-import {
-  AS2MimeNodeOptions,
-  SigningOptions,
-  EncryptionOptions
-} from './Interfaces'
+import { AS2MimeNodeOptions } from './Interfaces'
 import { AS2Headers } from '../Interfaces'
+import { AS2Crypto, SigningOptions, EncryptionOptions } from '../AS2Crypto'
 
 export interface AS2MimeNode {
   keepBcc: boolean
@@ -62,16 +59,12 @@ export class AS2MimeNode extends MimeNode {
   private _sign: SigningOptions
   private _encrypt: EncryptionOptions
 
-  setSigning (options: SigningOptions): AS2MimeNode {
+  setSigning (options: SigningOptions): void {
     this._sign = signingOptions(options)
-
-    return this
   }
 
-  setEncryption (options: EncryptionOptions): AS2MimeNode {
+  setEncryption (options: EncryptionOptions): void {
     this._encrypt = encryptionOptions(options)
-
-    return this
   }
 
   getHeaders (asObject: boolean = false): AS2Headers {
@@ -215,106 +208,19 @@ export class AS2MimeNode extends MimeNode {
   }
 
   async sign (options?: SigningOptions): Promise<AS2MimeNode> {
-    options = !isNullOrUndefined(options)
-      ? signingOptions(options)
-      : !isNullOrUndefined(this._sign)
+    options = isNullOrUndefined(options)
       ? this._sign
-      : signingOptions(options)
-    const rootNode = new AS2MimeNode({
-      contentType: `multipart/signed; protocol="application/pkcs7-signature"; micalg=${options.micalg};`,
-      encrypt: this._encrypt
-    })
-    const contentNode = rootNode.appendChild(
-      Object.assign(new MimeNode(), this)
-    ) as AS2MimeNode
-    const contentHeaders: Array<{
-      key: string
-      value: string
-    }> = (contentNode as any)._headers
+      : options
 
-    for (let i = 0, len = contentHeaders.length; i < len; i++) {
-      const header = contentHeaders[i]
-
-      if (header.key.toLowerCase() === 'content-type') continue
-
-      rootNode.setHeader(header.key, header.value)
-      contentHeaders.splice(i, 1)
-      i--
-      len--
-    }
-
-    canonicalTransform(contentNode)
-
-    const buffer = await contentNode.build()
-    const p7 = forge.pkcs7.createSignedData()
-    p7.content = forge.util.createBuffer(buffer.toString('binary'))
-
-    p7.addCertificate(options.cert)
-
-    options.chain.forEach(cert => {
-      p7.addCertificate(cert)
-    })
-
-    p7.addSigner({
-      key: options.key,
-      certificate: options.cert,
-      digestAlgorithm: forge.pki.oids[options.micalg],
-      authenticatedAttributes: [
-        {
-          type: forge.pki.oids.contentType,
-          value: forge.pki.oids.data
-        },
-        {
-          type: forge.pki.oids.messageDigest
-        },
-        {
-          type: forge.pki.oids.signingTime
-        }
-      ]
-    })
-
-    p7.sign()
-
-    const asn1: any = p7.toAsn1()
-
-    // Scrub encapContentInfo.eContent
-    asn1.value[1].value[0].value[2].value.splice(1, 1)
-
-    // Write PKCS7 ASN.1 as DER to buffer
-    const der = forge.asn1.toDer(asn1)
-    const derBuffer = Buffer.from(der.getBytes(), 'binary')
-    const signatureNode = rootNode.createChild('application/pkcs7-signature', {
-      filename: 'smime.p7s'
-    })
-
-    signatureNode.setContent(derBuffer)
-
-    return rootNode
+    return AS2Crypto.sign(this, options)
   }
 
   async encrypt (options?: EncryptionOptions): Promise<AS2MimeNode> {
-    options = !isNullOrUndefined(options)
-      ? encryptionOptions(options)
-      : !isNullOrUndefined(this._encrypt)
+    options = isNullOrUndefined(options)
       ? this._encrypt
-      : encryptionOptions(options)
-    const rootNode = new AS2MimeNode({
-      filename: 'smime.p7m',
-      contentType: 'application/x-pkcs7-mime; smime-type=enveloped-data'
-    })
-    const buffer = await super.build()
-    const p7 = forge.pkcs7.createEnvelopedData()
+      : options
 
-    p7.addRecipient(forge.pki.certificateFromPem(options.cert))
-    p7.content = forge.util.createBuffer(buffer.toString('utf8'))
-    p7.encrypt(undefined, forge.pki.oids[options.encryption])
-
-    const der = forge.asn1.toDer(p7.toAsn1())
-    const derBuffer = Buffer.from(der.getBytes(), 'binary')
-
-    rootNode.setContent(derBuffer)
-
-    return rootNode
+    return AS2Crypto.encrypt(this, options)
   }
 
   async build (): Promise<Buffer> {

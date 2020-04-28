@@ -1,10 +1,6 @@
-import { AS2Signing } from '../AS2Constants'
-import {
-  AS2MimeNodeOptions,
-  SigningOptions,
-  EncryptionOptions
-} from '../AS2MimeNode'
+import { AS2MimeNodeOptions } from '../AS2MimeNode'
 import { AS2Headers } from '../Interfaces'
+import { SigningOptions, EncryptionOptions, AS2Signing } from '../AS2Crypto'
 
 export interface AS2ComposerOptions {
   /** Message options */

@@ -1,6 +1,10 @@
 import * as AS2Constants from '../AS2Constants'
 import forge = require('node-forge')
 import crypto = require('crypto')
+import { AS2MimeNode } from '../AS2MimeNode'
+import { encryptionOptions, canonicalTransform } from '../Helpers'
+import MimeNode = require('nodemailer/lib/mime-node')
+import { EncryptionOptions, SigningOptions } from './Interfaces'
 
 export class AS2Crypto {
   public Constants = {
@@ -32,28 +36,30 @@ export class AS2Crypto {
     return p7.content.toString('utf8')
   }
 
-  /**
-   * @description Method to encrypt data into a PKCS7 3DES string in base64.
-   * @param {string} data - The data to encrypt into PKCS7 3DES.
-   * @param {string} publicCert - The public certificate in PEM format to encrypt with.
-   * @param {string} encryption - The encryption algorithm to use.
-   * @returns {string} The encrypted data.
-   */
-  public encrypt (
-    data: string,
-    publicCert: string,
-    encryption: string = AS2Constants.ENCRYPTION._3DES
-  ): string {
+  /** Method to envelope an AS2MimeNode in an encrypted AS2MimeNode. */
+  static async encrypt (
+    node: AS2MimeNode,
+    options: EncryptionOptions
+  ): Promise<AS2MimeNode> {
+    options = encryptionOptions(options)
+    const rootNode = new AS2MimeNode({
+      filename: 'smime.p7m',
+      contentType: 'application/x-pkcs7-mime; smime-type=enveloped-data'
+    })
+
+    const buffer = await MimeNode.prototype.build.bind(node)()
     const p7 = forge.pkcs7.createEnvelopedData()
 
-    p7.addRecipient(forge.pki.certificateFromPem(publicCert))
-    p7.content = forge.util.createBuffer(data)
-    p7.encrypt(undefined, forge.pki.oids[encryption])
+    p7.addRecipient(forge.pki.certificateFromPem(options.cert))
+    p7.content = forge.util.createBuffer(buffer.toString('utf8'))
+    p7.encrypt(undefined, forge.pki.oids[options.encryption])
 
-    return forge.pkcs7
-      .messageToPem(p7)
-      .replace(this.Constants.SIGNATURE_HEADER, '')
-      .replace(this.Constants.SIGNATURE_FOOTER, '')
+    const der = forge.asn1.toDer(p7.toAsn1())
+    const derBuffer = Buffer.from(der.getBytes(), 'binary')
+
+    rootNode.setContent(derBuffer)
+
+    return rootNode
   }
 
   /**
@@ -83,35 +89,79 @@ export class AS2Crypto {
     return verifier.verify(publicCert, msg.rawCapture.signature, 'latin1')
   }
 
-  /**
-   * @description Method to sign data against a certificate and key pair.
-   * @param {string|any} data - The data to verify.
-   * @param {string} publicCert - The certificate to verify against.
-   * @param {string} privateKey - The private key associated with the certificate.
-   * @param {string} [algorithm='sha1'] - The algorithm for signing.
-   * @returns {string} The signature of the data.
-   */
-  public sign (
-    data: string | any,
-    publicCert: string,
-    privateKey: string,
-    algorithm: string = AS2Constants.SIGNING.SHA256
-  ): string {
-    const p7 = forge.pkcs7.createSignedData()
-
-    p7.content = forge.util.createBuffer(data)
-    p7.addCertificate(publicCert)
-    p7.addSigner({
-      key: forge.pki.privateKeyFromPem(privateKey),
-      certificate: forge.pki.certificateFromPem(publicCert),
-      digestAlgorithm: forge.pki.oids[algorithm]
+  /** Method to sign data against a certificate and key pair. */
+  static async sign (
+    node: AS2MimeNode,
+    options: SigningOptions
+  ): Promise<AS2MimeNode> {
+    const rootNode = new AS2MimeNode({
+      contentType: `multipart/signed; protocol="application/pkcs7-signature"; micalg=${options.micalg};`,
+      encrypt: (node as any)._encrypt
     })
-    p7.sign({ detached: true })
+    const contentNode = rootNode.appendChild(node) as AS2MimeNode
+    const contentHeaders: Array<{
+      key: string
+      value: string
+    }> = (contentNode as any)._headers
 
-    return forge.pkcs7
-      .messageToPem(p7)
-      .replace(this.Constants.SIGNATURE_HEADER, '')
-      .replace(this.Constants.SIGNATURE_FOOTER, '')
+    for (let i = 0, len = contentHeaders.length; i < len; i++) {
+      const header = contentHeaders[i]
+
+      if (header.key.toLowerCase() === 'content-type') continue
+
+      rootNode.setHeader(header.key, header.value)
+      contentHeaders.splice(i, 1)
+      i--
+      len--
+    }
+
+    canonicalTransform(contentNode)
+
+    const buffer = await MimeNode.prototype.build.bind(contentNode)()
+    const p7 = forge.pkcs7.createSignedData()
+    p7.content = forge.util.createBuffer(buffer.toString('binary'))
+
+    p7.addCertificate(options.cert)
+
+    options.chain.forEach(cert => {
+      p7.addCertificate(cert)
+    })
+
+    p7.addSigner({
+      key: options.key,
+      certificate: options.cert,
+      digestAlgorithm: forge.pki.oids[options.micalg],
+      authenticatedAttributes: [
+        {
+          type: forge.pki.oids.contentType,
+          value: forge.pki.oids.data
+        },
+        {
+          type: forge.pki.oids.messageDigest
+        },
+        {
+          type: forge.pki.oids.signingTime
+        }
+      ]
+    })
+
+    p7.sign()
+
+    const asn1: any = p7.toAsn1()
+
+    // Scrub encapContentInfo.eContent
+    asn1.value[1].value[0].value[2].value.splice(1, 1)
+
+    // Write PKCS7 ASN.1 as DER to buffer
+    const der = forge.asn1.toDer(asn1)
+    const derBuffer = Buffer.from(der.getBytes(), 'binary')
+    const signatureNode = rootNode.createChild('application/pkcs7-signature', {
+      filename: 'smime.p7s'
+    })
+
+    signatureNode.setContent(derBuffer)
+
+    return rootNode
   }
 
   /**
