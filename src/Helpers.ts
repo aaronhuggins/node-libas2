@@ -1,8 +1,9 @@
-import { AS2MimeNode } from './AS2MimeNode'
 import { SIGNING, ENCRYPTION } from './AS2Constants'
-import { SigningOptions, EncryptionOptions } from './AS2MimeNodeInterfaces'
+import { AS2MimeNode, SigningOptions, EncryptionOptions } from './AS2MimNode'
 
-export const isNullOrUndefined = function isNullOrUndefined (value: any): boolean {
+export const isNullOrUndefined = function isNullOrUndefined (
+  value: any
+): boolean {
   return value === undefined || value === null
 }
 

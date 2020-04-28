@@ -1,8 +1,17 @@
 import { Readable } from 'stream'
 import MimeNode = require('nodemailer/lib/mime-node')
 import forge = require('node-forge')
-import { isNullOrUndefined, signingOptions, encryptionOptions, canonicalTransform } from './AS2Helpers'
-import { AS2MimeNodeOptions, SigningOptions, EncryptionOptions } from './AS2MimeNodeInterfaces'
+import {
+  isNullOrUndefined,
+  signingOptions,
+  encryptionOptions,
+  canonicalTransform
+} from './AS2Helpers'
+import {
+  AS2MimeNodeOptions,
+  SigningOptions,
+  EncryptionOptions
+} from './AS2MimeNodeInterfaces'
 
 export class AS2MimeNode extends MimeNode {
   constructor (options: AS2MimeNodeOptions) {
@@ -53,10 +62,11 @@ export class AS2MimeNode extends MimeNode {
       ? this._sign
       : signingOptions(options)
     const rootNode = new AS2MimeNode({
-      contentType:
-        `multipart/signed; protocol="application/pkcs7-signature"; micalg=${options.micalg};`
+      contentType: `multipart/signed; protocol="application/pkcs7-signature"; micalg=${options.micalg};`
     })
-    const contentNode = rootNode.appendChild(Object.assign(new MimeNode(), this)) as AS2MimeNode
+    const contentNode = rootNode.appendChild(
+      Object.assign(new MimeNode(), this)
+    ) as AS2MimeNode
     const contentHeaders: Array<{
       key: string
       value: string

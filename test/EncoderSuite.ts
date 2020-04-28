@@ -9,7 +9,7 @@ import {
 
 import fs = require('fs')
 import { simpleParser } from 'mailparser'
-import { AS2MimeNode } from '../src/AS2MimeNode'
+import { AS2MimeNode } from '../src/AS2MimNode'
 
 const content = fs.readFileSync('test/test-data/sample_edi.edi', 'utf8')
 const cert = fs.readFileSync('test/test-data/sample_cert.cer', 'utf8')

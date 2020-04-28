@@ -1,5 +1,5 @@
-import { Readable } from 'stream';
-import { AS2Encryption, AS2Signing } from './AS2Constants';
+import { Readable } from 'stream'
+import { AS2Encryption, AS2Signing } from './AS2Constants'
 
 export type AS2MimeNodeHeaders =
   | Array<{
@@ -40,7 +40,7 @@ export interface SigningOptions {
   /** PEM-based private certificate contents. */
   key: string
   /** Array of PEM-based certificate chain contents. */
-  chain?: string[],
+  chain?: string[]
   /** Algorithm of secure signature hash to use. */
   micalg?: AS2Signing
 }
