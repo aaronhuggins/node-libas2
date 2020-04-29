@@ -44,8 +44,10 @@ export class AS2Crypto {
     options = encryptionOptions(options)
     const rootNode = new AS2MimeNode({
       filename: 'smime.p7m',
-      contentType: 'application/x-pkcs7-mime; smime-type=enveloped-data'
+      contentType: 'application/pkcs7-mime; smime-type=enveloped-data'
     })
+
+    canonicalTransform(node)
 
     const buffer = await MimeNode.prototype.build.bind(node)()
     const p7 = forge.pkcs7.createEnvelopedData()
@@ -155,11 +157,12 @@ export class AS2Crypto {
     // Write PKCS7 ASN.1 as DER to buffer
     const der = forge.asn1.toDer(asn1)
     const derBuffer = Buffer.from(der.getBytes(), 'binary')
-    const signatureNode = rootNode.createChild('application/pkcs7-signature', {
-      filename: 'smime.p7s'
-    })
 
-    signatureNode.setContent(derBuffer)
+    rootNode.appendChild(new AS2MimeNode({
+      filename: 'smime.p7s',
+      contentType: 'application/pkcs7-signature',
+      content: derBuffer
+    })) as AS2MimeNode
 
     return rootNode
   }
