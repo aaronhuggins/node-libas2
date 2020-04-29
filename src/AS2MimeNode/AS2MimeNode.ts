@@ -67,6 +67,10 @@ export class AS2MimeNode extends MimeNode {
     this._encrypt = encryptionOptions(options)
   }
 
+  setHeader (keyOrHeaders: any, value?: any): this {
+    return super.setHeader(keyOrHeaders, value)
+  }
+
   getHeaders (asObject: boolean = false): AS2Headers {
     let transferEncoding = this.getTransferEncoding()
     let headers: AS2Headers = asObject ? {} : []

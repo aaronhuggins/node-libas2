@@ -79,7 +79,7 @@ export class AS2Composer {
       this._headers = this._headers.concat(result)
     } else {
       if (Array.isArray(headers)) {
-        this._headers = this._headers.concat(headers)
+        this._headers = this._headers.concat(headers as any)
       } else {
         for (let entry of Object.entries(headers)) {
           for (let [key, value] of entry) {
