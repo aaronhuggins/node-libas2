@@ -1,17 +1,13 @@
-import * as AS2Constants from '../Constants'
+import { NOT_IMPLEMENTED, SIGNING, CONTROL_CHAR, SIGNATURE_HEADER, SIGNATURE_FOOTER } from '../Constants'
 import forge = require('node-forge')
 import crypto = require('crypto')
 import { AS2MimeNode } from '../AS2MimeNode'
 import { encryptionOptions, canonicalTransform } from '../Helpers'
 import MimeNode = require('nodemailer/lib/mime-node')
 import { EncryptionOptions, SigningOptions } from './Interfaces'
+import { simpleParser } from 'mailparser'
 
 export class AS2Crypto {
-  public Constants = {
-    SIGNATURE_HEADER: `-----BEGIN PKCS7-----${AS2Constants.CONTROL_CHAR}`,
-    SIGNATURE_FOOTER: `-----END PKCS7-----${AS2Constants.CONTROL_CHAR}`
-  }
-
   /**
    * @description Method to decrypt data from a PKCS7 3DES string in base64.
    * @param {string} data - The data to decrypt from PKCS7 3DES.
@@ -19,21 +15,24 @@ export class AS2Crypto {
    * @param {string} privateKey - The private key to decrypt with.
    * @returns {string} The decrypted data.
    */
-  public decrypt (
-    data: string,
-    publicCert: string,
-    privateKey: string
-  ): string {
-    if (!data.includes(this.Constants.SIGNATURE_HEADER)) {
-      data = `${this.Constants.SIGNATURE_HEADER}${data}${this.Constants.SIGNATURE_FOOTER}`
-    }
+  static async decrypt (
+    node: AS2MimeNode,
+    options: any
+  ): Promise<string> {
+    const data: string = Buffer.isBuffer(node.content)
+      ? node.content.toString('utf8')
+      : node.content as string
+    const p7 = forge.pkcs7.messageFromPem(`${SIGNATURE_HEADER}${data}${SIGNATURE_FOOTER}`) as forge.pkcs7.PkcsEnvelopedData
+    const recipient = p7.findRecipient(forge.pki.certificateFromPem(options.cert))
 
-    const p7 = forge.pkcs7.messageFromPem(data)
-    const recipient = p7.findRecipient(forge.pki.certificateFromPem(publicCert))
+    p7.decrypt(recipient, forge.pki.privateKeyFromPem(options.key))
 
-    p7.decrypt(recipient, forge.pki.privateKeyFromPem(privateKey))
+    // Parse Mime body from p7.content back to AS2MimeNode
+    const mime = Buffer.from(p7.content.getBytes(), 'binary').toString('utf8')
+    const revivedMime = await simpleParser(mime)
+    //const revivedNode = revivedMime.
 
-    return p7.content.toString('utf8')
+    return 'revivedNode'
   }
 
   /** Method to envelope an AS2MimeNode in an encrypted AS2MimeNode. */
@@ -76,10 +75,10 @@ export class AS2Crypto {
     data: string | any,
     signature: string,
     publicCert: string,
-    algorithm: string = AS2Constants.SIGNING.SHA256
+    algorithm: string = SIGNING.SHA256
   ): boolean {
-    if (!signature.includes(this.Constants.SIGNATURE_HEADER)) {
-      signature = `${this.Constants.SIGNATURE_HEADER}${signature}${this.Constants.SIGNATURE_FOOTER}`
+    if (!signature.includes(SIGNATURE_HEADER)) {
+      signature = `${SIGNATURE_HEADER}${signature}${SIGNATURE_FOOTER}`
     }
 
     const msg = forge.pkcs7.messageFromPem(signature)
@@ -165,6 +164,16 @@ export class AS2Crypto {
     })) as AS2MimeNode
 
     return rootNode
+  }
+
+  /** Not yet implemented; do not use. */
+  async compress (node: AS2MimeNode, options: any): Promise<AS2MimeNode> {
+    throw NOT_IMPLEMENTED
+  }
+
+  /** Not yet implemented. */
+  async decompress (node: AS2MimeNode, options: any): Promise<AS2MimeNode> {
+    throw NOT_IMPLEMENTED
   }
 
   /**

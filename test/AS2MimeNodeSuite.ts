@@ -20,6 +20,7 @@ describe('AS2MimeNode', async () => {
       'bash -c "openssl smime -verify -noverify -in test/temp-data/smime2.txt -signer test/test-data/sample_cert.cer"'
     )
     const parsed = await simpleParser(openssl)
+    console.log(parsed)
     const opensslContent = parsed.attachments[0].content.toString('utf8')
 
     if (opensslContent !== content) {
