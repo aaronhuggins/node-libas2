@@ -24,7 +24,7 @@ const options: AS2ComposerOptions = {
         micalg: 'sha256'
       }
     },
-    headers: { 'not': ['real'] }
+    headers: { not: ['real'] }
   }
 }
 
@@ -32,7 +32,7 @@ describe('AS2Composer', async () => {
   it('should set headers on AS2 message without error', async () => {
     const composer = new AS2Composer(options)
     composer.setHeaders({ 'fake-header': 'not-a-real-header' })
-    composer.setHeaders([{ key:'fake-header', value: 'not-a-real-header' }])
+    composer.setHeaders([{ key: 'fake-header', value: 'not-a-real-header' }])
     /* ,
       'prepared': {
         prepared: true,

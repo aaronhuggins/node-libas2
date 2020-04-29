@@ -11,7 +11,10 @@ export const isNullOrUndefined = function isNullOrUndefined (
 }
 
 export const isSMime = function isSMime (value: string) {
-  return value.toLowerCase().startsWith('application/pkcs7') || value.toLowerCase().startsWith('application/x-pkcs7')
+  return (
+    value.toLowerCase().startsWith('application/pkcs7') ||
+    value.toLowerCase().startsWith('application/x-pkcs7')
+  )
 }
 
 /** Transforms a payload into a canonical text format before signing */

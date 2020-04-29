@@ -83,9 +83,9 @@ export class AS2MimeNode extends MimeNode {
         }
       }
 
-      if (this.smimeType = 'signed-data') this.signed = true
-      if (this.smimeType = 'enveloped-data') this.encrypted = true
-      if (this.smimeType = 'compressed-data') this.compressed = true
+      if ((this.smimeType = 'signed-data')) this.signed = true
+      if ((this.smimeType = 'enveloped-data')) this.encrypted = true
+      if ((this.smimeType = 'compressed-data')) this.compressed = true
     }
   }
 

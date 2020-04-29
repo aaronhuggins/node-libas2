@@ -1,4 +1,10 @@
-import { NOT_IMPLEMENTED, SIGNING, CONTROL_CHAR, SIGNATURE_HEADER, SIGNATURE_FOOTER } from '../Constants'
+import {
+  NOT_IMPLEMENTED,
+  SIGNING,
+  CONTROL_CHAR,
+  SIGNATURE_HEADER,
+  SIGNATURE_FOOTER
+} from '../Constants'
 import forge = require('node-forge')
 import crypto = require('crypto')
 import { AS2MimeNode } from '../AS2MimeNode'
@@ -15,15 +21,16 @@ export class AS2Crypto {
    * @param {string} privateKey - The private key to decrypt with.
    * @returns {string} The decrypted data.
    */
-  static async decrypt (
-    node: AS2MimeNode,
-    options: any
-  ): Promise<string> {
+  static async decrypt (node: AS2MimeNode, options: any): Promise<string> {
     const data: string = Buffer.isBuffer(node.content)
       ? node.content.toString('utf8')
-      : node.content as string
-    const p7 = forge.pkcs7.messageFromPem(`${SIGNATURE_HEADER}${data}${SIGNATURE_FOOTER}`) as forge.pkcs7.PkcsEnvelopedData
-    const recipient = p7.findRecipient(forge.pki.certificateFromPem(options.cert))
+      : (node.content as string)
+    const p7 = forge.pkcs7.messageFromPem(
+      `${SIGNATURE_HEADER}${data}${SIGNATURE_FOOTER}`
+    ) as forge.pkcs7.PkcsEnvelopedData
+    const recipient = p7.findRecipient(
+      forge.pki.certificateFromPem(options.cert)
+    )
 
     p7.decrypt(recipient, forge.pki.privateKeyFromPem(options.key))
 
@@ -157,11 +164,13 @@ export class AS2Crypto {
     const der = forge.asn1.toDer(asn1)
     const derBuffer = Buffer.from(der.getBytes(), 'binary')
 
-    rootNode.appendChild(new AS2MimeNode({
-      filename: 'smime.p7s',
-      contentType: 'application/pkcs7-signature',
-      content: derBuffer
-    })) as AS2MimeNode
+    rootNode.appendChild(
+      new AS2MimeNode({
+        filename: 'smime.p7s',
+        contentType: 'application/pkcs7-signature',
+        content: derBuffer
+      })
+    ) as AS2MimeNode
 
     return rootNode
   }

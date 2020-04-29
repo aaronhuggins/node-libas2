@@ -1,5 +1,5 @@
 import { Stream, TransformOptions } from 'stream'
-import { AgreementOptions } from '../AS2Composer';
+import { AgreementOptions } from '../AS2Composer'
 
 export interface AS2ParserOptions {
   content: Buffer | Stream | string
