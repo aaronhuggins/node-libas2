@@ -56,6 +56,7 @@ export class AS2MimeNode extends MimeNode {
     this.signed = contentType.toLowerCase().startsWith('multipart/signed')
     this.encrypted = contentType.toLowerCase().startsWith('multipart/encrypted')
     this.smime = isSMime(contentType)
+    this.compressed = false
     if (this.smime) {
       let applicationType: string
 
@@ -81,6 +82,10 @@ export class AS2MimeNode extends MimeNode {
           this.smimeType = 'not-available'
         }
       }
+
+      if (this.smimeType = 'signed-data') this.signed = true
+      if (this.smimeType = 'enveloped-data') this.encrypted = true
+      if (this.smimeType = 'compressed-data') this.compressed = true
     }
   }
 
@@ -89,6 +94,7 @@ export class AS2MimeNode extends MimeNode {
   smime: boolean
   signed: boolean
   encrypted: boolean
+  compressed: boolean
   smimeType: string
 
   setSigning (options: SigningOptions): void {
