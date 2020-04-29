@@ -10,6 +10,10 @@ export const isNullOrUndefined = function isNullOrUndefined (
   return value === undefined || value === null
 }
 
+export const isSMime = function isSMime (value: string) {
+  return value.toLowerCase().startsWith('application/pkcs7') || value.toLowerCase().startsWith('application/x-pkcs7')
+}
+
 /** Transforms a payload into a canonical text format before signing */
 export const canonicalTransform = function canonicalTransform (
   node: AS2MimeNode

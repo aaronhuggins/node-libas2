@@ -1,12 +1,11 @@
 import { Readable } from 'stream'
 import MimeNode = require('nodemailer/lib/mime-node')
 import mimeFuncs = require('nodemailer/lib/mime-funcs')
-import forge = require('node-forge')
 import {
   isNullOrUndefined,
   signingOptions,
   encryptionOptions,
-  canonicalTransform
+  isSMime
 } from '../Helpers'
 import { AS2MimeNodeOptions } from './Interfaces'
 import { AS2Headers } from '../Interfaces'
@@ -54,10 +53,43 @@ export class AS2MimeNode extends MimeNode {
       'Content-Disposition',
       isNullOrUndefined(contentDisposition) ? 'attachment' : contentDisposition
     )
+    this.signed = contentType.toLowerCase().startsWith('multipart/signed')
+    this.encrypted = contentType.toLowerCase().startsWith('multipart/encrypted')
+    this.smime = isSMime(contentType)
+    if (this.smime) {
+      let applicationType: string
+
+      // Check for actual smime-type
+      for (let part of contentType.split(/;/gu)) {
+        let [key, value] = part.trim().split(/=/gu)
+        key = key.trim().toLowerCase()
+
+        if (key === 'smime-type') {
+          this.smimeType = value.trim().toLowerCase()
+        }
+
+        if (key.startsWith('application/')) {
+          applicationType = key
+        }
+      }
+
+      // Infer smime-type
+      if (this.smimeType === undefined || this.smimeType === '') {
+        if (applicationType.endsWith('signature')) {
+          this.smimeType = 'signed-data'
+        } else {
+          this.smimeType = 'not-available'
+        }
+      }
+    }
   }
 
   private _sign: SigningOptions
   private _encrypt: EncryptionOptions
+  smime: boolean
+  signed: boolean
+  encrypted: boolean
+  smimeType: string
 
   setSigning (options: SigningOptions): void {
     this._sign = signingOptions(options)
