@@ -1,3 +1,7 @@
+import { AS2Encryption, AS2Signing } from './AS2Crypto'
+
+export const NOT_IMPLEMENTED = new Error('NOT YET IMPLEMENTED.')
+
 // STRINGS
 export const CONTROL_CHAR = '\r\n'
 export const MIME_VERSION = '1.0'
@@ -5,6 +9,8 @@ export const AS2_VERSION = '1.0'
 export const SMIME_DESC = 'This is an S/MIME signed message'
 export const SIGNATURE_FILENAME = 'smime.p7s'
 export const ENCRYPTION_FILENAME = 'smime.p7m'
+export const SIGNATURE_HEADER = `-----BEGIN PKCS7-----${CONTROL_CHAR}`
+export const SIGNATURE_FOOTER = `-----END PKCS7-----${CONTROL_CHAR}`
 
 // ENUMERABLES
 export const GUARANTEED_TEXT = [
@@ -65,33 +71,38 @@ export const RECEIPT = {
   SEND_SIGNED: 2 as AS2Receipt
 }
 
+export const STANDARD_HEADER = {
+  VERSION: 'AS2-Version',
+  TO: 'AS2-To',
+  FROM: 'AS2-From',
+  MDN_TO: 'Disposition-Notification-To',
+  MDN_OPTIONS: 'Disposition-Notification-Options',
+  MDN_URL: 'Receipt-Delivery-Option'
+}
+
 // TYPES
 export type AS2Encoding = '8bit' | 'binary' | 'base64'
-
-export type AS2Signing = 'sha1' | 'sha256' | 'sha384' | 'sha512'
-
-export type AS2Encryption = 'des-EDE3-CBC' | 'aes128-CBC' | 'aes192-CBC' | 'aes256-CBC'
 
 export type AS2Receipt = 0 | 1 | 2
 
 export type MimeType =
-'text/plain' |
-'application/edi-x12' |
-'application/EDI-X12' |
-'application/edifact' |
-'application/EDIFACT' |
-'application/edi-consent' |
-'application/EDI-Consent' |
-'application/pkcs7-signature' |
-'application/pkcs7-mime' |
-'application/x-pkcs7-signature' |
-'application/x-pkcs7-mime' |
-'application/xml' |
-'application/XML' |
-'message/disposition-notification' |
-'multipart/mixed' |
-'multipart/report' |
-'multipart/signed'
+  | 'text/plain'
+  | 'application/edi-x12'
+  | 'application/EDI-X12'
+  | 'application/edifact'
+  | 'application/EDIFACT'
+  | 'application/edi-consent'
+  | 'application/EDI-Consent'
+  | 'application/pkcs7-signature'
+  | 'application/pkcs7-mime'
+  | 'application/x-pkcs7-signature'
+  | 'application/x-pkcs7-mime'
+  | 'application/xml'
+  | 'application/XML'
+  | 'message/disposition-notification'
+  | 'multipart/mixed'
+  | 'multipart/report'
+  | 'multipart/signed'
 
 export interface AS2Headers {
   'AS2-Version'?: '1.0'
@@ -106,8 +117,8 @@ export interface AS2Headers {
   'content-disposition'?: string
   'Content-Transfer-Encoding'?: '8bit' | 'binary' | 'base64'
   'content-transfer-encoding'?: '8bit' | 'binary' | 'base64'
-  'Date'?: string
-  'date'?: string
+  Date?: string
+  date?: string
   'Disposition-Notification-Options'?: string
   'disposition-notification-options'?: string
   'Disposition-Notification-To'?: string
@@ -120,6 +131,6 @@ export interface AS2Headers {
   'original-message-id'?: string
   'Receipt-Delivery-Option'?: string
   'receipt-delivery-option'?: string
-  'Subject'?: string
-  'subject'?: string
+  Subject?: string
+  subject?: string
 }
