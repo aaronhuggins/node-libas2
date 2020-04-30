@@ -28,6 +28,7 @@
     "@types/mailparser": "^2.7.2",
     "@types/mocha": "^7.0.2",
     "@types/node": "^13.13.4",
+    "@types/node-forge": "^0.9.3",
     "@types/nodemailer": "^6.4.0",
     "@types/uuid": "^7.0.3",
     "@typescript-eslint/eslint-plugin": "^2.30.0",

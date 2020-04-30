@@ -17,10 +17,9 @@ describe('AS2MimeNode', async () => {
     writeFileSync('test/temp-data/multipart.txt', signed.toString('utf8'))
 
     const openssl = await run(
-      'bash -c "openssl smime -verify -noverify -in test/temp-data/smime2.txt -signer test/test-data/sample_cert.cer"'
+      'bash -c "openssl smime -verify -noverify -in test/temp-data/multipart.txt -signer test/test-data/sample_cert.cer"'
     )
     const parsed = await simpleParser(openssl)
-    console.log(parsed)
     const opensslContent = parsed.attachments[0].content.toString('utf8')
 
     if (opensslContent !== content) {

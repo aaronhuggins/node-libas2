@@ -1,7 +1,6 @@
 import {
   NOT_IMPLEMENTED,
   SIGNING,
-  CONTROL_CHAR,
   SIGNATURE_HEADER,
   SIGNATURE_FOOTER
 } from '../Constants'
@@ -25,17 +24,17 @@ export class AS2Crypto {
     const data: string = Buffer.isBuffer(node.content)
       ? node.content.toString('utf8')
       : (node.content as string)
-    const p7 = forge.pkcs7.messageFromPem(
+    const p7 = (forge.pkcs7 as any).messageFromPem(
       `${SIGNATURE_HEADER}${data}${SIGNATURE_FOOTER}`
     ) as forge.pkcs7.PkcsEnvelopedData
-    const recipient = p7.findRecipient(
+    const recipient: any = (p7 as any).findRecipient(
       forge.pki.certificateFromPem(options.cert)
     )
 
-    p7.decrypt(recipient, forge.pki.privateKeyFromPem(options.key))
+    ;(p7 as any).decrypt(recipient, forge.pki.privateKeyFromPem(options.key))
 
     // Parse Mime body from p7.content back to AS2MimeNode
-    const mime = Buffer.from(p7.content.getBytes(), 'binary').toString('utf8')
+    const mime = Buffer.from((p7.content as forge.util.ByteStringBuffer).getBytes(), 'binary').toString('utf8')
     const revivedMime = await simpleParser(mime)
     //const revivedNode = revivedMime.
 
@@ -60,7 +59,7 @@ export class AS2Crypto {
 
     p7.addRecipient(forge.pki.certificateFromPem(options.cert))
     p7.content = forge.util.createBuffer(buffer.toString('utf8'))
-    p7.encrypt(undefined, forge.pki.oids[options.encryption])
+    ;(p7 as any).encrypt(undefined, forge.pki.oids[options.encryption])
 
     const der = forge.asn1.toDer(p7.toAsn1())
     const derBuffer = Buffer.from(der.getBytes(), 'binary')
@@ -88,13 +87,13 @@ export class AS2Crypto {
       signature = `${SIGNATURE_HEADER}${signature}${SIGNATURE_FOOTER}`
     }
 
-    const msg = forge.pkcs7.messageFromPem(signature)
+    const msg = (forge.pkcs7 as any).messageFromPem(signature) as forge.pkcs7.PkcsEnvelopedData
     const verifier = crypto.createVerify(algorithm)
 
     verifier.update(Buffer.from(data))
 
     // The encoding 'latin1' is an alias for 'binary'.
-    return verifier.verify(publicCert, msg.rawCapture.signature, 'latin1')
+    return verifier.verify(publicCert, (msg as any).rawCapture.signature, 'latin1')
   }
 
   /** Method to sign data against a certificate and key pair. */
