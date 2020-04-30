@@ -7,6 +7,7 @@ import { AS2MimeNodeOptions, AS2MimeNode } from '../AS2MimeNode'
 import { isNullOrUndefined, agreementOptions } from '../Helpers'
 import { AS2Headers } from '../Interfaces'
 import { STANDARD_HEADER } from '../Constants'
+import { Readable } from 'stream'
 
 export class AS2Composer {
   constructor (options: AS2ComposerOptions) {
@@ -116,21 +117,19 @@ export class AS2Composer {
     return this.message
   }
 
-  async compileRequest (
+  async request (
     headersAsObject: boolean = false
   ): Promise<{
     headers: AS2Headers
-    body: string
+    body: string | Buffer | Readable
   }> {
-    const message = await this.compile()
-    const messageBuffer = await message.build()
-    const [bodyHeaders, ...body] = messageBuffer
-      .toString('utf8')
-      .split(/\r\n\r\n/gu)
+    if (this.message === undefined) {
+      await this.compile()
+    }
 
     return {
-      headers: message.getHeaders(headersAsObject),
-      body: body.join('\r\n\r\n')
+      headers: this.message.getHeaders(headersAsObject),
+      body: this.message.content
     }
   }
 }

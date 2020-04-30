@@ -63,6 +63,6 @@ describe('AS2Composer', async () => {
 
   it('should produce a valid AS2 request', async () => {
     const composer = new AS2Composer(options)
-    const compiled = await composer.compileRequest(true)
+    const compiled = await composer.request(true)
   }).timeout(1000)
 })
