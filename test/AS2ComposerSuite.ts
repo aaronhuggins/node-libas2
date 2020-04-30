@@ -49,7 +49,7 @@ describe('AS2Composer', async () => {
     writeFileSync('test/temp-data/as2message.txt', message.toString('utf8'))
 
     const openssl = await run(
-      'bash -c "openssl smime -decrypt -in test/temp-data/as2message.txt -recip test/test-data/sample_cert.cer  -inkey test/test-data/sample_priv.key -des3"'
+      'openssl smime -decrypt -in test/temp-data/as2message.txt -recip test/test-data/sample_cert.cer  -inkey test/test-data/sample_priv.key -des3'
     )
     const parsed = await simpleParser(openssl)
     const opensslContent = parsed.attachments[0].content.toString('utf8')

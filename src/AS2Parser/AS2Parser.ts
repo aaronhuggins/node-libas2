@@ -2,7 +2,9 @@ import { MailParser } from 'mailparser'
 import { AS2ParserOptions, MailParserOptions } from './Interfaces'
 import { AgreementOptions } from '../AS2Composer'
 import { Stream } from 'stream'
-import { AS2MimeNode } from '../AS2MimeNode'
+import { AS2MimeNode, AS2MimeNodeOptions } from '../AS2MimeNode'
+import { mapHeadersToNodeHeaders } from '../Helpers'
+import { ParserHeaders } from '../Interfaces'
 
 export class AS2Parser {
   constructor (options: AS2ParserOptions) {
@@ -22,25 +24,50 @@ export class AS2Parser {
   async parse (): Promise<AS2MimeNode> {
     return new Promise((resolve, reject) => {
       let input = this._content
-      let options: boolean | MailParserOptions = this._parser
-      let rootNode: AS2MimeNode
-
-      options = options || ({} as MailParserOptions)
-      let keepCidLinks = !!options.keepCidLinks
+      const rootNodeOptions: AS2MimeNodeOptions = {}
+      const childNodeOptions: AS2MimeNodeOptions[] = []
 
       let mail: any = {
         attachments: [] as any[]
       }
 
-      let parser = new MailParser(options)
+      let parser = this.stream()
 
       parser.on('error', err => {
         reject(err)
       })
 
       parser.on('headers', headers => {
-        mail.headers = headers
-        mail.headerLines = (parser as any).headerLines
+        if (headers.has('content-disposition')) {
+          const contentDisposition = (headers as ParserHeaders).get(
+            'content-disposition'
+          )
+
+          if (typeof contentDisposition === 'string') {
+            rootNodeOptions.contentDisposition = contentDisposition as
+              | 'inline'
+              | 'attachment'
+          } else {
+            rootNodeOptions.contentDisposition = contentDisposition.value as
+              | 'inline'
+              | 'attachment'
+            rootNodeOptions.filename = contentDisposition.params.filename
+          }
+        }
+        if (headers.has('content-type')) {
+          const contentType = (headers as ParserHeaders).get('content-type')
+
+          if (typeof contentType === 'string') {
+            rootNodeOptions.contentType = contentType
+          } else {
+            rootNodeOptions.contentType = contentType.value
+            if (rootNodeOptions.filename === undefined)
+              rootNodeOptions.filename = contentType.params.filename
+          }
+        }
+        rootNodeOptions.headers = mapHeadersToNodeHeaders(
+          headers as ParserHeaders
+        )
       })
 
       let reading = false
@@ -54,16 +81,13 @@ export class AS2Parser {
           return
         }
 
-        if (data.type === 'text') {
-          Object.keys(data).forEach(key => {
-            if (['text', 'html', 'textAsHtml'].includes(key)) {
-              mail[key] = data[key]
-            }
-          })
-        }
-
         if (data.type === 'attachment') {
-          mail.attachments.push(data)
+          const childNodeOption: AS2MimeNodeOptions = {
+            contentType: data.contentType,
+            contentDisposition: data.contentDisposition,
+            filename: data.filename,
+            headers: mapHeadersToNodeHeaders(data.headers as ParserHeaders)
+          }
 
           let chunks: any[] = []
           let chunklen = 0
@@ -76,10 +100,12 @@ export class AS2Parser {
           })
 
           data.content.on('end', () => {
-            data.content = Buffer.concat(chunks, chunklen)
+            childNodeOption.content = Buffer.concat(chunks, chunklen)
             data.release()
             reader()
           })
+
+          childNodeOptions.push(childNodeOption)
         } else {
           reader()
         }
@@ -92,7 +118,14 @@ export class AS2Parser {
       })
 
       parser.on('end', () => {
-        ;[
+        const rootNode = new AS2MimeNode(rootNodeOptions)
+
+        childNodeOptions.forEach(childNodeOption => {
+          rootNode.appendChild(new AS2MimeNode(childNodeOption))
+        })
+
+        resolve(rootNode)
+        /* const headers = [
           'subject',
           'references',
           'date',
@@ -104,38 +137,15 @@ export class AS2Parser {
           'message-id',
           'in-reply-to',
           'reply-to'
-        ].forEach(key => {
+        ]
+
+        headers.forEach(key => {
           if (mail.headers.has(key)) {
             mail[
               key.replace(/-([a-z])/g, (m, c) => c.toUpperCase())
             ] = mail.headers.get(key)
           }
-        })
-
-        if (keepCidLinks) {
-          resolve(mail)
-        }
-        ;(parser as any).updateImageLinks(
-          (attachment: any, done: Function) =>
-            done(
-              false,
-              'data:' +
-                attachment.contentType +
-                ';base64,' +
-                attachment.content.toString('base64')
-            ),
-          (err: any, html: string) => {
-            if (err) {
-              reject(err)
-              return
-            } else {
-              mail.html = html
-
-              resolve(mail)
-              return
-            }
-          }
-        )
+        }) */
       })
 
       if (typeof input === 'string') {
@@ -151,8 +161,6 @@ export class AS2Parser {
           })
           .pipe(parser)
       }
-
-      resolve(mail)
     })
   }
 }
