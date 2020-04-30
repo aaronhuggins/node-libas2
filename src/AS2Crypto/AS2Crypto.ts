@@ -23,7 +23,7 @@ export class AS2Crypto {
     options: DecryptionOptions
   ): Promise<AS2MimeNode> {
     const data: string = Buffer.isBuffer(node.content)
-      ? node.content.toString('utf8')
+      ? node.content.toString('base64')
       : (node.content as string)
     const p7 = (forge.pkcs7 as any).messageFromPem(
       `${SIGNATURE_HEADER}${data}${SIGNATURE_FOOTER}`

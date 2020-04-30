@@ -5,7 +5,7 @@ import { simpleParser } from 'mailparser'
 import { writeFileSync } from 'fs'
 
 describe('AS2MimeNode', async () => {
-  it('should be verified by openssl.', async () => {
+  it('should be verified by openssl', async () => {
     const smime = new AS2MimeNode({
       filename: 'message.edi',
       contentType: 'application/edi-x12',
