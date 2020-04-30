@@ -9,18 +9,19 @@ import crypto = require('crypto')
 import { AS2MimeNode } from '../AS2MimeNode'
 import { encryptionOptions, canonicalTransform } from '../Helpers'
 import MimeNode = require('nodemailer/lib/mime-node')
-import { EncryptionOptions, SigningOptions } from './Interfaces'
-import { simpleParser } from 'mailparser'
+import {
+  EncryptionOptions,
+  SigningOptions,
+  DecryptionOptions
+} from './Interfaces'
+import { AS2Parser } from '../AS2Parser'
 
 export class AS2Crypto {
-  /**
-   * @description Method to decrypt data from a PKCS7 3DES string in base64.
-   * @param {string} data - The data to decrypt from PKCS7 3DES.
-   * @param {string} publicCert - The public certificate in PEM format to verify.
-   * @param {string} privateKey - The private key to decrypt with.
-   * @returns {string} The decrypted data.
-   */
-  static async decrypt (node: AS2MimeNode, options: any): Promise<string> {
+  /** Method to decrypt an AS2MimeNode from a PKCS7 encrypted AS2MimeNode. */
+  static async decrypt (
+    node: AS2MimeNode,
+    options: DecryptionOptions
+  ): Promise<AS2MimeNode> {
     const data: string = Buffer.isBuffer(node.content)
       ? node.content.toString('utf8')
       : (node.content as string)
@@ -33,14 +34,13 @@ export class AS2Crypto {
     ;(p7 as any).decrypt(recipient, forge.pki.privateKeyFromPem(options.key))
 
     // Parse Mime body from p7.content back to AS2MimeNode
-    const mime = Buffer.from(
+    const buffer = Buffer.from(
       (p7.content as forge.util.ByteStringBuffer).getBytes(),
       'binary'
     ).toString('utf8')
-    const revivedMime = await simpleParser(mime)
-    //const revivedNode = revivedMime.
+    const revivedNode = await new AS2Parser({ content: buffer }).parse()
 
-    return 'revivedNode'
+    return revivedNode
   }
 
   /** Method to envelope an AS2MimeNode in an encrypted AS2MimeNode. */

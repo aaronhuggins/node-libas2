@@ -13,6 +13,13 @@ export interface EncryptionOptions {
   encryption: AS2Encryption
 }
 
+export interface DecryptionOptions {
+  /** PEM-based public certificate contents. */
+  cert: string
+  /** PEM-based private certificate contents. */
+  key: string
+}
+
 export interface SigningOptions {
   /** PEM-based public certificate contents. */
   cert: string

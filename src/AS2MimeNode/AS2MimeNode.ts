@@ -9,7 +9,12 @@ import {
 } from '../Helpers'
 import { AS2MimeNodeOptions } from './Interfaces'
 import { AS2Headers } from '../Interfaces'
-import { AS2Crypto, SigningOptions, EncryptionOptions } from '../AS2Crypto'
+import {
+  AS2Crypto,
+  SigningOptions,
+  EncryptionOptions,
+  DecryptionOptions
+} from '../AS2Crypto'
 
 export interface AS2MimeNode {
   keepBcc: boolean
@@ -253,6 +258,10 @@ export class AS2MimeNode extends MimeNode {
     options = isNullOrUndefined(options) ? this._sign : options
 
     return AS2Crypto.sign(this, options)
+  }
+
+  async decrypt (options: DecryptionOptions): Promise<AS2MimeNode> {
+    return AS2Crypto.decrypt(this, options)
   }
 
   async encrypt (options?: EncryptionOptions): Promise<AS2MimeNode> {
