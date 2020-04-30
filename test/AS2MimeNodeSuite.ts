@@ -17,7 +17,12 @@ describe('AS2MimeNode', async () => {
     writeFileSync('test/temp-data/multipart.txt', signed.toString('utf8'))
 
     const openssl = await run(
-      'openssl smime -verify -noverify -in test/temp-data/multipart.txt -signer test/test-data/sample_cert.cer'
+      [
+        'openssl smime',
+        '-verify -noverify',
+        '-in test/temp-data/multipart.txt',
+        '-signer test/test-data/sample_cert.cer'
+      ].join(' ')
     )
     const parsed = await simpleParser(openssl)
     const opensslContent = parsed.attachments[0].content.toString('utf8')
@@ -41,7 +46,12 @@ describe('AS2MimeNode', async () => {
     writeFileSync('test/temp-data/encrypted.txt', encrypted.toString('utf8'))
 
     const openssl = await run(
-      'openssl smime -decrypt -in test/temp-data/encrypted.txt -recip test/test-data/sample_cert.cer  -inkey test/test-data/sample_priv.key -des3'
+      [
+        'openssl smime',
+        '-decrypt -in test/temp-data/encrypted.txt',
+        '-recip test/test-data/sample_cert.cer',
+        '-inkey test/test-data/sample_priv.key -des3'
+      ].join(' ')
     )
     const parsed = await simpleParser(openssl)
     const opensslContent = parsed.attachments[0].content.toString('utf8')
@@ -63,10 +73,18 @@ describe('AS2MimeNode', async () => {
     })
     const encrypted = await smime.build()
 
-    writeFileSync('test/temp-data/signed-encrypted.txt', encrypted.toString('utf8'))
+    writeFileSync(
+      'test/temp-data/signed-encrypted.txt',
+      encrypted.toString('utf8')
+    )
 
     const openssl = await run(
-      'openssl smime -decrypt -in test/temp-data/encrypted.txt -recip test/test-data/sample_cert.cer  -inkey test/test-data/sample_priv.key -des3'
+      [
+        'openssl smime',
+        '-decrypt -in test/temp-data/signed-encrypted.txt',
+        '-recip test/test-data/sample_cert.cer',
+        '-inkey test/test-data/sample_priv.key -des3'
+      ].join(' ')
     )
     const parsed = await simpleParser(openssl)
     const opensslContent = parsed.attachments[0].content.toString('utf8')

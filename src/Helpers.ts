@@ -40,10 +40,13 @@ export const mapHeadersToNodeHeaders = function mapHeadersToNodeHeaders (
   const result: AS2Headers = []
 
   headers.forEach((value, key) => {
-    if (typeof value === 'string') {
+    if (
+      typeof value === 'string' ||
+      typeof (value as any).getDate === 'function'
+    ) {
       result.push({
         key,
-        value
+        value: value as string
       })
     } else {
       const obj = value

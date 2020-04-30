@@ -27,10 +27,6 @@ export class AS2Parser {
       const rootNodeOptions: AS2MimeNodeOptions = {}
       const childNodeOptions: AS2MimeNodeOptions[] = []
 
-      let mail: any = {
-        attachments: [] as any[]
-      }
-
       let parser = this.stream()
 
       parser.on('error', err => {
@@ -62,7 +58,8 @@ export class AS2Parser {
           } else {
             rootNodeOptions.contentType = contentType.value
             if (rootNodeOptions.filename === undefined)
-              rootNodeOptions.filename = contentType.params.filename
+              rootNodeOptions.filename = contentType.params.name
+            delete contentType.params.name
           }
         }
         rootNodeOptions.headers = mapHeadersToNodeHeaders(
@@ -118,34 +115,18 @@ export class AS2Parser {
       })
 
       parser.on('end', () => {
-        const rootNode = new AS2MimeNode(rootNodeOptions)
+        let rootNode = new AS2MimeNode(rootNodeOptions)
 
-        childNodeOptions.forEach(childNodeOption => {
-          rootNode.appendChild(new AS2MimeNode(childNodeOption))
+        childNodeOptions.forEach((childNodeOption, index) => {
+          const childNode = new AS2MimeNode(childNodeOption)
+          if (index === 0 && rootNode.messageId() === childNode.messageId()) {
+            rootNode = childNode
+          } else {
+            rootNode.appendChild(childNode)
+          }
         })
 
         resolve(rootNode)
-        /* const headers = [
-          'subject',
-          'references',
-          'date',
-          'to',
-          'from',
-          'to',
-          'cc',
-          'bcc',
-          'message-id',
-          'in-reply-to',
-          'reply-to'
-        ]
-
-        headers.forEach(key => {
-          if (mail.headers.has(key)) {
-            mail[
-              key.replace(/-([a-z])/g, (m, c) => c.toUpperCase())
-            ] = mail.headers.get(key)
-          }
-        }) */
       })
 
       if (typeof input === 'string') {
