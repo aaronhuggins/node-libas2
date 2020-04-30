@@ -59,10 +59,10 @@ describe('AS2Composer', async () => {
         `Mime section not correctly signed.\nExpected: '${content}'\nReceived: '${opensslContent}'`
       )
     }
-  })
+  }).timeout(1000)
 
   it('should produce a valid AS2 request', async () => {
     const composer = new AS2Composer(options)
     const compiled = await composer.compileRequest(true)
-  })
+  }).timeout(1000)
 })
