@@ -6,6 +6,9 @@ import {
   AS2Crypto
 } from '../core'
 import { content, cert, key } from './Helpers'
+import { ENCRYPTION, SIGNING } from '../src/Constants'
+import { default as got } from 'got'
+import { readFileSync } from 'fs'
 
 const options: AS2ComposerOptions = {
   message: {
@@ -52,7 +55,36 @@ describe('AS2Composer', async () => {
   }).timeout(1000)
 
   it('should produce a valid AS2 request', async () => {
-    const composer = new AS2Composer(options)
+    const publicCert = readFileSync(
+      'test/test-data/mendelsonAS2_test_recipient_cert.cer',
+      'utf8'
+    )
+    const privateCert = readFileSync(
+      'test/test-data/mendelsonAS2_test_sender_cert.cer',
+      'utf8'
+    )
+    const privateKey = readFileSync(
+      'test/test-data/mendelsonAS2_test_sender_key.key',
+      'utf8'
+    )
+    const composer = new AS2Composer({
+      message: options.message,
+      agreement: {
+        sender: 'mycompanyAS2',
+        recipient: 'mendelsontestAS2',
+        sign: { cert: privateCert, key: privateKey, micalg: SIGNING.SHA256 },
+        encrypt: { cert: publicCert, encryption: ENCRYPTION.DES3 },
+        mdn: { to: 'mycompanyAS2@example-message.net' }
+      }
+    })
     const compiled = await composer.request(true)
-  }).timeout(1000)
+    const result = await got({
+      url: 'http://testas2.mendelson-e-c.com:8080/as2/HttpReceiver',
+      method: 'POST',
+      headers: compiled.headers,
+      body: compiled.body
+    })
+    console.log(result.headers) //.rawBody.toString('utf8'))
+    console.log(result.rawBody.toString('utf8'))
+  }).timeout(5000)
 })
