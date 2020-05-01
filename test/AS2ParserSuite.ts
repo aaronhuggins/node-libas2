@@ -1,6 +1,6 @@
 import 'mocha'
 import { AS2Constants, AS2MimeNode, AS2Parser } from '../core'
-import { cert, key } from './helpers'
+import { cert, key } from './Helpers'
 import { readFileSync } from 'fs'
 
 describe('AS2Parser', async () => {

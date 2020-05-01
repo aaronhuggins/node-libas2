@@ -21,12 +21,13 @@ export const normalizeLineBreaks = function normalizeLineBreaks (
   return output.length > 0 ? output.join('\r\n') : input
 }
 
-const run = async function run (command: string): Promise<string> {
+const run = async function run (command: string, chunk?: Buffer): Promise<string> {
   return new Promise((resolve, reject) => {
     const output: string[] = []
     const error: string[] = []
     const child = cp.exec(command)
 
+    child.stdin.end(chunk, 'utf8')
     child.stdout.on('data', (data: string) => output.push(data))
     child.stderr.on('data', (data: string) => error.push(data))
     child.on('close', () => {
@@ -38,6 +39,7 @@ const run = async function run (command: string): Promise<string> {
 
 export async function openssl (options: {
   command: string
+  input?: Buffer
   arguments?: { [key: string]: string | boolean }
 }) {
   const openssl = ['openssl', options.command]
@@ -52,5 +54,5 @@ export async function openssl (options: {
     })
   }
 
-  return normalizeLineBreaks(await run(openssl.join(' ')))
+  return normalizeLineBreaks(await run(openssl.join(' '), options.input))
 }

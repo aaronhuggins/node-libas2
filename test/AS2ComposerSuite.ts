@@ -1,9 +1,11 @@
 import 'mocha'
-import { AS2Constants, AS2Composer, AS2ComposerOptions } from '../core'
-import { openssl, content, cert, key } from './helpers'
-import { simpleParser } from 'mailparser'
-import { writeFileSync } from 'fs'
-import { AS2Crypto } from '../src/AS2Crypto'
+import {
+  AS2Constants,
+  AS2Composer,
+  AS2ComposerOptions,
+  AS2Crypto
+} from '../core'
+import { content, cert, key } from './Helpers'
 
 const options: AS2ComposerOptions = {
   message: {
@@ -34,16 +36,9 @@ describe('AS2Composer', async () => {
     const composer = new AS2Composer(options)
     composer.setHeaders({ 'fake-header': 'not-a-real-header' })
     composer.setHeaders([{ key: 'fake-header', value: 'not-a-real-header' }])
-    /* ,
-      'prepared': {
-        prepared: true,
-        value: 'parepared value'
-      } as unknown as string // Tricking the compiler to test suppert for a nodemailer feature.
-      */
   })
 
   it('should produce a valid AS2 message', async () => {
-    const fileName = 'test/temp-data/as2message.txt'
     const composer = new AS2Composer(options)
     const compiled = await composer.compile()
     const decrypted = await AS2Crypto.decrypt(compiled, { cert, key })

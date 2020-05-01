@@ -1,12 +1,10 @@
 import 'mocha'
 import { AS2Constants, AS2MimeNode } from '../core'
-import { openssl, cert, key, content } from './helpers'
-import { simpleParser } from 'mailparser'
-import { writeFileSync } from 'fs'
+import { openssl, cert, key, content } from './Helpers'
+import { AS2Parser } from '../src/AS2Parser'
 
 describe('AS2MimeNode', async () => {
   it('should be verified by openssl', async () => {
-    const fileName = 'test/temp-data/signed.txt'
     const smime = new AS2MimeNode({
       filename: 'message.edi',
       contentType: 'application/edi-x12',
@@ -14,20 +12,17 @@ describe('AS2MimeNode', async () => {
       content
     })
     const signed = await smime.build()
-
-    writeFileSync(fileName, signed.toString('utf8'))
-
     const output = await openssl({
       command: 'smime',
+      input: signed,
       arguments: {
         verify: true,
         noverify: true,
-        in: fileName,
         signer: 'test/test-data/sample_cert.cer'
       }
     })
-    const parsed = await simpleParser(output)
-    const opensslContent = parsed.attachments[0].content.toString('utf8')
+    const parsed = await new AS2Parser({ content: output }).parse()
+    const opensslContent = parsed.content.toString('utf8')
 
     if (opensslContent !== content) {
       throw new Error(
@@ -37,7 +32,6 @@ describe('AS2MimeNode', async () => {
   })
 
   it('should be encrypted', async () => {
-    const fileName = 'test/temp-data/encrypted.txt'
     const smime = new AS2MimeNode({
       filename: 'message.edi',
       contentType: 'application/edi-x12',
@@ -45,21 +39,18 @@ describe('AS2MimeNode', async () => {
       content
     })
     const encrypted = await smime.build()
-
-    writeFileSync(fileName, encrypted.toString('utf8'))
-
     const output = await openssl({
       command: 'smime',
+      input: encrypted,
       arguments: {
         decrypt: true,
-        in: fileName,
         recip: 'test/test-data/sample_cert.cer',
         inkey: 'test/test-data/sample_priv.key',
         des3: true
       }
     })
-    const parsed = await simpleParser(output)
-    const opensslContent = parsed.attachments[0].content.toString('utf8')
+    const parsed = await new AS2Parser({ content: output }).parse()
+    const opensslContent = parsed.content.toString('utf8')
 
     if (opensslContent !== content) {
       throw new Error(
@@ -69,7 +60,6 @@ describe('AS2MimeNode', async () => {
   })
 
   it('should be decrypted by openssl', async () => {
-    const fileName = 'test/temp-data/signed-encrypted.txt'
     const smime = new AS2MimeNode({
       filename: 'message.edi',
       contentType: 'application/edi-x12',
@@ -78,21 +68,18 @@ describe('AS2MimeNode', async () => {
       content
     })
     const encrypted = await smime.build()
-
-    writeFileSync(fileName, encrypted.toString('utf8'))
-
     const output = await openssl({
       command: 'smime',
+      input: encrypted,
       arguments: {
         decrypt: true,
-        in: fileName,
         recip: 'test/test-data/sample_cert.cer',
         inkey: 'test/test-data/sample_priv.key',
         des3: true
       }
     })
-    const parsed = await simpleParser(output)
-    const opensslContent = parsed.attachments[0].content.toString('utf8')
+    const parsed = await new AS2Parser({ content: output }).parse()
+    const opensslContent = parsed.childNodes[0].content.toString('utf8')
 
     if (opensslContent !== content) {
       throw new Error(
