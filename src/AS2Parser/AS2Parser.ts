@@ -59,7 +59,6 @@ export class AS2Parser {
             rootNodeOptions.contentType = contentType.value
             if (rootNodeOptions.filename === undefined)
               rootNodeOptions.filename = contentType.params.name
-            delete contentType.params.name
           }
         }
         rootNodeOptions.headers = mapHeadersToNodeHeaders(
@@ -119,7 +118,12 @@ export class AS2Parser {
 
         childNodeOptions.forEach((childNodeOption, index) => {
           const childNode = new AS2MimeNode(childNodeOption)
-          if (index === 0 && rootNode.messageId() === childNode.messageId()) {
+
+          if (
+            index === 0 &&
+            rootNode.getHeader('Message-ID') ===
+              childNode.getHeader('Message-ID')
+          ) {
             rootNode = childNode
           } else {
             rootNode.appendChild(childNode)

@@ -2,7 +2,8 @@ import {
   NOT_IMPLEMENTED,
   SIGNING,
   SIGNATURE_HEADER,
-  SIGNATURE_FOOTER
+  SIGNATURE_FOOTER,
+  CRLF
 } from '../Constants'
 import forge = require('node-forge')
 import crypto = require('crypto')
@@ -12,11 +13,16 @@ import MimeNode = require('nodemailer/lib/mime-node')
 import {
   EncryptionOptions,
   SigningOptions,
-  DecryptionOptions
+  DecryptionOptions,
+  VerificationOptions
 } from './Interfaces'
 import { AS2Parser } from '../AS2Parser'
 
 export class AS2Crypto {
+  private static async buildNode (node: AS2MimeNode): Promise<Buffer> {
+    return await MimeNode.prototype.build.bind(node)()
+  }
+
   /** Method to decrypt an AS2MimeNode from a PKCS7 encrypted AS2MimeNode. */
   static async decrypt (
     node: AS2MimeNode,
@@ -56,7 +62,7 @@ export class AS2Crypto {
 
     canonicalTransform(node)
 
-    const buffer = await MimeNode.prototype.build.bind(node)()
+    const buffer = await AS2Crypto.buildNode(node)
     const p7 = forge.pkcs7.createEnvelopedData()
 
     p7.addRecipient(forge.pki.certificateFromPem(options.cert))
@@ -79,29 +85,24 @@ export class AS2Crypto {
    * @param {string} [algorithm='sha1'] - The algorithm for verification.
    * @returns {boolean} True when data matches signature.
    */
-  public verify (
-    data: string | any,
-    signature: string,
-    publicCert: string,
-    algorithm: string = SIGNING.SHA256
-  ): boolean {
-    if (!signature.includes(SIGNATURE_HEADER)) {
-      signature = `${SIGNATURE_HEADER}${signature}${SIGNATURE_FOOTER}`
-    }
-
+  static async verify (
+    node: AS2MimeNode,
+    options: VerificationOptions
+  ): Promise<AS2MimeNode> {
+    const contentPart: Buffer = await AS2Crypto.buildNode(node.childNodes[0])
+    const signaturePart = Buffer.isBuffer(node.childNodes[1].content)
+      ? node.childNodes[1].content.toString('base64')
+      : (node.childNodes[1].content as string)
     const msg = (forge.pkcs7 as any).messageFromPem(
-      signature
+      `${SIGNATURE_HEADER}${signaturePart}${SIGNATURE_FOOTER}`
     ) as forge.pkcs7.PkcsEnvelopedData
-    const verifier = crypto.createVerify(algorithm)
+    const signature = Buffer.from((msg as any).rawCapture.signature, 'binary')
+    const verifier = crypto.createVerify(options.micalg).update(contentPart)
+    const verified = verifier.verify(options.cert, signature)
 
-    verifier.update(Buffer.from(data))
-
-    // The encoding 'latin1' is an alias for 'binary'.
-    return verifier.verify(
-      publicCert,
-      (msg as any).rawCapture.signature,
-      'latin1'
-    )
+    if (verified) {
+      return node.childNodes[0]
+    }
   }
 
   /** Method to sign data against a certificate and key pair. */
@@ -132,7 +133,7 @@ export class AS2Crypto {
 
     canonicalTransform(contentNode)
 
-    const buffer = await MimeNode.prototype.build.bind(contentNode)()
+    const buffer = await AS2Crypto.buildNode(contentNode)
     const p7 = forge.pkcs7.createSignedData()
     p7.content = forge.util.createBuffer(buffer.toString('binary'))
 
@@ -146,18 +147,7 @@ export class AS2Crypto {
       key: options.key,
       certificate: options.cert,
       digestAlgorithm: forge.pki.oids[options.micalg],
-      authenticatedAttributes: [
-        {
-          type: forge.pki.oids.contentType,
-          value: forge.pki.oids.data
-        },
-        {
-          type: forge.pki.oids.messageDigest
-        },
-        {
-          type: forge.pki.oids.signingTime
-        }
-      ]
+      authenticatedAttributes: []
     })
 
     p7.sign()
@@ -183,12 +173,18 @@ export class AS2Crypto {
   }
 
   /** Not yet implemented; do not use. */
-  async compress (node: AS2MimeNode, options: any): Promise<AS2MimeNode> {
+  static async compress (
+    node: AS2MimeNode,
+    options: any
+  ): Promise<AS2MimeNode> {
     throw NOT_IMPLEMENTED
   }
 
   /** Not yet implemented. */
-  async decompress (node: AS2MimeNode, options: any): Promise<AS2MimeNode> {
+  static async decompress (
+    node: AS2MimeNode,
+    options: any
+  ): Promise<AS2MimeNode> {
     throw NOT_IMPLEMENTED
   }
 
@@ -197,7 +193,7 @@ export class AS2Crypto {
    * @param {object} options - Options for creating the certificate.
    * @returns {object} The public key, private key, and the certificate.
    */
-  public createSimpleX509v3 (options: SimpleX509v3Options): any {
+  static createSimpleX509v3 (options: SimpleX509v3Options): any {
     const keys = forge.pki.rsa.generateKeyPair(2048)
     const cert = forge.pki.createCertificate()
 

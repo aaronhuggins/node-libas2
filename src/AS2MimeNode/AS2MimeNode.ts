@@ -13,7 +13,8 @@ import {
   AS2Crypto,
   SigningOptions,
   EncryptionOptions,
-  DecryptionOptions
+  DecryptionOptions,
+  VerificationOptions
 } from '../AS2Crypto'
 
 export interface AS2MimeNode {
@@ -258,6 +259,10 @@ export class AS2MimeNode extends MimeNode {
     options = isNullOrUndefined(options) ? this._sign : options
 
     return AS2Crypto.sign(this, options)
+  }
+
+  async verify (options: VerificationOptions): Promise<AS2MimeNode> {
+    return AS2Crypto.verify(this, options)
   }
 
   async decrypt (options: DecryptionOptions): Promise<AS2MimeNode> {

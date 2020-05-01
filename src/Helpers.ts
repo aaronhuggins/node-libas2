@@ -50,6 +50,9 @@ export const mapHeadersToNodeHeaders = function mapHeadersToNodeHeaders (
       })
     } else {
       const obj = value
+      if (key === 'content-type' && typeof obj.params.name === 'string') {
+        delete obj.params.name
+      }
       const params = Array.from(Object.entries(obj.params)).map(
         param => `${param[0]}=${param[1]}`
       )
