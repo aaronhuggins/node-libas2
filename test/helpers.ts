@@ -21,7 +21,10 @@ export const normalizeLineBreaks = function normalizeLineBreaks (
   return output.length > 0 ? output.join('\r\n') : input
 }
 
-const run = async function run (command: string, chunk?: Buffer): Promise<string> {
+const run = async function run (
+  command: string,
+  chunk?: Buffer
+): Promise<string> {
   return new Promise((resolve, reject) => {
     const output: string[] = []
     const error: string[] = []
