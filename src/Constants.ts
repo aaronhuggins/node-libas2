@@ -104,7 +104,7 @@ export type MimeType =
   | 'multipart/report'
   | 'multipart/signed'
 
-export interface AS2Headers {
+export interface OldAS2Headers {
   'AS2-Version'?: '1.0'
   'as2-version'?: '1.0'
   'AS2-From'?: string

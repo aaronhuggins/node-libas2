@@ -2,6 +2,7 @@ import { AgreementOptions } from './AS2Composer'
 import { SIGNING, ENCRYPTION } from './Constants'
 import { AS2MimeNode } from './AS2MimeNode'
 import { SigningOptions, EncryptionOptions } from './AS2Crypto'
+import { AS2Headers, ParserHeaders } from './Interfaces'
 
 /** Convenience method for null-checks */
 export const isNullOrUndefined = function isNullOrUndefined (
@@ -31,6 +32,36 @@ export const canonicalTransform = function canonicalTransform (
   }
 
   node.childNodes.forEach(canonicalTransform)
+}
+
+export const mapHeadersToNodeHeaders = function mapHeadersToNodeHeaders (
+  headers: ParserHeaders
+): AS2Headers {
+  const result: AS2Headers = []
+
+  headers.forEach((value, key) => {
+    if (
+      typeof value === 'string' ||
+      typeof (value as any).getDate === 'function'
+    ) {
+      result.push({
+        key,
+        value: value as string
+      })
+    } else {
+      const obj = value
+      const params = Array.from(Object.entries(obj.params)).map(
+        param => `${param[0]}=${param[1]}`
+      )
+
+      result.push({
+        key,
+        value: [obj.value, ...params].join('; ')
+      })
+    }
+  })
+
+  return result
 }
 
 /** Normalizes certificate signing options. */

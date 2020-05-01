@@ -5,7 +5,9 @@ export const content = readFileSync('test/test-data/sample_edi.edi', 'utf8')
 export const cert = readFileSync('test/test-data/sample_cert.cer', 'utf8')
 export const key = readFileSync('test/test-data/sample_priv.key', 'utf8')
 
-export const normalizeLineBreaks = function normalizeLineBreaks (input: string) {
+export const normalizeLineBreaks = function normalizeLineBreaks (
+  input: string
+) {
   const lines = input.split('\r\n')
   const output = []
 

@@ -4,3 +4,12 @@ export type AS2Headers =
       value: string | string[]
     }>
   | { [key: string]: string | string[] }
+
+export type ParserHeaders = Map<
+  string,
+  | string
+  | {
+      value: string
+      params: { [key: string]: string }
+    }
+>
