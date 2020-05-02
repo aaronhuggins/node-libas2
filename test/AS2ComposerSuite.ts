@@ -55,6 +55,8 @@ describe('AS2Composer', async () => {
   }).timeout(1000)
 
   it('should produce a valid AS2 request', async () => {
+    // TODO: Test using ArcESB or pyAS2; mendelson AS2 is a bust due to non-conforming request/response.
+    // Ideally, come up with a way to test send/receive against a Drummond certified product.
     const publicCert = readFileSync(
       'test/test-data/mendelsonAS2_test_recipient_cert.cer',
       'utf8'
