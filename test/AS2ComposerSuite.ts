@@ -5,10 +5,10 @@ import {
   AS2ComposerOptions,
   AS2Crypto
 } from '../core'
-import { content, cert, key } from './Helpers'
+import { content, cert, key, request } from './Helpers'
 import { ENCRYPTION, SIGNING } from '../src/Constants'
 import { default as got } from 'got'
-import { readFileSync } from 'fs'
+import { readFileSync, writeFileSync } from 'fs'
 
 const options: AS2ComposerOptions = {
   message: {
@@ -70,21 +70,33 @@ describe('AS2Composer', async () => {
     const composer = new AS2Composer({
       message: options.message,
       agreement: {
-        sender: 'mycompanyAS2',
-        recipient: 'mendelsontestAS2',
-        sign: { cert: privateCert, key: privateKey, micalg: SIGNING.SHA256 },
-        encrypt: { cert: publicCert, encryption: ENCRYPTION.DES3 },
-        mdn: { to: 'mycompanyAS2@example-message.net' }
+        sender: 'AS2Ident',
+        recipient: 'mycompanyAS2', // 'mendelsontestAS2',
+        sign: { cert /*: privateCert*/, key /*: privateKey*/, micalg: SIGNING.SHA256 },
+        encrypt: { cert/*: publicCert*/, encryption: ENCRYPTION.DES3 },
+        mdn: { to: 'mycompanyAS2@example-message.net', sign: {
+          importance: 'required',
+          protocol: 'pkcs7-signature',
+          micalg: SIGNING.SHA256
+        } }
       }
     })
     const compiled = await composer.request(true)
-    const result = await got({
-      url: 'http://testas2.mendelson-e-c.com:8080/as2/HttpReceiver',
+    const result = await request({
+      url: 'http://localhost:8080/as2/HttpReceiver', // 'http://testas2.mendelson-e-c.com:8080/as2/HttpReceiver',
       method: 'POST',
       headers: compiled.headers,
-      body: compiled.body
+      body: compiled.body as Buffer
     })
-    console.log(result.headers) //.rawBody.toString('utf8'))
-    console.log(result.rawBody.toString('utf8'))
+    const headerString = Object.entries(result.headers)
+      .map((val) => `${val[0]
+        .split(/-/gu)
+        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+        .join('-')}: ${val[1]}`)
+      .join('\r\n')
+    const mimeString = headerString + '\r\n\r\n' + result.rawBody.toString('utf8')
+
+    writeFileSync('test/temp-data/meneldson-mdn.txt', mimeString)
+    //writeFileSync('test/temp-data/meneldson-mdn-headers.json', headerString /*JSON.stringify(result.headers, null, 2)*/)
   }).timeout(5000)
 })
