@@ -1,8 +1,7 @@
 import 'mocha'
 import { AS2Constants, AS2MimeNode } from '../core'
-import { run, cert, key, content } from './helpers'
-import { simpleParser } from 'mailparser'
-import { writeFileSync } from 'fs'
+import { openssl, cert, key, content } from './Helpers'
+import { AS2Parser } from '../src/AS2Parser'
 
 describe('AS2MimeNode', async () => {
   it('should be verified by openssl', async () => {
@@ -13,19 +12,17 @@ describe('AS2MimeNode', async () => {
       content
     })
     const signed = await smime.build()
-
-    writeFileSync('test/temp-data/multipart.txt', signed.toString('utf8'))
-
-    const openssl = await run(
-      [
-        'openssl smime',
-        '-verify -noverify',
-        '-in test/temp-data/multipart.txt',
-        '-signer test/test-data/sample_cert.cer'
-      ].join(' ')
-    )
-    const parsed = await simpleParser(openssl)
-    const opensslContent = parsed.attachments[0].content.toString('utf8')
+    const output = await openssl({
+      command: 'smime',
+      input: signed,
+      arguments: {
+        verify: true,
+        noverify: true,
+        signer: 'test/test-data/sample_cert.cer'
+      }
+    })
+    const parsed = await new AS2Parser({ content: output }).parse()
+    const opensslContent = parsed.content.toString('utf8')
 
     if (opensslContent !== content) {
       throw new Error(
@@ -42,19 +39,18 @@ describe('AS2MimeNode', async () => {
       content
     })
     const encrypted = await smime.build()
-
-    writeFileSync('test/temp-data/encrypted.txt', encrypted.toString('utf8'))
-
-    const openssl = await run(
-      [
-        'openssl smime',
-        '-decrypt -in test/temp-data/encrypted.txt',
-        '-recip test/test-data/sample_cert.cer',
-        '-inkey test/test-data/sample_priv.key -des3'
-      ].join(' ')
-    )
-    const parsed = await simpleParser(openssl)
-    const opensslContent = parsed.attachments[0].content.toString('utf8')
+    const output = await openssl({
+      command: 'smime',
+      input: encrypted,
+      arguments: {
+        decrypt: true,
+        recip: 'test/test-data/sample_cert.cer',
+        inkey: 'test/test-data/sample_priv.key',
+        des3: true
+      }
+    })
+    const parsed = await new AS2Parser({ content: output }).parse()
+    const opensslContent = parsed.content.toString('utf8')
 
     if (opensslContent !== content) {
       throw new Error(
@@ -72,22 +68,18 @@ describe('AS2MimeNode', async () => {
       content
     })
     const encrypted = await smime.build()
-
-    writeFileSync(
-      'test/temp-data/signed-encrypted.txt',
-      encrypted.toString('utf8')
-    )
-
-    const openssl = await run(
-      [
-        'openssl smime',
-        '-decrypt -in test/temp-data/signed-encrypted.txt',
-        '-recip test/test-data/sample_cert.cer',
-        '-inkey test/test-data/sample_priv.key -des3'
-      ].join(' ')
-    )
-    const parsed = await simpleParser(openssl)
-    const opensslContent = parsed.attachments[0].content.toString('utf8')
+    const output = await openssl({
+      command: 'smime',
+      input: encrypted,
+      arguments: {
+        decrypt: true,
+        recip: 'test/test-data/sample_cert.cer',
+        inkey: 'test/test-data/sample_priv.key',
+        des3: true
+      }
+    })
+    const parsed = await new AS2Parser({ content: output }).parse()
+    const opensslContent = parsed.childNodes[0].content.toString('utf8')
 
     if (opensslContent !== content) {
       throw new Error(

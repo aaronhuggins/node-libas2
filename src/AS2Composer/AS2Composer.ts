@@ -117,6 +117,16 @@ export class AS2Composer {
     return this.message
   }
 
+  async request (): Promise<{
+    headers: AS2Headers
+    body: string | Buffer | Readable
+  }>
+  async request (
+    headersAsObject: true
+  ): Promise<{
+    headers: { [key: string]: string }
+    body: string | Buffer | Readable
+  }>
   async request (
     headersAsObject: boolean = false
   ): Promise<{
@@ -126,10 +136,12 @@ export class AS2Composer {
     if (this.message === undefined) {
       await this.compile()
     }
+    const buffer = await this.message.build()
+    const [headers, ...body] = buffer.toString('utf8').split(/\r\n\r\n/gu)
 
     return {
       headers: this.message.getHeaders(headersAsObject),
-      body: this.message.content
+      body: body.join('\r\n\r\n')
     }
   }
 }

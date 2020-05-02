@@ -1,10 +1,10 @@
 import 'mocha'
 import { AS2Constants, AS2MimeNode, AS2Parser } from '../core'
-import { cert, key } from './helpers'
+import { cert, key } from './Helpers'
 import { readFileSync } from 'fs'
 
 describe('AS2Parser', async () => {
-  it('should decrypt contents of parsed mime message', async () => {
+  it('should parse mime message to AS2MimeNode and match parsed contents', async () => {
     const buffer = readFileSync('test/test-data/content.encrypted.txt')
     const parser = new AS2Parser({ content: buffer })
     const result = await parser.parse()

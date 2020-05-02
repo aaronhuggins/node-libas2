@@ -30,3 +30,10 @@ export interface SigningOptions {
   /** Algorithm of secure signature hash to use. */
   micalg?: AS2Signing
 }
+
+export interface VerificationOptions {
+  /** PEM-based public certificate contents. */
+  cert: string
+  /** Algorithm of secure signature hash to use. */
+  micalg?: AS2Signing
+}

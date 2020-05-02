@@ -1,8 +1,14 @@
 import 'mocha'
-import { AS2Constants, AS2Composer, AS2ComposerOptions } from '../core'
-import { run, content, cert, key } from './helpers'
-import { simpleParser } from 'mailparser'
-import { writeFileSync } from 'fs'
+import {
+  AS2Constants,
+  AS2Composer,
+  AS2ComposerOptions,
+  AS2Crypto
+} from '../core'
+import { content, cert, key } from './Helpers'
+import { ENCRYPTION, SIGNING } from '../src/Constants'
+import { default as got } from 'got'
+import { readFileSync } from 'fs'
 
 const options: AS2ComposerOptions = {
   message: {
@@ -33,41 +39,52 @@ describe('AS2Composer', async () => {
     const composer = new AS2Composer(options)
     composer.setHeaders({ 'fake-header': 'not-a-real-header' })
     composer.setHeaders([{ key: 'fake-header', value: 'not-a-real-header' }])
-    /* ,
-      'prepared': {
-        prepared: true,
-        value: 'parepared value'
-      } as unknown as string // Tricking the compiler to test suppert for a nodemailer feature.
-      */
   })
 
   it('should produce a valid AS2 message', async () => {
     const composer = new AS2Composer(options)
     const compiled = await composer.compile()
-    const message = await compiled.build()
+    const decrypted = await AS2Crypto.decrypt(compiled, { cert, key })
+    const decryptedContent = decrypted.childNodes[0].content.toString('utf8')
 
-    writeFileSync('test/temp-data/as2message.txt', message.toString('utf8'))
-
-    const openssl = await run(
-      [
-        'openssl smime',
-        '-decrypt -in test/temp-data/as2message.txt',
-        '-recip test/test-data/sample_cert.cer',
-        '-inkey test/test-data/sample_priv.key -des3'
-      ].join(' ')
-    )
-    const parsed = await simpleParser(openssl)
-    const opensslContent = parsed.attachments[0].content.toString('utf8')
-
-    if (opensslContent !== content) {
+    if (decryptedContent !== content) {
       throw new Error(
-        `Mime section not correctly signed.\nExpected: '${content}'\nReceived: '${opensslContent}'`
+        `Mime section not correctly signed.\nExpected: '${content}'\nReceived: '${decryptedContent}'`
       )
     }
   }).timeout(1000)
 
   it('should produce a valid AS2 request', async () => {
-    const composer = new AS2Composer(options)
+    const publicCert = readFileSync(
+      'test/test-data/mendelsonAS2_test_recipient_cert.cer',
+      'utf8'
+    )
+    const privateCert = readFileSync(
+      'test/test-data/mendelsonAS2_test_sender_cert.cer',
+      'utf8'
+    )
+    const privateKey = readFileSync(
+      'test/test-data/mendelsonAS2_test_sender_key.key',
+      'utf8'
+    )
+    const composer = new AS2Composer({
+      message: options.message,
+      agreement: {
+        sender: 'mycompanyAS2',
+        recipient: 'mendelsontestAS2',
+        sign: { cert: privateCert, key: privateKey, micalg: SIGNING.SHA256 },
+        encrypt: { cert: publicCert, encryption: ENCRYPTION.DES3 },
+        mdn: { to: 'mycompanyAS2@example-message.net' }
+      }
+    })
     const compiled = await composer.request(true)
-  }).timeout(1000)
+    const result = await got({
+      url: 'http://testas2.mendelson-e-c.com:8080/as2/HttpReceiver',
+      method: 'POST',
+      headers: compiled.headers,
+      body: compiled.body
+    })
+    console.log(result.headers) //.rawBody.toString('utf8'))
+    console.log(result.rawBody.toString('utf8'))
+  }).timeout(5000)
 })

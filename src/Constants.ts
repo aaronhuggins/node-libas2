@@ -3,14 +3,14 @@ import { AS2Encryption, AS2Signing } from './AS2Crypto'
 export const NOT_IMPLEMENTED = new Error('NOT YET IMPLEMENTED.')
 
 // STRINGS
-export const CONTROL_CHAR = '\r\n'
+export const CRLF = '\r\n'
 export const MIME_VERSION = '1.0'
 export const AS2_VERSION = '1.0'
 export const SMIME_DESC = 'This is an S/MIME signed message'
 export const SIGNATURE_FILENAME = 'smime.p7s'
 export const ENCRYPTION_FILENAME = 'smime.p7m'
-export const SIGNATURE_HEADER = `-----BEGIN PKCS7-----${CONTROL_CHAR}`
-export const SIGNATURE_FOOTER = `-----END PKCS7-----${CONTROL_CHAR}`
+export const SIGNATURE_HEADER = `-----BEGIN PKCS7-----${CRLF}`
+export const SIGNATURE_FOOTER = `-----END PKCS7-----${CRLF}`
 
 // ENUMERABLES
 export const GUARANTEED_TEXT = [
