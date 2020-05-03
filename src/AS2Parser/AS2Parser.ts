@@ -3,7 +3,7 @@ import { AS2ParserOptions, MailParserOptions } from './Interfaces'
 import { AgreementOptions } from '../AS2Composer'
 import { Stream } from 'stream'
 import { AS2MimeNode, AS2MimeNodeOptions } from '../AS2MimeNode'
-import { mapHeadersToNodeHeaders } from '../Helpers'
+import { mapHeadersToNodeHeaders, isNullOrUndefined } from '../Helpers'
 import { ParserHeaders } from '../Interfaces'
 
 export class AS2Parser {
@@ -118,11 +118,12 @@ export class AS2Parser {
 
         childNodeOptions.forEach((childNodeOption, index) => {
           const childNode = new AS2MimeNode(childNodeOption)
+          const rootMessageId = rootNode.getHeader('Message-ID')
 
           if (
             index === 0 &&
-            rootNode.getHeader('Message-ID') ===
-              childNode.getHeader('Message-ID')
+            !isNullOrUndefined(rootMessageId) &&
+            childNode.getHeader('Message-ID') === rootMessageId
           ) {
             rootNode = childNode
           } else {

@@ -1,6 +1,5 @@
 import {
   NOT_IMPLEMENTED,
-  SIGNING,
   SIGNATURE_HEADER,
   SIGNATURE_FOOTER,
   CRLF
@@ -17,10 +16,44 @@ import {
   VerificationOptions
 } from './Interfaces'
 import { AS2Parser } from '../AS2Parser'
+import { AS2DecryptError } from './AS2CryptoError'
+import { randomBytes } from 'crypto'
+
+interface PkcsEnvelopedData extends forge.pkcs7.PkcsEnvelopedData {
+  content: forge.util.ByteStringBuffer
+  rawCapture: { signature: string }
+  findRecipient(certificate: forge.pki.Certificate): forge.pki.Certificate
+  decrypt(certificate: forge.pki.Certificate, key: forge.pki.PrivateKey): void
+}
+
+interface pkcs7 {
+  messageFromPem(pem: string): PkcsEnvelopedData
+  messageFromAsn1(asn1: forge.asn1.Asn1): PkcsEnvelopedData
+}
 
 export class AS2Crypto {
   private static async buildNode (node: AS2MimeNode): Promise<Buffer> {
     return await MimeNode.prototype.build.bind(node)()
+  }
+
+  /** A fix for signing with Nodemailer to produce verifiable SMIME;
+   * the library joins multipart boundaries without the part's trailing CRLF,
+   * where OpenSSL and other SMIME clients keep each part's last CRLF. */
+  static removeTrailingCrLf (buffer: Buffer): Buffer {
+    const trailingBytes = buffer.slice(buffer.length - 2, buffer.length)
+
+    return trailingBytes.toString('utf8') === CRLF
+      ? buffer.slice(0, buffer.length - 2)
+      : buffer
+  }
+
+  /** Crux to generate UUID-like random strings */
+  static generateUniqueId (): string {
+    const byteLengths = [4, 2, 2, 2, 6]
+
+    return byteLengths
+      .map(byteLength => randomBytes(byteLength).toString('hex'))
+      .join('-')
   }
 
   /** Method to decrypt an AS2MimeNode from a PKCS7 encrypted AS2MimeNode. */
@@ -33,17 +66,19 @@ export class AS2Crypto {
       : (node.content as string)
     const p7 = (forge.pkcs7 as any).messageFromPem(
       `${SIGNATURE_HEADER}${data}${SIGNATURE_FOOTER}`
-    ) as forge.pkcs7.PkcsEnvelopedData
-    const recipient: any = (p7 as any).findRecipient(
+    ) as PkcsEnvelopedData
+    const recipient: any = p7.findRecipient(
       forge.pki.certificateFromPem(options.cert)
     )
-    ;(p7 as any).decrypt(recipient, forge.pki.privateKeyFromPem(options.key))
+    if (recipient === null) {
+      throw new AS2DecryptError(
+        'Certificate provided was not used to encrypt message.'
+      )
+    }
+    p7.decrypt(recipient, forge.pki.privateKeyFromPem(options.key))
 
     // Parse Mime body from p7.content back to AS2MimeNode
-    const buffer = Buffer.from(
-      (p7.content as forge.util.ByteStringBuffer).getBytes(),
-      'binary'
-    ).toString('utf8')
+    const buffer = Buffer.from(p7.content.getBytes(), 'binary').toString('utf8')
     const revivedNode = await new AS2Parser({ content: buffer }).parse()
 
     return revivedNode
@@ -63,7 +98,7 @@ export class AS2Crypto {
     canonicalTransform(node)
 
     const buffer = await AS2Crypto.buildNode(node)
-    const p7 = forge.pkcs7.createEnvelopedData()
+    const p7 = forge.pkcs7.createEnvelopedData() as PkcsEnvelopedData
 
     p7.addRecipient(forge.pki.certificateFromPem(options.cert))
     p7.content = forge.util.createBuffer(buffer.toString('utf8'))
@@ -77,6 +112,9 @@ export class AS2Crypto {
     return rootNode
   }
 
+  /** Method to verify data has not been modified from a signature. */
+  static async forgeVerify () {}
+
   /**
    * @description Method to verify data has not been modified from a signature.
    * @param {string|any} data - The data to verify.
@@ -89,20 +127,24 @@ export class AS2Crypto {
     node: AS2MimeNode,
     options: VerificationOptions
   ): Promise<AS2MimeNode> {
-    const contentPart: Buffer = await AS2Crypto.buildNode(node.childNodes[0])
+    const contentPart = await AS2Crypto.buildNode(node.childNodes[0])
     const signaturePart = Buffer.isBuffer(node.childNodes[1].content)
-      ? node.childNodes[1].content.toString('base64')
-      : (node.childNodes[1].content as string)
-    const msg = (forge.pkcs7 as any).messageFromPem(
-      `${SIGNATURE_HEADER}${signaturePart}${SIGNATURE_FOOTER}`
-    ) as forge.pkcs7.PkcsEnvelopedData
-    const signature = Buffer.from((msg as any).rawCapture.signature, 'binary')
+      ? node.childNodes[1].content
+      : Buffer.from(node.childNodes[1].content as string, 'base64')
+    const cert = crypto.createPublicKey(options.cert)
+    const der = forge.util.createBuffer(signaturePart)
+    const asn1 = forge.asn1.fromDer(der)
+    const msg = ((forge.pkcs7 as unknown) as pkcs7).messageFromAsn1(asn1)
+    const signature = Buffer.from(msg.rawCapture.signature, 'binary')
+    // Deal with Nodemailer trailing CRLF bug by trying with and without CRLF
     const verifier = crypto.createVerify(options.micalg).update(contentPart)
-    const verified = verifier.verify(options.cert, signature)
+    const verifierNoCrLf = crypto
+      .createVerify(options.micalg)
+      .update(AS2Crypto.removeTrailingCrLf(contentPart))
+    const verified =
+      verifier.verify(cert, signature) || verifierNoCrLf.verify(cert, signature)
 
-    if (verified) {
-      return node.childNodes[0]
-    }
+    return verified ? node.childNodes[0] : null
   }
 
   /** Method to sign data against a certificate and key pair. */
@@ -133,31 +175,36 @@ export class AS2Crypto {
 
     canonicalTransform(contentNode)
 
-    const buffer = await AS2Crypto.buildNode(contentNode)
+    const buffer = AS2Crypto.removeTrailingCrLf(
+      await AS2Crypto.buildNode(contentNode)
+    )
     const p7 = forge.pkcs7.createSignedData()
-    p7.content = forge.util.createBuffer(buffer.toString('binary'))
+    p7.content = forge.util.createBuffer(buffer)
 
     p7.addCertificate(options.cert)
-
-    options.chain.forEach(cert => {
-      p7.addCertificate(cert)
-    })
 
     p7.addSigner({
       key: options.key,
       certificate: options.cert,
       digestAlgorithm: forge.pki.oids[options.micalg],
-      authenticatedAttributes: []
+      authenticatedAttributes: [
+        {
+          type: forge.pki.oids.contentType,
+          value: forge.pki.oids.data
+        },
+        {
+          type: forge.pki.oids.messageDigest
+        },
+        {
+          type: forge.pki.oids.signingTime
+        }
+      ]
     })
 
-    p7.sign()
-
-    const asn1: any = p7.toAsn1()
-
-    // Scrub encapContentInfo.eContent
-    asn1.value[1].value[0].value[2].value.splice(1, 1)
+    p7.sign({ detached: true })
 
     // Write PKCS7 ASN.1 as DER to buffer
+    const asn1 = p7.toAsn1()
     const der = forge.asn1.toDer(asn1)
     const derBuffer = Buffer.from(der.getBytes(), 'binary')
 

@@ -16,6 +16,7 @@ import {
   DecryptionOptions,
   VerificationOptions
 } from '../AS2Crypto'
+import { hostname } from 'os'
 
 export interface AS2MimeNode {
   keepBcc: boolean
@@ -25,6 +26,7 @@ export interface AS2MimeNode {
   }>
   filename: string
   date: Date
+  boundaryPrefix: string
   content: string | Buffer | Readable
   contentType: string
   rootNode: AS2MimeNode
@@ -41,6 +43,7 @@ export class AS2MimeNode extends MimeNode {
       filename,
       content,
       baseBoundary,
+      boundaryPrefix,
       contentType,
       contentDisposition,
       messageId,
@@ -51,10 +54,13 @@ export class AS2MimeNode extends MimeNode {
 
     super(contentType, { filename, baseBoundary })
 
+    this.boundaryPrefix = boundaryPrefix || '--LibAs2'
+
     if (!isNullOrUndefined(content)) this.setContent(content)
     if (!isNullOrUndefined(headers)) this.setHeader(headers)
     if (!isNullOrUndefined(sign)) this.setSigning(sign)
     if (!isNullOrUndefined(encrypt)) this.setEncryption(encrypt)
+    if (!isNullOrUndefined(messageId)) this.setHeader('Message-ID', messageId)
     this.setHeader(
       'Content-Disposition',
       isNullOrUndefined(contentDisposition) ? 'attachment' : contentDisposition
@@ -296,5 +302,14 @@ export class AS2MimeNode extends MimeNode {
     }
 
     return await super.build()
+  }
+
+  static generateMessageId (uniqueId?: string, sender?: string): string {
+    uniqueId = isNullOrUndefined(uniqueId)
+      ? AS2Crypto.generateUniqueId()
+      : uniqueId
+    sender = isNullOrUndefined(uniqueId) ? hostname() || 'localhost' : sender
+
+    return '<' + uniqueId + '@' + sender + '>'
   }
 }

@@ -4,9 +4,12 @@ import * as http from 'http'
 import * as https from 'https'
 import { URL } from 'url'
 
-export const content = readFileSync('test/test-data/sample_edi.edi', 'utf8')
-export const cert = readFileSync('test/test-data/sample_cert.cer', 'utf8')
-export const key = readFileSync('test/test-data/sample_priv.key', 'utf8')
+export const LIBAS2_EDI_PATH = 'test/test-data/sample_edi.edi'
+export const LIBAS2_CERT_PATH = 'test/test-data/libas2community.cer'
+export const LIBAS2_KEY_PATH = 'test/test-data/libas2community.key'
+export const LIBAS2_EDI = readFileSync(LIBAS2_EDI_PATH, 'utf8')
+export const LIBAS2_CERT = readFileSync(LIBAS2_CERT_PATH, 'utf8')
+export const LIBAS2_KEY = readFileSync(LIBAS2_KEY_PATH, 'utf8')
 
 export const normalizeLineBreaks = function normalizeLineBreaks (
   input: string
@@ -24,20 +27,32 @@ export const normalizeLineBreaks = function normalizeLineBreaks (
   return output.length > 0 ? output.join('\r\n') : input
 }
 
-const run = async function run (
+export const run = async function run (
   command: string,
-  chunk?: Buffer
+  args?: string[] | Buffer,
+  input?: Buffer
 ): Promise<string> {
+  if (Buffer.isBuffer(args) && input === undefined) {
+    input = args
+    args = undefined
+  }
   return new Promise((resolve, reject) => {
-    const output: string[] = []
-    const error: string[] = []
-    const child = cp.exec(command)
+    const output: Buffer[] = []
+    const error: Buffer[] = []
+    const child = cp.spawn(command, Array.isArray(args) ? args : undefined)
 
-    child.stdin.end(chunk, 'utf8')
-    child.stdout.on('data', (data: string) => output.push(data))
-    child.stderr.on('data', (data: string) => error.push(data))
+    if (input !== undefined) child.stdin.end(input)
+    child.stdout.on('data', (data: Buffer) => output.push(data))
+    child.stderr.on('data', (data: Buffer) => error.push(data))
     child.on('close', () => {
-      resolve(output.join(''))
+      if (error.length > 0) {
+        const [message, ...stack] = error
+        const rejected = new Error(message.toString('utf8').trim())
+        rejected.stack = stack.join('')
+        reject(rejected)
+      } else {
+        resolve(output.join(''))
+      }
     })
     child.on('error', (err: Error) => reject(err))
   })
@@ -47,20 +62,37 @@ export async function openssl (options: {
   command: string
   input?: Buffer
   arguments?: { [key: string]: string | boolean }
-}) {
-  const openssl = ['openssl', options.command]
+}): Promise<string>
+export async function openssl (options: {
+  command: string
+  input?: Buffer
+  arguments?: { verify: true; [key: string]: string | boolean }
+}): Promise<boolean>
+export async function openssl (options: {
+  command: string
+  input?: Buffer
+  arguments?: { [key: string]: string | boolean }
+}): Promise<string | boolean> {
+  const args = [options.command]
 
   if (options.arguments !== undefined) {
     new Map(Object.entries(options.arguments)).forEach((value, key) => {
       if (typeof value === 'string') {
-        openssl.push('-' + key, value)
+        args.push('-' + key, value)
       } else {
-        openssl.push('-' + key)
+        args.push('-' + key)
       }
     })
   }
 
-  return normalizeLineBreaks(await run(openssl.join(' '), options.input))
+  try {
+    return normalizeLineBreaks(await run('openssl', args, options.input))
+  } catch (error) {
+    if (options.arguments.verify === true) {
+      return error.message.toLowerCase() === 'verification successful'
+    }
+    throw error
+  }
 }
 
 interface RequestOptions extends http.RequestOptions {
@@ -79,7 +111,9 @@ const getProtocol = function (url: string | URL) {
   throw new Error('URL is not one of either "string" or instance of "URL".')
 }
 
-export async function request (options: RequestOptions): Promise<IncomingMessage> {
+export async function request (
+  options: RequestOptions
+): Promise<IncomingMessage> {
   return new Promise((resolve, reject) => {
     const { body, url } = options
     const protocol = getProtocol(url) === 'https' ? https : http
@@ -88,7 +122,7 @@ export async function request (options: RequestOptions): Promise<IncomingMessage
     const req = protocol.request(url, options, (response: IncomingMessage) => {
       let rawBody = Buffer.from('')
 
-      response.on('error', (error) => reject(error))
+      response.on('error', error => reject(error))
       response.on('data', (data: Buffer) => {
         rawBody = Buffer.concat([rawBody, data])
       })
@@ -97,7 +131,7 @@ export async function request (options: RequestOptions): Promise<IncomingMessage
         resolve(response)
       })
     })
-    req.on('error', (error) => reject(error))
+    req.on('error', error => reject(error))
     req.write(body)
     req.end()
   })

@@ -1,33 +1,44 @@
 import 'mocha'
 import { AS2Constants, AS2MimeNode } from '../core'
-import { openssl, cert, key, content } from './Helpers'
+import {
+  openssl,
+  LIBAS2_CERT,
+  LIBAS2_KEY,
+  LIBAS2_EDI,
+  LIBAS2_CERT_PATH,
+  LIBAS2_KEY_PATH
+} from './Helpers'
 import { AS2Parser } from '../src/AS2Parser'
+// import { writeFileSync } from 'fs'
 
 describe('AS2MimeNode', async () => {
   it('should be verified by openssl', async () => {
     const smime = new AS2MimeNode({
       filename: 'message.edi',
       contentType: 'application/edi-x12',
-      sign: { cert, key },
-      content
+      sign: { cert: LIBAS2_CERT, key: LIBAS2_KEY },
+      content: LIBAS2_EDI
     })
     const signed = await smime.build()
-    const output = await openssl({
-      command: 'smime',
+    // writeFileSync('test/test-data/content.signed.txt', signed)
+    const parsed = await new AS2Parser({ content: signed }).parse()
+    console.log({
+      smime: signed.toString('utf8'),
+      parsed: (await parsed.childNodes[0].build()).toString('utf8')
+    })
+    console.log(await parsed.verify({ cert: LIBAS2_CERT, micalg: 'sha256' }))
+    const verified = await openssl({
+      command: 'cms',
       input: signed,
       arguments: {
         verify: true,
         noverify: true,
-        signer: 'test/test-data/sample_cert.cer'
+        signer: LIBAS2_CERT_PATH
       }
     })
-    const parsed = await new AS2Parser({ content: output }).parse()
-    const opensslContent = parsed.content.toString('utf8')
 
-    if (opensslContent !== content) {
-      throw new Error(
-        `Mime section not correctly signed.\nExpected: '${content}'\nReceived: '${opensslContent}'`
-      )
+    if (!verified) {
+      throw new Error('Mime section not correctly signed.')
     }
   })
 
@@ -35,26 +46,27 @@ describe('AS2MimeNode', async () => {
     const smime = new AS2MimeNode({
       filename: 'message.edi',
       contentType: 'application/edi-x12',
-      encrypt: { cert, encryption: AS2Constants.ENCRYPTION._3DES },
-      content
+      encrypt: { cert: LIBAS2_CERT, encryption: AS2Constants.ENCRYPTION._3DES },
+      content: LIBAS2_EDI
     })
     const encrypted = await smime.build()
+    // writeFileSync('test/test-data/content.encrypted.txt', encrypted)
     const output = await openssl({
-      command: 'smime',
+      command: 'cms',
       input: encrypted,
       arguments: {
         decrypt: true,
-        recip: 'test/test-data/sample_cert.cer',
-        inkey: 'test/test-data/sample_priv.key',
+        recip: LIBAS2_CERT_PATH,
+        inkey: LIBAS2_KEY_PATH,
         des3: true
       }
     })
     const parsed = await new AS2Parser({ content: output }).parse()
     const opensslContent = parsed.content.toString('utf8')
 
-    if (opensslContent !== content) {
+    if (opensslContent !== LIBAS2_EDI) {
       throw new Error(
-        `Mime section not correctly encrypted.\nExpected: '${smime.toString()}'\nReceived: '${openssl}'`
+        `Mime section not correctly encrypted.\nExpected: '${LIBAS2_EDI}'\nReceived: '${opensslContent}'`
       )
     }
   })
@@ -63,27 +75,27 @@ describe('AS2MimeNode', async () => {
     const smime = new AS2MimeNode({
       filename: 'message.edi',
       contentType: 'application/edi-x12',
-      sign: { cert, key },
-      encrypt: { cert, encryption: AS2Constants.ENCRYPTION._3DES },
-      content
+      sign: { cert: LIBAS2_CERT, key: LIBAS2_KEY },
+      encrypt: { cert: LIBAS2_CERT, encryption: AS2Constants.ENCRYPTION._3DES },
+      content: LIBAS2_EDI
     })
     const encrypted = await smime.build()
     const output = await openssl({
-      command: 'smime',
+      command: 'cms',
       input: encrypted,
       arguments: {
         decrypt: true,
-        recip: 'test/test-data/sample_cert.cer',
-        inkey: 'test/test-data/sample_priv.key',
+        recip: LIBAS2_CERT_PATH,
+        inkey: LIBAS2_KEY_PATH,
         des3: true
       }
     })
     const parsed = await new AS2Parser({ content: output }).parse()
     const opensslContent = parsed.childNodes[0].content.toString('utf8')
 
-    if (opensslContent !== content) {
+    if (opensslContent !== LIBAS2_EDI) {
       throw new Error(
-        `Mime section not correctly encrypted.\nExpected: '${smime.toString()}'\nReceived: '${openssl}'`
+        `Mime section not correctly encrypted.\nExpected: '${LIBAS2_EDI}'\nReceived: '${opensslContent}'`
       )
     }
   })
