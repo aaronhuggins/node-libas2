@@ -7,7 +7,7 @@ import { createSign, createVerify } from 'crypto'
 import { AS2Crypto } from '../src/AS2Crypto'
 
 const contentEncrypted = readFileSync('test/test-data/content.encrypted.txt')
-const contentSigned = readFileSync('test/temp-data/sync-mdn.txt') //('test/test-data/content.signed.txt')
+const contentSigned = readFileSync('test/test-data/content.signed.txt')
 
 describe('AS2Crypto', async () => {
   it('should decrypt contents of parsed mime message', async () => {
@@ -35,7 +35,7 @@ describe('AS2Crypto', async () => {
       cert: LIBAS2_CERT,
       micalg: SIGNING.SHA256
     })
-    console.log(await openssl({
+    /* console.log(await openssl({
       command: 'cms',
       input: contentSigned,
       arguments: {
@@ -43,7 +43,7 @@ describe('AS2Crypto', async () => {
         noverify: true,
         certfile: LIBAS2_CERT_PATH
       }
-    }))
+    })) */
 
     if (verified === null) {
       throw new Error('Mime section could not be verified.')

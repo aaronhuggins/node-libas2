@@ -21,12 +21,6 @@ describe('AS2MimeNode', async () => {
     })
     const signed = await smime.build()
     writeFileSync('test/test-data/content.signed.txt', signed)
-    /* const parsed = await new AS2Parser({ content: signed }).parse()
-    console.log({
-      smime: signed.toString('utf8'),
-      parsed: (await parsed.childNodes[0].build()).toString('utf8')
-    })
-    console.log(await parsed.verify({ cert: LIBAS2_CERT, micalg: 'sha256' })) */
     const verified = await openssl({
       command: 'cms',
       input: signed,

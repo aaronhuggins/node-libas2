@@ -78,7 +78,7 @@ describe('AS2Composer', async () => {
       }
     })
     const compiled = await composer.request(true)
-    const result = await request({
+    /* const result = await request({
       url: 'http://localhost:8001/pub/Receive.rsb',
       method: 'POST',
       headers: compiled.headers,
@@ -96,6 +96,6 @@ describe('AS2Composer', async () => {
     const mimeString =
       headerString + '\r\n\r\n' + result.rawBody.toString('utf8')
 
-    writeFileSync('test/temp-data/sync-mdn.txt', mimeString)
+    writeFileSync('test/temp-data/sync-mdn.txt', mimeString) */
   }).timeout(5000)
 })
