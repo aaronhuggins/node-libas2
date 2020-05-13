@@ -9,6 +9,8 @@ export interface AS2MimeNodeOptions {
   content?: string | Buffer | Readable
   /** Shared part of the unique multipart boundary. */
   baseBoundary?: string
+  /** Prefix for the boundary; default is '--LibAs2_'. */
+  boundaryPrefix?: string
   /** Content type of the node; will be auto-calculated from the filename if not set. */
   contentType?: string
   /** The content disposition of the node. */

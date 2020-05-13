@@ -1,6 +1,6 @@
 import 'mocha'
-import { AS2Constants, AS2MimeNode, AS2Parser } from '../core'
-import { cert, key } from './Helpers'
+import { AS2MimeNode, AS2Parser } from '../core'
+import { normalizeLineBreaks } from './Helpers'
 import { readFileSync } from 'fs'
 
 describe('AS2Parser', async () => {
@@ -18,7 +18,7 @@ describe('AS2Parser', async () => {
     }
 
     const rebuilt = await result.build()
-    const original = buffer.toString('utf8')
+    const original = normalizeLineBreaks(buffer.toString('utf8'))
     const parsed = rebuilt.toString('utf8')
 
     if (original !== parsed) {

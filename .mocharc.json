@@ -4,5 +4,5 @@
   "require": ["ts-node/register", "source-map-support/register"],
   "reporter": ["spec"],
   "full-trace": true,
-  "bail": true
+  "bail": false
 }
