@@ -7,7 +7,7 @@ import {
 import forge = require('node-forge')
 import crypto = require('crypto')
 import { AS2MimeNode } from '../AS2MimeNode'
-import { encryptionOptions, canonicalTransform } from '../Helpers'
+import { encryptionOptions, canonicalTransform, isNullOrUndefined } from '../Helpers'
 import MimeNode = require('nodemailer/lib/mime-node')
 import {
   EncryptionOptions,
@@ -21,9 +21,24 @@ import { randomBytes } from 'crypto'
 
 interface PkcsEnvelopedData extends forge.pkcs7.PkcsEnvelopedData {
   content: forge.util.ByteStringBuffer
-  rawCapture: { signature: string }
+  authenticatedAttributes?: any[]
+  certificates: Array<{
+    publicKey: any
+  }>
+  rawCapture: {
+    signature: string,
+    digestAlgorithm: forge.util.ByteStringBuffer,
+    signerInfos: any[]
+    authenticatedAttributes?: Array<    {
+    tagClass: number,
+    type: number,
+    constructed: boolean,
+    composed: boolean,
+    value: any[]
+  }> }
   findRecipient(certificate: forge.pki.Certificate): forge.pki.Certificate
   decrypt(certificate: forge.pki.Certificate, key: forge.pki.PrivateKey): void
+  addSigner(options: any): void
 }
 
 interface pkcs7 {
@@ -61,12 +76,12 @@ export class AS2Crypto {
     node: AS2MimeNode,
     options: DecryptionOptions
   ): Promise<AS2MimeNode> {
-    const data: string = Buffer.isBuffer(node.content)
-      ? node.content.toString('base64')
-      : (node.content as string)
-    const p7 = (forge.pkcs7 as any).messageFromPem(
-      `${SIGNATURE_HEADER}${data}${SIGNATURE_FOOTER}`
-    ) as PkcsEnvelopedData
+    const data: Buffer = Buffer.isBuffer(node.content)
+      ? node.content
+      : Buffer.from(node.content as string, 'base64')
+    const der = forge.util.createBuffer(data)
+    const asn1 = forge.asn1.fromDer(der)
+    const p7 = (forge.pkcs7 as unknown as pkcs7).messageFromAsn1(asn1)
     const recipient: any = p7.findRecipient(
       forge.pki.certificateFromPem(options.cert)
     )
@@ -112,8 +127,105 @@ export class AS2Crypto {
     return rootNode
   }
 
+  static verify1 (verifier: {
+    content: string | forge.util.ByteStringBuffer
+    signature: string | forge.pkcs7.PkcsSignedData
+    certificate: string | forge.pki.Certificate
+  }): boolean {
+    let cert: forge.pki.Certificate
+    let content: string
+    let signature: forge.pkcs7.PkcsSignedData
+    let publicKey: forge.pki.PublicKey
+    let signedAttributes: forge.asn1.Asn1
+
+    if (typeof verifier.certificate === 'string') {
+      cert = forge.pki.certificateFromPem(verifier.certificate)
+    } else {
+      cert = verifier.certificate
+    }
+
+    if (typeof verifier.signature === 'string') {
+      signature = (forge.pkcs7 as any).messageFromPem(verifier.signature) as forge.pkcs7.PkcsSignedData
+    } else {
+      signature = verifier.signature
+    }
+
+    const recipient: forge.pki.Certificate = (signature as any).findRecipient(cert)
+
+    if (isNullOrUndefined(recipient)) {
+      throw new Error(
+        'Certificate provided was not used to sign message; no matching recipient.'
+      )
+    }
+
+    publicKey = recipient.publicKey || cert.publicKey
+
+    if (isNullOrUndefined(publicKey)) {
+      throw new Error(
+        'Public key not found in either the signature or provided certificate.'
+      )
+    }
+
+    if ((signature as any).rawCapture && (signature as any).rawCapture.authenticatedAttributes) {
+      signedAttributes = (signature as any).rawCapture.authenticatedAttributes
+      // TODO: write ASN1 validator for deserializing signedAttributes to usable object
+    }
+
+    if (verifier.content instanceof forge.util.ByteStringBuffer) {
+      content = verifier.content.bytes()
+    } else if (typeof verifier.content === 'string') {
+      content = forge.util.encodeUtf8(verifier.content)
+    }
+
+    const contentAsn1 = forge.asn1.create(
+      forge.asn1.Class.UNIVERSAL,
+      forge.asn1.Type.OCTETSTRING,
+      false,
+      content
+    )
+    let contentDer = forge.asn1.toDer(contentAsn1)
+    // skip identifier and length per RFC 2315 9.3
+    // skip identifier (1 byte)
+    contentDer.getByte()
+    // read and discard length bytes
+    ;(forge.asn1 as any).getBerValueLength(contentDer)
+
+    const algorithm = forge.asn1.derToOid((signature as any).rawCapture.digestAlgorithm)
+    const messageDigest = forge.md[forge.pki.oids[algorithm]].create() as forge.md.MessageDigest
+
+    ;(messageDigest as any).start().update(contentDer.getBytes())
+
+    return true
+  }
+
   /** Method to verify data has not been modified from a signature. */
-  static async forgeVerify () {}
+  static async forgeVerify (
+    node: AS2MimeNode,
+    options: VerificationOptions
+  ): Promise<AS2MimeNode> {
+    const contentPart = await AS2Crypto.buildNode(node.childNodes[0])
+    const signaturePart = Buffer.isBuffer(node.childNodes[1].content)
+      ? node.childNodes[1].content
+      : Buffer.from(node.childNodes[1].content as string, 'base64')
+    const der = forge.util.createBuffer(signaturePart)
+    const asn1 = forge.asn1.fromDer(der)
+    const msg = ((forge.pkcs7 as unknown) as pkcs7).messageFromAsn1(asn1)
+    const attributes = msg.rawCapture.authenticatedAttributes || []
+    const algorithm = forge.asn1.derToOid(msg.rawCapture.digestAlgorithm)
+    const cert = crypto.createPublicKey(options.cert).export({ type: 'pkcs1', format: 'der'}) as Buffer
+    const p7 = forge.pkcs7.createSignedData()
+    p7.content = forge.util.createBuffer(contentPart)
+    p7.addCertificate(options.cert)
+    ;(p7 as any).addSigner({
+      key: cert,
+      certificate: options.cert,
+      digestAlgorithm: algorithm,
+      authenticatedAttributes: attributes as any
+    })
+    p7.sign()
+    console.log((p7 as unknown as PkcsEnvelopedData).rawCapture)
+    return null
+  }
 
   /**
    * @description Method to verify data has not been modified from a signature.
@@ -136,6 +248,8 @@ export class AS2Crypto {
     const asn1 = forge.asn1.fromDer(der)
     const msg = ((forge.pkcs7 as unknown) as pkcs7).messageFromAsn1(asn1)
     const signature = Buffer.from(msg.rawCapture.signature, 'binary')
+    console.log((msg as any).rawCapture, null, 2)
+    // console.log((forge.asn1 as any).prettyPrint(asn1, 1, '  '))
     // Deal with Nodemailer trailing CRLF bug by trying with and without CRLF
     const verifier = crypto.createVerify(options.micalg).update(contentPart)
     const verifierNoCrLf = crypto

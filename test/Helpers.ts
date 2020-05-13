@@ -79,12 +79,12 @@ export async function openssl (options: {
     new Map(Object.entries(options.arguments)).forEach((value, key) => {
       if (typeof value === 'string') {
         args.push('-' + key, value)
-      } else {
+      } else if (value === true) {
         args.push('-' + key)
       }
     })
   }
-
+  console.log('openssl', ...args)
   try {
     return normalizeLineBreaks(await run('openssl', args, options.input))
   } catch (error) {
