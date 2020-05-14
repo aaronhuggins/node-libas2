@@ -1,6 +1,6 @@
 # libas2
 
-A pure Javascript implementation of the AS2 protocol.
+A pure Javascript/Typescript implementation of the AS2 protocol.
 
 ## Usage
 > TODO
