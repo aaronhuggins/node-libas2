@@ -10,7 +10,6 @@ import {
   VerificationOptions
 } from './Interfaces'
 import { AS2Parser } from '../AS2Parser'
-import { AS2DecryptError } from './AS2CryptoError'
 import { randomBytes } from 'crypto'
 import { verify as forgeVerify } from './ForgeVerify'
 
@@ -82,7 +81,7 @@ export class AS2Crypto {
       forge.pki.certificateFromPem(options.cert)
     )
     if (recipient === null) {
-      throw new AS2DecryptError(
+      throw new Error(
         'Certificate provided was not used to encrypt message.'
       )
     }

@@ -34,34 +34,6 @@ describe('AS2MimeNode', async () => {
     }
   })
 
-  it('should be encrypted', async () => {
-    const smime = new AS2MimeNode({
-      filename: 'message.edi',
-      contentType: 'application/edi-x12',
-      encrypt: { cert: LIBAS2_CERT, encryption: AS2Constants.ENCRYPTION._3DES },
-      content: LIBAS2_EDI
-    })
-    const encrypted = await smime.build()
-    const output = await openssl({
-      command: 'cms',
-      input: encrypted,
-      arguments: {
-        decrypt: true,
-        recip: LIBAS2_CERT_PATH,
-        inkey: LIBAS2_KEY_PATH,
-        des3: true
-      }
-    })
-    const parsed = await new AS2Parser({ content: output }).parse()
-    const opensslContent = parsed.content.toString('utf8')
-
-    if (opensslContent !== LIBAS2_EDI) {
-      throw new Error(
-        `Mime section not correctly encrypted.\nExpected: '${LIBAS2_EDI}'\nReceived: '${opensslContent}'`
-      )
-    }
-  })
-
   it('should be decrypted by openssl', async () => {
     const smime = new AS2MimeNode({
       filename: 'message.edi',
