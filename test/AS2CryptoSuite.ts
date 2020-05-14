@@ -1,6 +1,12 @@
 import 'mocha'
 import { AS2Parser } from '../core'
-import { LIBAS2_CERT, LIBAS2_KEY, LIBAS2_EDI, openssl, LIBAS2_CERT_PATH } from './Helpers'
+import {
+  LIBAS2_CERT,
+  LIBAS2_KEY,
+  LIBAS2_EDI,
+  openssl,
+  LIBAS2_CERT_PATH
+} from './Helpers'
 import { readFileSync } from 'fs'
 import { SIGNING } from '../src/Constants'
 import { createSign, createVerify } from 'crypto'
@@ -29,21 +35,10 @@ describe('AS2Crypto', async () => {
   it('should verify signed contents of parsed mime message', async () => {
     const parser = new AS2Parser({ content: contentSigned })
     const result = await parser.parse()
-    const verified = await AS2Crypto.verify( // result.verify({
+    const verified = await AS2Crypto.verify(
       result,
-    {
-      cert: LIBAS2_CERT,
-      micalg: SIGNING.SHA256
-    })
-    /* console.log(await openssl({
-      command: 'cms',
-      input: contentSigned,
-      arguments: {
-        verify: true,
-        noverify: true,
-        certfile: LIBAS2_CERT_PATH
-      }
-    })) */
+      { cert: LIBAS2_CERT }
+    )
 
     if (verified === null) {
       throw new Error('Mime section could not be verified.')
