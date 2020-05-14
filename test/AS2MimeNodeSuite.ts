@@ -9,7 +9,6 @@ import {
   LIBAS2_KEY_PATH
 } from './Helpers'
 import { AS2Parser } from '../src/AS2Parser'
-import { writeFileSync } from 'fs'
 
 describe('AS2MimeNode', async () => {
   it('should be verified by openssl', async () => {
@@ -20,7 +19,6 @@ describe('AS2MimeNode', async () => {
       content: LIBAS2_EDI
     })
     const signed = await smime.build()
-    writeFileSync('test/test-data/content.signed.txt', signed)
     const verified = await openssl({
       command: 'cms',
       input: signed,
@@ -44,7 +42,6 @@ describe('AS2MimeNode', async () => {
       content: LIBAS2_EDI
     })
     const encrypted = await smime.build()
-    writeFileSync('test/test-data/content.encrypted.txt', encrypted)
     const output = await openssl({
       command: 'cms',
       input: encrypted,
