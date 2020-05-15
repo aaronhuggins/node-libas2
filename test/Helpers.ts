@@ -84,7 +84,7 @@ export async function openssl (options: {
       }
     })
   }
-  console.log('openssl', ...args)
+
   try {
     return normalizeLineBreaks(await run('openssl', args, options.input))
   } catch (error) {
