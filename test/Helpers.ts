@@ -10,6 +10,7 @@ export const LIBAS2_KEY_PATH = 'test/test-data/libas2community.key'
 export const LIBAS2_EDI = readFileSync(LIBAS2_EDI_PATH, 'utf8')
 export const LIBAS2_CERT = readFileSync(LIBAS2_CERT_PATH, 'utf8')
 export const LIBAS2_KEY = readFileSync(LIBAS2_KEY_PATH, 'utf8')
+export const AS2_TESTING_CERT = readFileSync('test/test-data/as2Testing.cer', 'utf8')
 
 export const normalizeLineBreaks = function normalizeLineBreaks (
   input: string
