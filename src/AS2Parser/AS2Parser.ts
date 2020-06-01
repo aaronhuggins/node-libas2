@@ -77,6 +77,19 @@ export class AS2Parser {
           return
         }
 
+        if (data.type === 'text') {
+          /* const childNodeOption: any = {
+            contentType: data.contentType,
+            contentDisposition: data.contentDisposition,
+            filename: data.filename,
+            headers: mapHeadersToNodeHeaders(data.headers as ParserHeaders),
+            text: data
+          } */
+
+          // childNodeOptions.push(childNodeOption)
+          console.log(data)
+        }
+
         if (data.type === 'attachment') {
           const childNodeOption: AS2MimeNodeOptions = {
             contentType: data.contentType,
@@ -115,7 +128,7 @@ export class AS2Parser {
 
       parser.on('end', () => {
         let rootNode = new AS2MimeNode(rootNodeOptions)
-
+        console.log(childNodeOptions)
         childNodeOptions.forEach((childNodeOption, index) => {
           const childNode = new AS2MimeNode(childNodeOption)
           const rootMessageId = rootNode.getHeader('Message-ID')

@@ -5,9 +5,13 @@ import {
   AS2ComposerOptions,
   AS2Crypto
 } from '../core'
-import { LIBAS2_EDI, LIBAS2_CERT, LIBAS2_KEY, request } from './Helpers'
+import { AS2_TESTING_CERT, LIBAS2_EDI, LIBAS2_CERT, LIBAS2_KEY, request } from './Helpers'
 import { ENCRYPTION, SIGNING } from '../src/Constants'
 import { readFileSync, writeFileSync } from 'fs'
+import { AS2Parser } from '../src/AS2Parser'
+import { simpleParser } from 'mailparser'
+import MailComposer = require('nodemailer/lib/mail-composer')
+import MimeNode = require('nodemailer/lib/mime-node')
 
 const options: AS2ComposerOptions = {
   message: {
@@ -59,14 +63,13 @@ describe('AS2Composer', async () => {
   it('should produce a valid AS2 request', async () => {
     // TODO: Test using ArcESB or pyAS2; mendelson AS2 is a bust due to non-conforming request/response.
     // Ideally, come up with a way to test send/receive against a Drummond certified product.
-    const as2TestingCert = readFileSync('test/test-data/as2Testing.cer', 'utf8')
     const composer = new AS2Composer({
       message: options.message,
       agreement: {
         sender: 'libas2community',
         recipient: 'as2testing',
         sign: { cert: LIBAS2_CERT, key: LIBAS2_KEY, micalg: SIGNING.SHA256 },
-        encrypt: { cert: as2TestingCert, encryption: ENCRYPTION.DES3 },
+        encrypt: { cert: AS2_TESTING_CERT, encryption: ENCRYPTION.DES3 },
         mdn: {
           to: 'mycompanyAS2@example-message.net',
           sign: {
@@ -78,8 +81,8 @@ describe('AS2Composer', async () => {
       }
     })
     const compiled = await composer.request(true)
-    /* const result = await request({
-      url: 'http://localhost:8001/pub/Receive.rsb',
+    const result = await request({
+      url: 'https://as2testing.centralus.cloudapp.azure.com/pub/Receive.rsb',
       method: 'POST',
       headers: compiled.headers,
       body: compiled.body as Buffer
@@ -95,7 +98,18 @@ describe('AS2Composer', async () => {
       .join('\r\n')
     const mimeString =
       headerString + '\r\n\r\n' + result.rawBody.toString('utf8')
-
-    writeFileSync('test/temp-data/sync-mdn.txt', mimeString) */
+    const mdn = await new AS2Parser({ content: mimeString }).parse()
+    const test = await simpleParser(mimeString)
+    const contentTypeObj: any = test.headers.get('content-type')
+    const contentType = [contentTypeObj.value, ...Object.entries(contentTypeObj.params).map(([key, val]) => `${key}="${val}"`)].join('; ')
+    // const [propName, ...contentType] = test.headerLines.find(line => line.key === 'content-type').line.split(/:/gu)
+    // const test2 = new MimeNode(contentType, { ...test, baseBoundary: contentTypeObj.params.boundary } as any) 
+    const test2 = await new MailComposer({ ...test, baseBoundary: contentTypeObj.params.boundary } as any).compile()
+    // ;(test2 as any).boundaryPrefix = ''
+    const verified = await mdn.verify({ cert: AS2_TESTING_CERT })
+    console.log(verified)
+    console.log(test2) //2.toString('utf8'))
+    // console.log((await mdn.build()).toString('utf8'))
+    // writeFileSync('test/temp-data/sync-mdn.txt', mimeString)
   }).timeout(5000)
 })
