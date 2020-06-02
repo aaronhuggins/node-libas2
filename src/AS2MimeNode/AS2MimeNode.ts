@@ -30,7 +30,9 @@ export interface AS2MimeNode {
   content: string | Buffer | Readable
   contentType: string
   rootNode: AS2MimeNode
+  parentNode?: AS2MimeNode
   childNodes: AS2MimeNode[]
+  raw: string
   normalizeHeaderKey: Function
   _handleContentType(structured: any): void
   _encodeWords(value: string): string
