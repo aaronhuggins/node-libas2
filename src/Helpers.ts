@@ -127,7 +127,7 @@ export async function request (
       const protocol = getProtocol(url) === 'https' ? https : http
       delete options.body
       delete options.url
-      options.method = 'POST'
+      options.method = options.method || 'POST'
       let responseBufs: Buffer[] = []
       const req = protocol.request(url, options, (response: IncomingMessage) => {
         // We dispose of the body data, but read the stream so we can collect the raw response.
