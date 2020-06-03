@@ -1,8 +1,17 @@
+import * as http from 'http'
+import * as https from 'https'
+import { URL } from 'url'
 import { AgreementOptions } from './AS2Composer'
 import { SIGNING, ENCRYPTION } from './Constants'
 import { AS2MimeNode } from './AS2MimeNode'
 import { SigningOptions, EncryptionOptions } from './AS2Crypto'
-import { AS2Headers, ParserHeaders } from './Interfaces'
+import { AS2Headers, ParserHeaders, RequestOptions, IncomingMessage } from './Interfaces'
+
+export const getProtocol = function (url: string | URL) {
+  if (typeof url === 'string') return url.toLowerCase().split(/:/gu)[0]
+  if (url instanceof URL) return url.protocol.toLowerCase().replace(/:/gu, '')
+  throw new Error('URL is not one of either "string" or instance of "URL".')
+}
 
 /** Convenience method for null-checks */
 export const isNullOrUndefined = function isNullOrUndefined (
@@ -104,4 +113,31 @@ export const agreementOptions = function agreementOptions (
               }
         }
   }
+}
+
+// TODO: Capture raw response so it can be parsed without reconstructing from IncomingMessage.
+export async function request (
+  options: RequestOptions
+): Promise<IncomingMessage> {
+  return new Promise((resolve, reject) => {
+    const { body, url } = options
+    const protocol = getProtocol(url) === 'https' ? https : http
+    delete options.body
+    delete options.url
+    const req = protocol.request(url, options, (response: IncomingMessage) => {
+      let rawBody = Buffer.from('')
+
+      response.on('error', error => reject(error))
+      response.on('data', (data: Buffer) => {
+        rawBody = Buffer.concat([rawBody, data])
+      })
+      response.on('end', () => {
+        response.rawBody = rawBody
+        resolve(response)
+      })
+    })
+    req.on('error', error => reject(error))
+    req.write(body)
+    req.end()
+  })
 }

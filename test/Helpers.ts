@@ -1,8 +1,5 @@
 import * as cp from 'child_process'
 import { readFileSync } from 'fs'
-import * as http from 'http'
-import * as https from 'https'
-import { URL } from 'url'
 
 export const LIBAS2_EDI_PATH = 'test/test-data/sample_edi.edi'
 export const LIBAS2_CERT_PATH = 'test/test-data/libas2community.cer'
@@ -94,46 +91,4 @@ export async function openssl (options: {
     }
     throw error
   }
-}
-
-interface RequestOptions extends http.RequestOptions {
-  url: string | URL
-  body: string | Buffer
-}
-
-interface IncomingMessage extends http.IncomingMessage {
-  body?: string
-  rawBody?: Buffer
-}
-
-const getProtocol = function (url: string | URL) {
-  if (typeof url === 'string') return url.toLowerCase().split(/:/gu)[0]
-  if (url instanceof URL) return url.protocol.toLowerCase().replace(/:/gu, '')
-  throw new Error('URL is not one of either "string" or instance of "URL".')
-}
-
-export async function request (
-  options: RequestOptions
-): Promise<IncomingMessage> {
-  return new Promise((resolve, reject) => {
-    const { body, url } = options
-    const protocol = getProtocol(url) === 'https' ? https : http
-    delete options.body
-    delete options.url
-    const req = protocol.request(url, options, (response: IncomingMessage) => {
-      let rawBody = Buffer.from('')
-
-      response.on('error', error => reject(error))
-      response.on('data', (data: Buffer) => {
-        rawBody = Buffer.concat([rawBody, data])
-      })
-      response.on('end', () => {
-        response.rawBody = rawBody
-        resolve(response)
-      })
-    })
-    req.on('error', error => reject(error))
-    req.write(body)
-    req.end()
-  })
 }

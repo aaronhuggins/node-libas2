@@ -101,10 +101,13 @@ export class AS2MimeNode extends MimeNode {
       if ((this.smimeType = 'enveloped-data')) this.encrypted = true
       if ((this.smimeType = 'compressed-data')) this.compressed = true
     }
+
+    this.parsed = false
   }
 
   private _sign: SigningOptions
   private _encrypt: EncryptionOptions
+  parsed: boolean
   smime: boolean
   signed: boolean
   encrypted: boolean
@@ -270,7 +273,7 @@ export class AS2MimeNode extends MimeNode {
   }
 
   async verify (options: VerificationOptions): Promise<AS2MimeNode> {
-    return AS2Crypto.verify(this, options)
+    return AS2Crypto.verify(this, options) ? this.childNodes[0] : undefined
   }
 
   async decrypt (options: DecryptionOptions): Promise<AS2MimeNode> {
@@ -284,6 +287,8 @@ export class AS2MimeNode extends MimeNode {
   }
 
   async build (): Promise<Buffer> {
+    if (this.parsed && this.raw !== undefined) return Buffer.from(this.raw)
+
     if (!isNullOrUndefined(this._sign) && !isNullOrUndefined(this._encrypt)) {
       const signed = await this.sign(this._sign)
       const encrypted = await signed.encrypt(this._encrypt)

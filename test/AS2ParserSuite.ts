@@ -2,13 +2,13 @@ import 'mocha'
 import { AS2MimeNode, AS2Parser } from '../core'
 import { normalizeLineBreaks } from './Helpers'
 import { readFileSync } from 'fs'
+import MimeNode = require('nodemailer/lib/mime-node')
 
 describe('AS2Parser', async () => {
   it('should parse mime message to AS2MimeNode and match parsed contents', async () => {
     const buffer = readFileSync('test/test-data/content.encrypted.txt')
     const parser = new AS2Parser({ content: buffer })
     const result = await parser.parse()
-
     if (!(result instanceof AS2MimeNode)) {
       throw new Error(
         `Result was not an AS2MimeNode.\nExpected: 'AS2MimeNode'\nReceived: '${
@@ -18,7 +18,7 @@ describe('AS2Parser', async () => {
     }
 
     const rebuilt = await result.build()
-    const original = normalizeLineBreaks(buffer.toString('utf8'))
+    const original = buffer.toString('utf8')
     const parsed = rebuilt.toString('utf8')
 
     if (original !== parsed) {

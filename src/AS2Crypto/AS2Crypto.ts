@@ -43,7 +43,7 @@ interface pkcs7 {
 
 export class AS2Crypto {
   private static async buildNode (node: AS2MimeNode): Promise<Buffer> {
-    return await MimeNode.prototype.build.bind(node)()
+    return node.parsed ? await node.build() : await MimeNode.prototype.build.bind(node)()
   }
 
   /** A fix for signing with Nodemailer to produce verifiable SMIME;
@@ -126,7 +126,7 @@ export class AS2Crypto {
   static async verify (
     node: AS2MimeNode,
     options: VerificationOptions
-  ): Promise<AS2MimeNode> {
+  ): Promise<boolean> {
     const contentPart = await AS2Crypto.buildNode(node.childNodes[0])
     const contentBuffer = forge.util.createBuffer(contentPart)
     const contentBufferNoCrLf = forge.util.createBuffer(
@@ -140,7 +140,7 @@ export class AS2Crypto {
     const msg = ((forge.pkcs7 as unknown) as pkcs7).messageFromAsn1(asn1)
     const verify = forgeVerify.bind(msg)
     // Deal with Nodemailer trailing CRLF bug by trying with and without CRLF
-    const verified =
+    const verified: boolean =
       verify({ certificate: options.cert, detached: contentBuffer }) ||
       verify({ certificate: options.cert, detached: contentBufferNoCrLf })
 

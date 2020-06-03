@@ -10,7 +10,7 @@
     "outDir": "dist",
     "declaration": true,
     "typeRoots": ["node_modules/@types", "typings"],
-    "types": ["node-forge", "mailparser", "mocha", "node", "nodemailer", "uuid"]
+    "types": ["node-forge", "mailparser", "mocha", "node", "nodemailer"]
   },
 
   "exclude": ["node_modules", "dist"]
