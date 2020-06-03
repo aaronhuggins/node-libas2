@@ -53,7 +53,7 @@ describe('AS2MimeNode', async () => {
         des3: true
       }
     })
-    const parsed = await new AS2Parser({ content: output }).parse()
+    const parsed = await AS2Parser.parse(output)
     const opensslContent = parsed.childNodes[0].content.toString('utf8')
 
     if (opensslContent !== LIBAS2_EDI) {

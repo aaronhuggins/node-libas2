@@ -89,7 +89,7 @@ export class AS2Crypto {
 
     // Parse Mime body from p7.content back to AS2MimeNode
     const buffer = Buffer.from(p7.content.getBytes(), 'binary').toString('utf8')
-    const revivedNode = await new AS2Parser({ content: buffer }).parse()
+    const revivedNode = await AS2Parser.parse(buffer)
 
     return revivedNode
   }

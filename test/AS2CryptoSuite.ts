@@ -17,8 +17,7 @@ const contentSigned = readFileSync('test/test-data/content.signed.txt')
 
 describe('AS2Crypto', async () => {
   it('should decrypt contents of parsed mime message', async () => {
-    const parser = new AS2Parser({ content: contentEncrypted })
-    const result = await parser.parse()
+    const result = await AS2Parser.parse(contentEncrypted)
     const decrypted = await result.decrypt({
       cert: LIBAS2_CERT,
       key: LIBAS2_KEY
@@ -33,8 +32,7 @@ describe('AS2Crypto', async () => {
   })
 
   it('should verify signed contents of parsed mime message', async () => {
-    const parser = new AS2Parser({ content: contentSigned })
-    const result = await parser.parse()
+    const result = await AS2Parser.parse(contentSigned)
     const verified = await AS2Crypto.verify(
       result,
       { cert: LIBAS2_CERT }
