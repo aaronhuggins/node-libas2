@@ -1,5 +1,6 @@
 import * as http from 'http'
 import { URL } from 'url'
+import { AS2MimeNode } from './AS2MimeNode'
 
 export type AS2Headers =
   | Array<{
@@ -23,6 +24,6 @@ export interface RequestOptions extends http.RequestOptions {
 }
 
 export interface IncomingMessage extends http.IncomingMessage {
-  body?: string
-  rawBody?: Buffer
+  parsed: Promise<AS2MimeNode>
+  rawResponse: Buffer
 }

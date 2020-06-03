@@ -6,6 +6,8 @@ import { SIGNING, ENCRYPTION } from './Constants'
 import { AS2MimeNode } from './AS2MimeNode'
 import { SigningOptions, EncryptionOptions } from './AS2Crypto'
 import { AS2Headers, ParserHeaders, RequestOptions, IncomingMessage } from './Interfaces'
+import { Socket } from 'net'
+import { AS2Parser } from './AS2Parser'
 
 export const getProtocol = function (url: string | URL) {
   if (typeof url === 'string') return url.toLowerCase().split(/:/gu)[0]
@@ -115,29 +117,39 @@ export const agreementOptions = function agreementOptions (
   }
 }
 
-// TODO: Capture raw response so it can be parsed without reconstructing from IncomingMessage.
+/** Convenience method for making AS2 HTTP/S requests. */
 export async function request (
   options: RequestOptions
 ): Promise<IncomingMessage> {
   return new Promise((resolve, reject) => {
-    const { body, url } = options
-    const protocol = getProtocol(url) === 'https' ? https : http
-    delete options.body
-    delete options.url
-    const req = protocol.request(url, options, (response: IncomingMessage) => {
-      let rawBody = Buffer.from('')
-
-      response.on('error', error => reject(error))
-      response.on('data', (data: Buffer) => {
-        rawBody = Buffer.concat([rawBody, data])
+    try {
+      const { body, url } = options
+      const protocol = getProtocol(url) === 'https' ? https : http
+      delete options.body
+      delete options.url
+      options.method = 'POST'
+      let responseBufs: Buffer[] = []
+      const req = protocol.request(url, options, (response: IncomingMessage) => {
+        // We dispose of the body data, but read the stream so we can collect the raw response.
+        response.on('data', () => {})
+        response.on('error', error => reject(error))
+        response.on('end', () => {
+          const rawResponse = Buffer.concat(responseBufs)
+          response.rawResponse = rawResponse
+          response.parsed = AS2Parser.parse(rawResponse)
+          resolve(response)
+        })
       })
-      response.on('end', () => {
-        response.rawBody = rawBody
-        resolve(response)
+      req.on('error', error => reject(error))
+      req.on('socket', (socket: Socket) => {
+        socket.on('data', (data: Buffer) => {
+          responseBufs.push(data)
+        })
       })
-    })
-    req.on('error', error => reject(error))
-    req.write(body)
-    req.end()
+      req.write(body)
+      req.end()
+    } catch (error) {
+      reject(error)
+    }
   })
 }

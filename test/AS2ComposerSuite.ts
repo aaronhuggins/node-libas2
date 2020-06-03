@@ -86,18 +86,7 @@ describe('AS2Composer', async () => {
       headers: compiled.headers,
       body: compiled.body as Buffer
     })
-    const headerString = Object.entries(result.headers)
-      .map(
-        val =>
-          `${val[0]
-            .split(/-/gu)
-            .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-            .join('-')}: ${val[1]}`
-      )
-      .join('\r\n')
-    const mimeString =
-      headerString + '\r\n\r\n' + result.rawBody.toString('utf8')
-    const mdn = await new AS2Parser({ content: mimeString }).parse()
+    const mdn = await AS2Parser.parse(result.rawResponse)
     const message = await mdn.verify({ cert: AS2_TESTING_CERT })
     if (!message) {
       throw new Error('Signed MDN could not be verified.')
