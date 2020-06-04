@@ -1,11 +1,10 @@
 import 'mocha'
 import { AS2MimeNode, AS2Parser } from '../core'
-import { readFileSync } from 'fs'
+import { ENCRYPTED_CONTENT } from './Helpers'
 
 describe('AS2Parser', async () => {
   it('should parse mime message to AS2MimeNode and match parsed contents', async () => {
-    const buffer = readFileSync('test/test-data/content.encrypted.txt')
-    const result = await AS2Parser.parse(buffer)
+    const result = await AS2Parser.parse(ENCRYPTED_CONTENT)
     if (!(result instanceof AS2MimeNode)) {
       throw new Error(
         `Result was not an AS2MimeNode.\nExpected: 'AS2MimeNode'\nReceived: '${
@@ -14,13 +13,12 @@ describe('AS2Parser', async () => {
       )
     }
 
-    const rebuilt = await result.build()
-    const original = buffer.toString('utf8')
-    const parsed = rebuilt.toString('utf8')
+    // const rebuilt = await result.build()
+    // const parsed = rebuilt.toString('utf8')
 
-    if (original !== parsed) {
+    if (ENCRYPTED_CONTENT !== result.raw) {
       throw new Error(
-        `Mime section not correctly parsed.\nExpected: '${original}'\nReceived: '${parsed}'`
+        `Mime section not correctly parsed.\nExpected: '${ENCRYPTED_CONTENT}'\nReceived: '${result.raw}'`
       )
     }
   })

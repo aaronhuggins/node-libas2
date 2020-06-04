@@ -7,9 +7,6 @@ import {
   AS2Helpers
 } from '../core'
 import { AS2_TESTING_CERT, LIBAS2_EDI, LIBAS2_CERT, LIBAS2_KEY } from './Helpers'
-import { ENCRYPTION, SIGNING } from '../src/Constants'
-import { readFileSync, writeFileSync } from 'fs'
-import { AS2Parser } from '../src/AS2Parser'
 
 const options: AS2ComposerOptions = {
   message: {
@@ -58,33 +55,30 @@ describe('AS2Composer', async () => {
     }
   }).timeout(1000)
 
-  it('should produce a valid AS2 request', async () => {
-    // TODO: Test using ArcESB or pyAS2; mendelson AS2 is a bust due to non-conforming request/response.
-    // Ideally, come up with a way to test send/receive against a Drummond certified product.
-    // NOTE: Mendelson might not be a bust with new mime parser; test interop again.
+  it('should make a valid AS2 exchange', async () => {
+    // Test using ArcESB; this is a Drummond certified product.
     const composer = new AS2Composer({
       message: options.message,
       agreement: {
         sender: 'libas2community',
         recipient: 'as2testing',
-        sign: { cert: LIBAS2_CERT, key: LIBAS2_KEY, micalg: SIGNING.SHA256 },
-        encrypt: { cert: AS2_TESTING_CERT, encryption: ENCRYPTION.DES3 },
+        sign: { cert: LIBAS2_CERT, key: LIBAS2_KEY, micalg: AS2Constants.SIGNING.SHA256 },
+        encrypt: { cert: AS2_TESTING_CERT, encryption: AS2Constants.ENCRYPTION.DES3 },
         mdn: {
           to: 'mycompanyAS2@example-message.net',
           sign: {
             importance: 'required',
             protocol: 'pkcs7-signature',
-            micalg: SIGNING.SHA256
+            micalg: AS2Constants.SIGNING.SHA256
           }
         }
       }
     })
-    const compiled = await composer.request(true)
-    const result = await AS2Helpers.request({
-      url: 'https://as2testing.centralus.cloudapp.azure.com/pub/Receive.rsb',
-      headers: compiled.headers,
-      body: compiled.body as Buffer
-    })
+    const result = await AS2Helpers.request(
+      await composer.toRequestOptions(
+        'https://as2testing.centralus.cloudapp.azure.com/pub/Receive.rsb'
+      )
+    )
     const mdn = await result.parsed
     const message = await mdn.verify({ cert: AS2_TESTING_CERT })
     if (!message) {
