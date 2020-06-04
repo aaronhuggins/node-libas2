@@ -1,12 +1,19 @@
 export interface AS2DispositionNotification {
-  'reporting-ua'?: string
-  'mdn-gateway'?: string
-  'original-recipient'?: string
-  'final-recipient'?: string
-  'original-message-id'?: string
-  'disposition'?: string
-  'warning'?: string
-  'failure'?: string
-  'error'?: string
-  [key: string]: string | string[]
+  'reporting-ua'?: NotificationValue
+  'mdn-gateway'?: NotificationValue
+  'original-recipient'?: NotificationValue
+  'final-recipient'?: NotificationValue
+  'original-message-id'?: NotificationValue
+  'disposition'?: NotificationValue
+  'warning'?: NotificationValue
+  'failure'?: NotificationValue
+  'error'?: NotificationValue
+  [key: string]: NotificationValue
+}
+
+export interface NotificationValue {
+  value?: string
+  attributes?: { [key: string]: string }
+  original?: string
+  type?: string
 }

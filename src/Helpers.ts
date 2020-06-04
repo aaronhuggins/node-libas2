@@ -9,13 +9,24 @@ import { RequestOptions, IncomingMessage } from './Interfaces'
 import { Socket } from 'net'
 import { AS2Parser } from './AS2Parser'
 
-export function parseHeaderString (headers: string): { [key: string]: string | string[] } {
+/** Method for converting a string of headers into key:value pairs. */
+export function parseHeaderString (headers: string): { [key: string]: string | string[] }
+export function parseHeaderString (headers: string, keyToLowerCase: boolean): { [key: string]: string | string[] }
+export function parseHeaderString (headers: string, callback: (value: string) => any): { [key: string]: any }
+export function parseHeaderString (headers: string, keyToLowerCase: boolean, callback: (value: string) => any): { [key: string]: any }
+export function parseHeaderString (headers: string, keyToLowerCase: boolean | Function = false, callback?: Function): { [key: string]: any } {
   const result = {}
 
   if (!headers) return result
+  if (typeof keyToLowerCase === 'function') {
+    callback = keyToLowerCase
+    keyToLowerCase = false
+  }
+  if (!callback) callback = (value: string) => value
 
   // Unfold header lines, split on newline, and trim whitespace from strings.
   const lines = headers
+    .trim()
     .replace(/(\r\n|\n\r|\n)( |\t)/gu, ' ')
     .split(/\n/gu)
     .map((line) => line.trim())
@@ -23,15 +34,17 @@ export function parseHeaderString (headers: string): { [key: string]: string | s
   // Assign one or more values to each header key.
   for (const line of lines) {
     const index = line.indexOf(':')
-    const key = line.slice(0, index).trim()
+    let key = line.slice(0, index).trim()
     const value = line.slice(index + 1).trim()
 
+    if (keyToLowerCase) key = key.toLowerCase()
+
     if (result[key] === undefined) {
-      result[key] = value
+      result[key] = callback(value)
     } else if (Array.isArray(result[key])) {
-      result[key].push(value)
+      result[key].push(callback(value))
     } else {
-      result[key] = [result[key], value]
+      result[key] = [result[key], callback(value)]
     }
   }
 

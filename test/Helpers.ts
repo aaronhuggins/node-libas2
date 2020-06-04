@@ -95,3 +95,4 @@ export const AS2_TESTING_CERT = readFileSync('test/test-data/as2Testing.cer', 'u
 // Normalize line breaks for test files; original environment saved the files as crlf.
 export const ENCRYPTED_CONTENT = normalizeLineBreaks(readFileSync('test/test-data/content.encrypted.txt', 'utf8'))
 export const SIGNED_CONTENT = normalizeLineBreaks(readFileSync('test/test-data/content.signed.txt', 'utf8'))
+export const SIGNED_MDN = normalizeLineBreaks(readFileSync('test/test-data/mdn.signed.txt', 'utf8'))

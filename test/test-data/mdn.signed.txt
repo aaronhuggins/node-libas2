@@ -1,0 +1,74 @@
+Cache-Control: private
+Content-Length: 3127
+Content-Type: multipart/signed; protocol="application/pkcs7-signature"; micalg=sha-256; boundary="boundaryHO/tAQ=="
+Server: Microsoft-HTTPAPI/2.0
+X-Aspnet-Version: 4.0.30319
+X-Frame-Options: SAMEORIGIN
+As2-From: as2testing
+As2-To: libas2community
+As2-Version: 1.2
+Ediint-Features: CEM, multiple-attachments
+Subject: Message Disposition Notification
+Content-Description: MIME Message
+Message-Id: <2308b49e-c2e2-41fd-ac0a-b5002863308f@libas2community>
+Mime-Version: 1.0
+Set-Cookie: ASP.NET_SessionId=p4zjmmzv3mouyq4hudxbxtdq; path=/; HttpOnly; SameSite=Lax
+Date: Mon, 01 Jun 2020 16:12:51 GMT
+Connection: close
+
+--boundaryHO/tAQ==
+Content-Type: multipart/report; report-type=disposition-notification; boundary="MDNBoundary"
+Content-Transfer-Encoding: 8bit
+
+
+--MDNBoundary
+Content-Type: text/plain
+
+The incoming message from libas2community to as2testing with Id <51dac186-d7d2-8440-392e-d9153a830125@DESKTOP-BTP8V2E> was received successfully. This is not a guarantee that the message has been processed by the receiving translator.
+
+--MDNBoundary
+Content-Type: message/disposition-notification
+
+Original-Recipient: rfc822;as2testing
+Final-Recipient: rfc822;as2testing
+Original-Message-ID: <51dac186-d7d2-8440-392e-d9153a830125@DESKTOP-BTP8V2E>
+Disposition: automatic-action/MDN-sent-automatically; processed
+Received-Content-MIC: bIwxkbRLLtHWlniKxMReISQ/GvEve0LV/hxdl9OD0E8=, sha-256
+
+--MDNBoundary--
+
+--boundaryHO/tAQ==
+Content-Type: application/pkcs7-signature;  	name="smime.p7s"
+Content-Disposition: attachment; filename="smime.p7s"
+Content-Transfer-Encoding: base64
+
+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
+NQ+BiX0=
+
+--boundaryHO/tAQ==--

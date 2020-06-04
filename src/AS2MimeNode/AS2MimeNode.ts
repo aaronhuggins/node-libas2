@@ -55,6 +55,7 @@ export class AS2MimeNode extends MimeNode {
 
     super(contentType, { filename, baseBoundary })
 
+    this.contentType = contentType
     this.boundaryPrefix = boundaryPrefix === undefined ? '--LibAs2' : boundaryPrefix || ''
 
     if (!isNullOrUndefined(content)) this.setContent(content)
