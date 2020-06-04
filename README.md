@@ -10,11 +10,10 @@ A pure Javascript/Typescript implementation of the AS2 protocol.
   - Parse received AS2 messages, including decrypting and verifying
   - Near-complete support for AS2 protocol 1.0 [per RFC 4130](https://tools.ietf.org/html/rfc4130); see roadmap
   - Rich cryptography support based on [Forge](https://github.com/digitalbazaar/forge)
-  - Rich MIME support based on [Nodemailer](https://github.com/nodemailer/nodemailer)
+  - Rich MIME support based on [Nodemailer](https://github.com/nodemailer/nodemailer) and [Emailjs](https://github.com/emailjs/emailjs-mime-parser)
 
 ## Roadmap
-  - Write code for destructuring MDN responses
-  - Write code for composing MDN requests
+  - Write code for composing MDN responses
   - Finish README
   - Support versions of AS2 greater than 1.0
   - Write implementation of CMS compression
