@@ -1,14 +1,12 @@
 import { Readable } from 'stream'
 import MimeNode = require('nodemailer/lib/mime-node')
-import mimeFuncs = require('nodemailer/lib/mime-funcs')
+import { AS2MimeNodeOptions } from './Interfaces'
 import {
   isNullOrUndefined,
   signingOptions,
   encryptionOptions,
   isSMime
 } from '../Helpers'
-import { AS2MimeNodeOptions } from './Interfaces'
-import { AS2Headers } from '../Interfaces'
 import {
   AS2Crypto,
   SigningOptions,
@@ -127,6 +125,19 @@ export class AS2MimeNode extends MimeNode {
     return super.setHeader(keyOrHeaders, value)
   }
 
+  messageId (create: boolean = false) {
+    let messageId = this.getHeader('Message-ID')
+
+    // You really should define your own Message-Id field!
+    if (!messageId && create) {
+        messageId = AS2MimeNode.generateMessageId()
+
+        this.setHeader('Message-ID', messageId)
+    }
+
+    return messageId
+  }
+
   async sign (options?: SigningOptions): Promise<AS2MimeNode> {
     options = isNullOrUndefined(options) ? this._sign : options
 
@@ -172,7 +183,7 @@ export class AS2MimeNode extends MimeNode {
     return await super.build()
   }
 
-  static generateMessageId (uniqueId?: string, sender?: string): string {
+  static generateMessageId (sender?: string, uniqueId?: string): string {
     uniqueId = isNullOrUndefined(uniqueId)
       ? AS2Crypto.generateUniqueId()
       : uniqueId
