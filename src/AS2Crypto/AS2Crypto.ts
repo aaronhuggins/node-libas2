@@ -43,7 +43,9 @@ interface pkcs7 {
 
 export class AS2Crypto {
   private static async buildNode (node: AS2MimeNode): Promise<Buffer> {
-    return node.parsed ? await node.build() : await MimeNode.prototype.build.bind(node)()
+    return node.parsed
+      ? await node.build()
+      : await MimeNode.prototype.build.bind(node)()
   }
 
   /** A fix for signing with Nodemailer to produce verifiable SMIME;
@@ -81,9 +83,7 @@ export class AS2Crypto {
       forge.pki.certificateFromPem(options.cert)
     )
     if (recipient === null) {
-      throw new Error(
-        'Certificate provided was not used to encrypt message.'
-      )
+      throw new Error('Certificate provided was not used to encrypt message.')
     }
     p7.decrypt(recipient, forge.pki.privateKeyFromPem(options.key))
 

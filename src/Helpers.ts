@@ -10,11 +10,27 @@ import { Socket } from 'net'
 import { AS2Parser } from './AS2Parser'
 
 /** Method for converting a string of headers into key:value pairs. */
-export function parseHeaderString (headers: string): { [key: string]: string | string[] }
-export function parseHeaderString (headers: string, keyToLowerCase: boolean): { [key: string]: string | string[] }
-export function parseHeaderString (headers: string, callback: (value: string) => any): { [key: string]: any }
-export function parseHeaderString (headers: string, keyToLowerCase: boolean, callback: (value: string) => any): { [key: string]: any }
-export function parseHeaderString (headers: string, keyToLowerCase: boolean | Function = false, callback?: Function): { [key: string]: any } {
+export function parseHeaderString (
+  headers: string
+): { [key: string]: string | string[] }
+export function parseHeaderString (
+  headers: string,
+  keyToLowerCase: boolean
+): { [key: string]: string | string[] }
+export function parseHeaderString (
+  headers: string,
+  callback: (value: string) => any
+): { [key: string]: any }
+export function parseHeaderString (
+  headers: string,
+  keyToLowerCase: boolean,
+  callback: (value: string) => any
+): { [key: string]: any }
+export function parseHeaderString (
+  headers: string,
+  keyToLowerCase: boolean | Function = false,
+  callback?: Function
+): { [key: string]: any } {
   const result = {}
 
   if (!headers) return result
@@ -29,7 +45,7 @@ export function parseHeaderString (headers: string, keyToLowerCase: boolean | Fu
     .trim()
     .replace(/(\r\n|\n\r|\n)( |\t)/gu, ' ')
     .split(/\n/gu)
-    .map((line) => line.trim())
+    .map(line => line.trim())
 
   // Assign one or more values to each header key.
   for (const line of lines) {
@@ -60,9 +76,7 @@ export function getProtocol (url: string | URL): string {
 }
 
 /** Convenience method for null-checks */
-export function isNullOrUndefined (
-  value: any
-): boolean {
+export function isNullOrUndefined (value: any): boolean {
   return value === undefined || value === null
 }
 
@@ -90,9 +104,7 @@ export const canonicalTransform = function canonicalTransform (
 }
 
 /** Normalizes certificate signing options. */
-export function signingOptions (
-  sign: SigningOptions
-): SigningOptions {
+export function signingOptions (sign: SigningOptions): SigningOptions {
   return { cert: '', key: '', chain: [], micalg: SIGNING.SHA256, ...sign }
 }
 
@@ -140,17 +152,21 @@ export async function request (
       delete options.url
       options.method = options.method || 'POST'
       let responseBufs: Buffer[] = []
-      const req = protocol.request(url, options, (response: IncomingMessage) => {
-        // We dispose of the body data, but read the stream so we can collect the raw response.
-        response.on('data', () => {})
-        response.on('error', error => reject(error))
-        response.on('end', () => {
-          const rawResponse = Buffer.concat(responseBufs)
-          response.rawResponse = rawResponse
-          response.parsed = AS2Parser.parse(rawResponse)
-          resolve(response)
-        })
-      })
+      const req = protocol.request(
+        url,
+        options,
+        (response: IncomingMessage) => {
+          // We dispose of the body data, but read the stream so we can collect the raw response.
+          response.on('data', () => {})
+          response.on('error', error => reject(error))
+          response.on('end', () => {
+            const rawResponse = Buffer.concat(responseBufs)
+            response.rawResponse = rawResponse
+            response.parsed = AS2Parser.parse(rawResponse)
+            resolve(response)
+          })
+        }
+      )
       req.on('error', error => reject(error))
       req.on('socket', (socket: Socket) => {
         socket.on('data', (data: Buffer) => {

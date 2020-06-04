@@ -4,10 +4,10 @@ export interface AS2DispositionNotification {
   'original-recipient'?: NotificationValue
   'final-recipient'?: NotificationValue
   'original-message-id'?: NotificationValue
-  'disposition'?: NotificationValue
-  'warning'?: NotificationValue
-  'failure'?: NotificationValue
-  'error'?: NotificationValue
+  disposition?: NotificationValue
+  warning?: NotificationValue
+  failure?: NotificationValue
+  error?: NotificationValue
   [key: string]: NotificationValue
 }
 

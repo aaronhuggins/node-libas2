@@ -4,10 +4,13 @@ import {
   MessageDispositionOptions
 } from './Interfaces'
 import { AS2MimeNodeOptions, AS2MimeNode } from '../AS2MimeNode'
-import { isNullOrUndefined, agreementOptions, parseHeaderString } from '../Helpers'
+import {
+  isNullOrUndefined,
+  agreementOptions,
+  parseHeaderString
+} from '../Helpers'
 import { AS2Headers, RequestOptions } from '../Interfaces'
 import { STANDARD_HEADER } from '../Constants'
-import { Readable } from 'stream'
 
 export class AS2Composer {
   constructor (options: AS2ComposerOptions) {
@@ -117,14 +120,14 @@ export class AS2Composer {
     return this.message
   }
 
-  async toRequestOptions (
-    url: string
-  ): Promise<RequestOptions> {
+  async toRequestOptions (url: string): Promise<RequestOptions> {
     if (this.message === undefined) {
       await this.compile()
     }
     const buffer = await this.message.build()
-    const [headers, ...body] = buffer.toString('utf8').split(/(\r\n|\n\r|\n)(\r\n|\n\r|\n)/gu)
+    const [headers, ...body] = buffer
+      .toString('utf8')
+      .split(/(\r\n|\n\r|\n)(\r\n|\n\r|\n)/gu)
 
     return {
       url,

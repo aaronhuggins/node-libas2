@@ -1,6 +1,6 @@
-import { AS2MimeNode } from "../AS2MimeNode"
-import { AS2DispositionNotification, NotificationValue } from "./Interfaces"
-import { parseHeaderString } from "../Helpers"
+import { AS2MimeNode } from '../AS2MimeNode'
+import { AS2DispositionNotification, NotificationValue } from './Interfaces'
+import { parseHeaderString } from '../Helpers'
 
 const getReportNode = function getReportNode (node: AS2MimeNode): AS2MimeNode {
   if (!node) return
@@ -11,18 +11,23 @@ const getReportNode = function getReportNode (node: AS2MimeNode): AS2MimeNode {
   ) {
     return node
   } else {
-    for (const childNode of (node.childNodes || [])) {
+    for (const childNode of node.childNodes || []) {
       return getReportNode(childNode)
     }
   }
 }
 
-const toNotificationValue = function toNotificationValue (value: string): NotificationValue {
+const toNotificationValue = function toNotificationValue (
+  value: string
+): NotificationValue {
   const result: NotificationValue = {}
   const mic = /([A-Za-z0-9+\/=]+),\s*(.+)/gu
-  const parts = value.split(/;/gu).map((part) => part.trim())
+  const parts = value.split(/;/gu).map(part => part.trim())
 
-  if (parts[0].toLowerCase() === 'rfc822' || parts[0].toLowerCase() === 'unknown') {
+  if (
+    parts[0].toLowerCase() === 'rfc822' ||
+    parts[0].toLowerCase() === 'unknown'
+  ) {
     result.value = parts.slice(1).join('; ')
     result.type = parts[0]
   } else if (parts[0].toLowerCase().includes('automatic-action')) {
@@ -55,7 +60,7 @@ const toNotificationValue = function toNotificationValue (value: string): Notifi
       }
     }
   } else if (mic.test(value)) {
-    const [micValue, type] = value.split(',').map((val) => val.trim())
+    const [micValue, type] = value.split(',').map(val => val.trim())
     result.value = micValue
     result.type = type
   } else {
@@ -96,7 +101,11 @@ export class AS2Disposition {
       // Get the human-readable message, the first part of the report.
       this.explanation = mdn.childNodes[0].content.toString('utf8').trim()
       // Get the message/disposition-notification and parse, which is the second part.
-      this.notification = parseHeaderString(mdn.childNodes[1].content.toString('utf8'), true, toNotificationValue)
+      this.notification = parseHeaderString(
+        mdn.childNodes[1].content.toString('utf8'),
+        true,
+        toNotificationValue
+      )
       // Get the optional thid part, if present; it is the returned message content.
       this.returned = mdn.childNodes[2]
     }

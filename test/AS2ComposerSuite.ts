@@ -6,7 +6,12 @@ import {
   AS2Crypto,
   AS2Helpers
 } from '../core'
-import { AS2_TESTING_CERT, LIBAS2_EDI, LIBAS2_CERT, LIBAS2_KEY } from './Helpers'
+import {
+  AS2_TESTING_CERT,
+  LIBAS2_EDI,
+  LIBAS2_CERT,
+  LIBAS2_KEY
+} from './Helpers'
 
 const options: AS2ComposerOptions = {
   message: {
@@ -62,8 +67,15 @@ describe('AS2Composer', async () => {
       agreement: {
         sender: 'libas2community',
         recipient: 'as2testing',
-        sign: { cert: LIBAS2_CERT, key: LIBAS2_KEY, micalg: AS2Constants.SIGNING.SHA256 },
-        encrypt: { cert: AS2_TESTING_CERT, encryption: AS2Constants.ENCRYPTION.DES3 },
+        sign: {
+          cert: LIBAS2_CERT,
+          key: LIBAS2_KEY,
+          micalg: AS2Constants.SIGNING.SHA256
+        },
+        encrypt: {
+          cert: AS2_TESTING_CERT,
+          encryption: AS2Constants.ENCRYPTION.DES3
+        },
         mdn: {
           to: 'mycompanyAS2@example-message.net',
           sign: {

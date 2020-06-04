@@ -56,7 +56,8 @@ export class AS2MimeNode extends MimeNode {
     super(contentType, { filename, baseBoundary })
 
     this.contentType = contentType
-    this.boundaryPrefix = boundaryPrefix === undefined ? '--LibAs2' : boundaryPrefix || ''
+    this.boundaryPrefix =
+      boundaryPrefix === undefined ? '--LibAs2' : boundaryPrefix || ''
 
     if (!isNullOrUndefined(content)) this.setContent(content)
     if (!isNullOrUndefined(headers)) this.setHeader(headers)
@@ -131,9 +132,9 @@ export class AS2MimeNode extends MimeNode {
 
     // You really should define your own Message-Id field!
     if (!messageId && create) {
-        messageId = AS2MimeNode.generateMessageId()
+      messageId = AS2MimeNode.generateMessageId()
 
-        this.setHeader('Message-ID', messageId)
+      this.setHeader('Message-ID', messageId)
     }
 
     return messageId
@@ -146,7 +147,9 @@ export class AS2MimeNode extends MimeNode {
   }
 
   async verify (options: VerificationOptions): Promise<AS2MimeNode> {
-    return await AS2Crypto.verify(this, options) ? this.childNodes[0] : undefined
+    return (await AS2Crypto.verify(this, options))
+      ? this.childNodes[0]
+      : undefined
   }
 
   async decrypt (options: DecryptionOptions): Promise<AS2MimeNode> {

@@ -55,7 +55,9 @@ describe('AS2Parser', async () => {
 
     if (result.messageId() !== mdn.messageId) {
       throw new Error(
-        `Mime section not correctly parsed.\nExpected: '${result.messageId()}'\nReceived: '${mdn.messageId}'`
+        `Mime section not correctly parsed.\nExpected: '${result.messageId()}'\nReceived: '${
+          mdn.messageId
+        }'`
       )
     }
   })
