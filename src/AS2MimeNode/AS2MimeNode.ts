@@ -32,6 +32,7 @@ export interface AS2MimeNode {
   rootNode: AS2MimeNode
   parentNode?: AS2MimeNode
   childNodes: AS2MimeNode[]
+  nodeCounter: number
   raw: string
   normalizeHeaderKey: Function
   _handleContentType(structured: any): void
@@ -56,7 +57,7 @@ export class AS2MimeNode extends MimeNode {
 
     super(contentType, { filename, baseBoundary })
 
-    this.boundaryPrefix = boundaryPrefix || '--LibAs2'
+    this.boundaryPrefix = boundaryPrefix === undefined ? '--LibAs2' : boundaryPrefix || ''
 
     if (!isNullOrUndefined(content)) this.setContent(content)
     if (!isNullOrUndefined(headers)) this.setHeader(headers)
@@ -273,7 +274,7 @@ export class AS2MimeNode extends MimeNode {
   }
 
   async verify (options: VerificationOptions): Promise<AS2MimeNode> {
-    return AS2Crypto.verify(this, options) ? this.childNodes[0] : undefined
+    return await AS2Crypto.verify(this, options) ? this.childNodes[0] : undefined
   }
 
   async decrypt (options: DecryptionOptions): Promise<AS2MimeNode> {

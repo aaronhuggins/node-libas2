@@ -54,9 +54,10 @@ export class AS2Parser {
   
     currentNode.rootNode = rootNode
     currentNode.parentNode = parentNode
+    currentNode.nodeCounter = typeof nodeLike.nodeCounter === 'object' ?  nodeLike.nodeCounter.count : nodeLike.nodeCounter
     currentNode.parsed = true
     currentNode.raw = nodeLike.raw
-  
+
     if (Array.isArray(nodeLike.childNodes)) {
       for (const childNode of nodeLike.childNodes) {
         const as2Node = this.transformNodeLike(childNode, rootNode, currentNode)

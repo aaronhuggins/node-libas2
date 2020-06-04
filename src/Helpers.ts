@@ -9,20 +9,49 @@ import { AS2Headers, ParserHeaders, RequestOptions, IncomingMessage } from './In
 import { Socket } from 'net'
 import { AS2Parser } from './AS2Parser'
 
-export const getProtocol = function (url: string | URL) {
+export function parseHeaderString (headers: string): { [key: string]: string | string[] } {
+  const result = {}
+
+  if (!headers) return result
+
+  // Unfold header lines, split on newline, and trim whitespace from strings.
+  const lines = headers
+    .replace(/(\r\n|\n\r|\n)( |\t)/gu, ' ')
+    .split(/\n/gu)
+    .map((line) => line.trim())
+
+  // Assign one or more values to each header key.
+  for (const line of lines) {
+    const index = line.indexOf(':')
+    const key = line.slice(0, index).trim()
+    const value = line.slice(index + 1).trim()
+
+    if (result[key] === undefined) {
+      result[key] = value
+    } else if (Array.isArray(result[key])) {
+      result[key].push(value)
+    } else {
+      result[key] = [result[key], value]
+    }
+  }
+
+  return result
+}
+
+export function getProtocol (url: string | URL) {
   if (typeof url === 'string') return url.toLowerCase().split(/:/gu)[0]
   if (url instanceof URL) return url.protocol.toLowerCase().replace(/:/gu, '')
   throw new Error('URL is not one of either "string" or instance of "URL".')
 }
 
 /** Convenience method for null-checks */
-export const isNullOrUndefined = function isNullOrUndefined (
+export function isNullOrUndefined (
   value: any
 ): boolean {
   return value === undefined || value === null
 }
 
-export const isSMime = function isSMime (value: string) {
+export function isSMime (value: string) {
   return (
     value.toLowerCase().startsWith('application/pkcs7') ||
     value.toLowerCase().startsWith('application/x-pkcs7')
@@ -45,7 +74,7 @@ export const canonicalTransform = function canonicalTransform (
   node.childNodes.forEach(canonicalTransform)
 }
 
-export const mapHeadersToNodeHeaders = function mapHeadersToNodeHeaders (
+export function mapHeadersToNodeHeaders (
   headers: ParserHeaders
 ): AS2Headers {
   const result: AS2Headers = []
@@ -79,21 +108,21 @@ export const mapHeadersToNodeHeaders = function mapHeadersToNodeHeaders (
 }
 
 /** Normalizes certificate signing options. */
-export const signingOptions = function signingOptions (
+export function signingOptions (
   sign: SigningOptions
 ): SigningOptions {
   return { cert: '', key: '', chain: [], micalg: SIGNING.SHA256, ...sign }
 }
 
 /** Normalizes encryption options. */
-export const encryptionOptions = function encryptionOptions (
+export function encryptionOptions (
   encrypt: EncryptionOptions
 ): EncryptionOptions {
   return { cert: '', encryption: ENCRYPTION._3DES, ...encrypt }
 }
 
 /** Normalizes agreement options. */
-export const agreementOptions = function agreementOptions (
+export function agreementOptions (
   agreement: AgreementOptions
 ): AgreementOptions {
   const { mdn } = agreement
