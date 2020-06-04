@@ -5,7 +5,7 @@ import { AgreementOptions } from './AS2Composer'
 import { SIGNING, ENCRYPTION } from './Constants'
 import { AS2MimeNode } from './AS2MimeNode'
 import { SigningOptions, EncryptionOptions } from './AS2Crypto'
-import { AS2Headers, ParserHeaders, RequestOptions, IncomingMessage } from './Interfaces'
+import { RequestOptions, IncomingMessage } from './Interfaces'
 import { Socket } from 'net'
 import { AS2Parser } from './AS2Parser'
 
@@ -38,9 +38,11 @@ export function parseHeaderString (headers: string): { [key: string]: string | s
   return result
 }
 
-export function getProtocol (url: string | URL) {
-  if (typeof url === 'string') return url.toLowerCase().split(/:/gu)[0]
-  if (url instanceof URL) return url.protocol.toLowerCase().replace(/:/gu, '')
+export function getProtocol (url: string | URL): string {
+  if (typeof url === 'string' || url instanceof URL) {
+    return new URL(url as string).protocol.replace(':', '')
+  }
+
   throw new Error('URL is not one of either "string" or instance of "URL".')
 }
 
@@ -72,39 +74,6 @@ export const canonicalTransform = function canonicalTransform (
   }
 
   node.childNodes.forEach(canonicalTransform)
-}
-
-export function mapHeadersToNodeHeaders (
-  headers: ParserHeaders
-): AS2Headers {
-  const result: AS2Headers = []
-
-  headers.forEach((value, key) => {
-    if (
-      typeof value === 'string' ||
-      typeof (value as any).getDate === 'function'
-    ) {
-      result.push({
-        key,
-        value: value as string
-      })
-    } else {
-      const obj = value
-      if (key === 'content-type' && typeof obj.params.name === 'string') {
-        delete obj.params.name
-      }
-      const params = Array.from(Object.entries(obj.params)).map(
-        param => `${param[0]}=${param[1]}`
-      )
-
-      result.push({
-        key,
-        value: [obj.value, ...params].join('; ')
-      })
-    }
-  })
-
-  return result
 }
 
 /** Normalizes certificate signing options. */
