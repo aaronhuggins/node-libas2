@@ -146,9 +146,10 @@ export async function request (
 ): Promise<IncomingMessage> {
   return new Promise((resolve, reject) => {
     try {
-      const { body, params } = options
-      let { url } = options
+      const { params } = options
+      let { body, url } = options
       url = new URL(url as string)
+      body = isNullOrUndefined(body) ? '' : body
       const protocol = getProtocol(url) === 'https' ? https : http
       delete options.body
       delete options.url

@@ -20,7 +20,7 @@ export type ParserHeaders = Map<
 
 export interface RequestOptions extends http.RequestOptions {
   url: string | URL
-  body: string | Buffer
+  body?: string | Buffer
   params?: { [key: string]: string }
 }
 
