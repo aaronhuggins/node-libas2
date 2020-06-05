@@ -91,7 +91,7 @@ describe('AS2Composer', async () => {
         'https://as2testing.centralus.cloudapp.azure.com/pub/Receive.rsb'
       )
     )
-    const mdn = await result.parsed
+    const mdn = await result.mime()
     const message = await mdn.verify({ cert: AS2_TESTING_CERT })
     if (!message) {
       throw new Error('Signed MDN could not be verified.')

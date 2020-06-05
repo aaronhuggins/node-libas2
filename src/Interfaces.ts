@@ -25,7 +25,7 @@ export interface RequestOptions extends http.RequestOptions {
 }
 
 export interface IncomingMessage extends http.IncomingMessage {
-  parsed: Promise<AS2MimeNode>
+  mime: () => Promise<AS2MimeNode>
   json: () => any
   rawResponse: Buffer
   rawBody: Buffer

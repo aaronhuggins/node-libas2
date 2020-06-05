@@ -169,7 +169,7 @@ export async function request (
             const rawBody = Buffer.concat(bodyBufs)
             response.rawBody = rawBody
             response.rawResponse = rawResponse
-            response.parsed = AS2Parser.parse(rawResponse)
+            response.mime = () => AS2Parser.parse(rawResponse)
             response.json = function json () {
               try {
                 return JSON.parse(rawBody.toString('utf8'))
