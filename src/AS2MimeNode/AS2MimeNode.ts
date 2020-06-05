@@ -56,15 +56,21 @@ export class AS2MimeNode extends MimeNode {
     super(contentType, { filename, baseBoundary })
 
     this.contentType = contentType
-    this.boundaryPrefix =
-      isNullOrUndefined(boundaryPrefix) ? '--LibAs2' : boundaryPrefix || ''
+    this.boundaryPrefix = isNullOrUndefined(boundaryPrefix)
+      ? '--LibAs2'
+      : boundaryPrefix === false
+      ? ''
+      : boundaryPrefix
 
     if (!isNullOrUndefined(content)) this.setContent(content)
     if (!isNullOrUndefined(headers)) this.setHeader(headers)
     if (!isNullOrUndefined(sign)) this.setSigning(sign)
     if (!isNullOrUndefined(encrypt)) this.setEncryption(encrypt)
     if (!isNullOrUndefined(messageId)) this.setHeader('Message-ID', messageId)
-    if (!isNullOrUndefined(contentDisposition) && contentDisposition !== false) {
+    if (
+      !isNullOrUndefined(contentDisposition) &&
+      contentDisposition !== false
+    ) {
       this.setHeader(
         'Content-Disposition',
         contentDisposition === true ? 'attachment' : contentDisposition
@@ -72,7 +78,9 @@ export class AS2MimeNode extends MimeNode {
     }
     if (this.contentType) {
       this.signed = contentType.toLowerCase().startsWith('multipart/signed')
-      this.encrypted = contentType.toLowerCase().startsWith('multipart/encrypted')
+      this.encrypted = contentType
+        .toLowerCase()
+        .startsWith('multipart/encrypted')
       this.smime = isSMime(contentType)
       this.compressed = false
       if (this.smime) {
@@ -101,9 +109,9 @@ export class AS2MimeNode extends MimeNode {
           }
         }
 
-        if (this.smimeType = 'signed-data') this.signed = true
-        if (this.smimeType = 'enveloped-data') this.encrypted = true
-        if (this.smimeType = 'compressed-data') this.compressed = true
+        if (this.smimeType === 'signed-data') this.signed = true
+        if (this.smimeType === 'enveloped-data') this.encrypted = true
+        if (this.smimeType === 'compressed-data') this.compressed = true
       }
     }
 
