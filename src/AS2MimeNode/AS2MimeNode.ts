@@ -70,39 +70,41 @@ export class AS2MimeNode extends MimeNode {
         contentDisposition === true ? 'attachment' : contentDisposition
       )
     }
-    this.signed = contentType.toLowerCase().startsWith('multipart/signed')
-    this.encrypted = contentType.toLowerCase().startsWith('multipart/encrypted')
-    this.smime = isSMime(contentType)
-    this.compressed = false
-    if (this.smime) {
-      let applicationType: string
+    if (this.contentType) {
+      this.signed = contentType.toLowerCase().startsWith('multipart/signed')
+      this.encrypted = contentType.toLowerCase().startsWith('multipart/encrypted')
+      this.smime = isSMime(contentType)
+      this.compressed = false
+      if (this.smime) {
+        let applicationType: string
 
-      // Check for actual smime-type
-      for (let part of contentType.split(/;/gu)) {
-        let [key, value] = part.trim().split(/=/gu)
-        key = key.trim().toLowerCase()
+        // Check for actual smime-type
+        for (let part of contentType.split(/;/gu)) {
+          let [key, value] = part.trim().split(/=/gu)
+          key = key.trim().toLowerCase()
 
-        if (key === 'smime-type') {
-          this.smimeType = value.trim().toLowerCase()
+          if (key === 'smime-type') {
+            this.smimeType = value.trim().toLowerCase()
+          }
+
+          if (key.startsWith('application/')) {
+            applicationType = key
+          }
         }
 
-        if (key.startsWith('application/')) {
-          applicationType = key
+        // Infer smime-type
+        if (this.smimeType === undefined || this.smimeType === '') {
+          if (applicationType.endsWith('signature')) {
+            this.smimeType = 'signed-data'
+          } else {
+            this.smimeType = 'not-available'
+          }
         }
+
+        if (this.smimeType = 'signed-data') this.signed = true
+        if (this.smimeType = 'enveloped-data') this.encrypted = true
+        if (this.smimeType = 'compressed-data') this.compressed = true
       }
-
-      // Infer smime-type
-      if (this.smimeType === undefined || this.smimeType === '') {
-        if (applicationType.endsWith('signature')) {
-          this.smimeType = 'signed-data'
-        } else {
-          this.smimeType = 'not-available'
-        }
-      }
-
-      if ((this.smimeType = 'signed-data')) this.signed = true
-      if ((this.smimeType = 'enveloped-data')) this.encrypted = true
-      if ((this.smimeType = 'compressed-data')) this.compressed = true
     }
 
     this.parsed = false
