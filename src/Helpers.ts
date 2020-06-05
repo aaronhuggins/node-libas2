@@ -151,27 +151,35 @@ export async function request (
       delete options.body
       delete options.url
       options.method = options.method || 'POST'
-      let responseBufs: Buffer[] = []
+      const responseBufs: Buffer[] = []
       const req = protocol.request(
         url,
         options,
         (response: IncomingMessage) => {
-          // We dispose of the body data, but read the stream so we can collect the raw response.
-          response.on('data', () => {})
+          const bodyBufs: Buffer[] = []
+
+          response.on('data', (data: Buffer) => bodyBufs.push(data))
           response.on('error', error => reject(error))
           response.on('end', () => {
             const rawResponse = Buffer.concat(responseBufs)
+            const rawBody = Buffer.concat(bodyBufs)
+            response.rawBody = rawBody
             response.rawResponse = rawResponse
             response.parsed = AS2Parser.parse(rawResponse)
+            response.json = function json () {
+              try {
+                return JSON.parse(rawBody.toString('utf8'))
+              } catch (err) {
+                return err
+              }
+            }
             resolve(response)
           })
         }
       )
       req.on('error', error => reject(error))
       req.on('socket', (socket: Socket) => {
-        socket.on('data', (data: Buffer) => {
-          responseBufs.push(data)
-        })
+        socket.on('data', (data: Buffer) => responseBufs.push(data))
       })
       req.write(body)
       req.end()
