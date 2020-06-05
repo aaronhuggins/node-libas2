@@ -2,6 +2,8 @@ const fs = require('fs')
 const gulp = require('gulp')
 const shell = require('gulp-shell')
 
+
+
 gulp.task('mkdir', async done => {
   if (!fs.existsSync('coverage')) {
     fs.mkdirSync('coverage')
@@ -22,7 +24,7 @@ gulp.task(
   'compile:docs',
   shell.task([
     'jsdoc2md --no-cache --files ./src/**/*.ts --configure ./jsdoc2md.json > ./docs/API.md',
-    'mocha --reporter=markdown > ./docs/Tests.md'
+    'nyc --report-dir ./docs mocha --reporter=markdown > ./docs/Tests.md'
   ])
 )
 
