@@ -140,7 +140,7 @@ export function agreementOptions (
   }
 }
 
-/** Convenience method for making AS2 HTTP/S requests. */
+/** Convenience method for making AS2 HTTP/S requests. Makes a POST request by default. */
 export async function request (
   options: RequestOptions
 ): Promise<IncomingMessage> {
