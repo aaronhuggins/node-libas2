@@ -1,6 +1,6 @@
 {
   "name": "libas2",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Implementation of the AS2 protocol as presented in RFC 4130 and related RFCs",
   "main": "dist/core.js",
   "types": "dist/core.d.ts",
