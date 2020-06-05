@@ -146,11 +146,14 @@ export async function request (
 ): Promise<IncomingMessage> {
   return new Promise((resolve, reject) => {
     try {
-      const { body, url } = options
+      const { body, params } = options
+      let { url } = options
+      url = new URL(url as string)
       const protocol = getProtocol(url) === 'https' ? https : http
       delete options.body
       delete options.url
       options.method = options.method || 'POST'
+      Object.entries(params || {}).forEach(val => (url as URL).searchParams.append(...val))
       const responseBufs: Buffer[] = []
       const req = protocol.request(
         url,
