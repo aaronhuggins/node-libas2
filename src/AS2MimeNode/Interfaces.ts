@@ -14,7 +14,7 @@ export interface AS2MimeNodeOptions {
   /** Content type of the node; will be auto-calculated from the filename if not set. */
   contentType?: string
   /** The content disposition of the node. */
-  contentDisposition?: 'inline' | 'attachment'
+  contentDisposition?: boolean | 'inline' | 'attachment'
   /** Optional message ID; if not provided, one will be generated. */
   messageId?: string
   /** Additional headers for the node. */

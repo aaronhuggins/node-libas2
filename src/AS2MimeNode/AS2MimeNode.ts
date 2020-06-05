@@ -57,17 +57,19 @@ export class AS2MimeNode extends MimeNode {
 
     this.contentType = contentType
     this.boundaryPrefix =
-      boundaryPrefix === undefined ? '--LibAs2' : boundaryPrefix || ''
+      isNullOrUndefined(boundaryPrefix) ? '--LibAs2' : boundaryPrefix || ''
 
     if (!isNullOrUndefined(content)) this.setContent(content)
     if (!isNullOrUndefined(headers)) this.setHeader(headers)
     if (!isNullOrUndefined(sign)) this.setSigning(sign)
     if (!isNullOrUndefined(encrypt)) this.setEncryption(encrypt)
     if (!isNullOrUndefined(messageId)) this.setHeader('Message-ID', messageId)
-    this.setHeader(
-      'Content-Disposition',
-      isNullOrUndefined(contentDisposition) ? 'attachment' : contentDisposition
-    )
+    if (!isNullOrUndefined(contentDisposition) && contentDisposition !== false) {
+      this.setHeader(
+        'Content-Disposition',
+        contentDisposition === true ? 'attachment' : contentDisposition
+      )
+    }
     this.signed = contentType.toLowerCase().startsWith('multipart/signed')
     this.encrypted = contentType.toLowerCase().startsWith('multipart/encrypted')
     this.smime = isSMime(contentType)
