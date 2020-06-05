@@ -1,4 +1,4 @@
-import forge = require('node-forge')
+import * as forge from 'node-forge'
 import { isNullOrUndefined } from '../Helpers'
 
 const attributeValidator = {

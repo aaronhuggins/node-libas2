@@ -4,6 +4,7 @@ import { AS2MimeNode } from '../AS2MimeNode'
 // @ts-ignore
 import parse from '@nhs-llc/emailjs-mime-parser'
 
+/** Class for parsing a MIME document to an AS2MimeNode tree. */
 export class AS2Parser {
   private static isStream (stream: any): boolean {
     return stream instanceof Stream || typeof stream.on === 'function'

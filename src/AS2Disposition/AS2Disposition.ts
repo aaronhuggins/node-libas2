@@ -85,6 +85,7 @@ const toNotificationValue = function toNotificationValue (
   return result
 }
 
+/** Class for describing and constructing a Message Disposition Notification. */
 export class AS2Disposition {
   constructor (mdn?: AS2MimeNode) {
     let messageId

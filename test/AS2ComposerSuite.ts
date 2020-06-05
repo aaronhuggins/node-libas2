@@ -4,7 +4,7 @@ import {
   AS2Composer,
   AS2ComposerOptions,
   AS2Crypto,
-  AS2Helpers
+  request
 } from '../core'
 import {
   AS2_TESTING_CERT,
@@ -86,7 +86,7 @@ describe('AS2Composer', async () => {
         }
       }
     })
-    const result = await AS2Helpers.request(
+    const result = await request(
       await composer.toRequestOptions(
         'https://as2testing.centralus.cloudapp.azure.com/pub/Receive.rsb'
       )

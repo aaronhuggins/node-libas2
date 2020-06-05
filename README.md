@@ -2,6 +2,12 @@
 
 A pure Javascript/Typescript implementation of the AS2 protocol.
 
+## **WARNING**
+
+**BETA SOFTWARE**
+
+This library is not quite yet ready for production use. The API is still in flux, and it's missing an API for constructing MDNs. These will be settled soon to allow for a production release. Documentation of the API is only partially complete and won't be until the API is solidified.
+
 ## Usage
 
 > TODO

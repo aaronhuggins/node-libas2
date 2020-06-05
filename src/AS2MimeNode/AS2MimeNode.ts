@@ -1,5 +1,5 @@
 import { Readable } from 'stream'
-import MimeNode = require('nodemailer/lib/mime-node')
+import * as MimeNode from 'nodemailer/lib/mime-node'
 import { AS2MimeNodeOptions } from './Interfaces'
 import {
   isNullOrUndefined,
@@ -16,6 +16,7 @@ import {
 } from '../AS2Crypto'
 import { hostname } from 'os'
 
+/** Class for describing and constructing a MIME document. */
 export interface AS2MimeNode {
   keepBcc: boolean
   _headers: Array<{
@@ -38,6 +39,7 @@ export interface AS2MimeNode {
   _encodeHeaderValue(key: string, value: string): string
 }
 
+/** Class for describing and constructing a MIME document. */
 export class AS2MimeNode extends MimeNode {
   constructor (options: AS2MimeNodeOptions) {
     const {

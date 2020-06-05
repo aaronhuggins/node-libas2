@@ -1,8 +1,8 @@
 import { NOT_IMPLEMENTED, CRLF } from '../Constants'
-import forge = require('node-forge')
+import * as forge from 'node-forge'
 import { AS2MimeNode } from '../AS2MimeNode'
 import { encryptionOptions, canonicalTransform } from '../Helpers'
-import MimeNode = require('nodemailer/lib/mime-node')
+import * as MimeNode from 'nodemailer/lib/mime-node'
 import {
   EncryptionOptions,
   SigningOptions,
@@ -41,6 +41,7 @@ interface pkcs7 {
   messageFromAsn1(asn1: forge.asn1.Asn1): PkcsEnvelopedData
 }
 
+/** Class for cryptography methods supported by AS2. */
 export class AS2Crypto {
   private static async buildNode (node: AS2MimeNode): Promise<Buffer> {
     return node.parsed
@@ -219,7 +220,9 @@ export class AS2Crypto {
     return rootNode
   }
 
-  /** Not yet implemented; do not use. */
+  /** Not yet implemented; do not use.
+   * @throws NOT_IMPLEMENTED
+  */
   static async compress (
     node: AS2MimeNode,
     options: any
@@ -227,7 +230,9 @@ export class AS2Crypto {
     throw NOT_IMPLEMENTED
   }
 
-  /** Not yet implemented. */
+  /** Not yet implemented.
+   * @throws NOT_IMPLEMENTED
+  */
   static async decompress (
     node: AS2MimeNode,
     options: any

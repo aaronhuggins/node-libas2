@@ -12,6 +12,7 @@ import {
 import { AS2Headers, RequestOptions } from '../Interfaces'
 import { STANDARD_HEADER } from '../Constants'
 
+/** Class for composing AS2 messages. */
 export class AS2Composer {
   constructor (options: AS2ComposerOptions) {
     this._message = { ...options.message }

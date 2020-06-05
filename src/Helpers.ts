@@ -88,7 +88,7 @@ export function isSMime (value: string) {
 }
 
 /** Transforms a payload into a canonical text format before signing */
-export const canonicalTransform = function canonicalTransform (
+export function canonicalTransform (
   node: AS2MimeNode
 ): void {
   const newline = /\r\n|\r|\n/g
