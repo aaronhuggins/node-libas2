@@ -1,3 +1,4 @@
+import { AS2Constants } from '../core'
 import * as cp from 'child_process'
 import { readFileSync } from 'fs'
 
@@ -14,7 +15,7 @@ export const normalizeLineBreaks = function normalizeLineBreaks (
     output.push(line)
   }
 
-  return output.length > 0 ? output.join('\r\n') : input
+  return output.length > 0 ? output.join(AS2Constants.CRLF) : input
 }
 
 export const run = async function run (

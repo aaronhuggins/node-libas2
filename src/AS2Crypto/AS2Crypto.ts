@@ -1,4 +1,4 @@
-import { NOT_IMPLEMENTED, CRLF } from '../Constants'
+import { NOT_IMPLEMENTED, CRLF, ENCRYPTION_FILENAME, SIGNATURE_FILENAME } from '../Constants'
 import * as forge from 'node-forge'
 import { AS2MimeNode } from '../AS2MimeNode'
 import { encryptionOptions, canonicalTransform } from '../Helpers'
@@ -102,7 +102,7 @@ export class AS2Crypto {
   ): Promise<AS2MimeNode> {
     options = encryptionOptions(options)
     const rootNode = new AS2MimeNode({
-      filename: 'smime.p7m',
+      filename: ENCRYPTION_FILENAME,
       contentType: 'application/pkcs7-mime; smime-type=enveloped-data'
     })
 
@@ -211,7 +211,7 @@ export class AS2Crypto {
 
     rootNode.appendChild(
       new AS2MimeNode({
-        filename: 'smime.p7s',
+        filename: SIGNATURE_FILENAME,
         contentType: 'application/pkcs7-signature',
         content: derBuffer
       })

@@ -2,7 +2,7 @@ import * as http from 'http'
 import * as https from 'https'
 import { URL } from 'url'
 import { AgreementOptions } from './AS2Composer'
-import { SIGNING, ENCRYPTION } from './Constants'
+import { SIGNING, ENCRYPTION, CRLF } from './Constants'
 import { AS2MimeNode } from './AS2MimeNode'
 import { SigningOptions, EncryptionOptions } from './AS2Crypto'
 import { RequestOptions, IncomingMessage } from './Interfaces'
@@ -67,6 +67,9 @@ export function parseHeaderString (
   return result
 }
 
+/** Method for retrieving the protocol of a URL, dynamically.
+ * @throws URL is not one of either "string" or instance of "URL".
+ */
 export function getProtocol (url: string | URL): string {
   if (typeof url === 'string' || url instanceof URL) {
     return new URL(url as string).protocol.replace(':', '')
@@ -80,6 +83,7 @@ export function isNullOrUndefined (value: any): boolean {
   return value === undefined || value === null
 }
 
+/** Determine if a given string is one of PKCS7 MIME types. */
 export function isSMime (value: string) {
   return (
     value.toLowerCase().startsWith('application/pkcs7') ||
@@ -91,13 +95,13 @@ export function isSMime (value: string) {
 export function canonicalTransform (
   node: AS2MimeNode
 ): void {
-  const newline = /\r\n|\r|\n/g
+  const newline = /\r\n|\r|\n/gu
 
   if (
     node.getHeader('content-type').slice(0, 5) === 'text/' &&
     !isNullOrUndefined(node.content)
   ) {
-    node.content = (node.content as string).replace(newline, '\r\n')
+    node.content = (node.content as string).replace(newline, CRLF)
   }
 
   node.childNodes.forEach(canonicalTransform)

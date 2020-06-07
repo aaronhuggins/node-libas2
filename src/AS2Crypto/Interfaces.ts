@@ -1,5 +1,7 @@
 export type AS2Signing = 'sha1' | 'sha256' | 'sha384' | 'sha512'
 
+export type AS2MicAlgorithm = 'sha1' | 'sha-256' | 'sha-384' | 'sha-512'
+
 export type AS2Encryption =
   | 'des-EDE3-CBC'
   | 'aes128-CBC'
