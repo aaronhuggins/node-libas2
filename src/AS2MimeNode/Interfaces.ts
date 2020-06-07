@@ -10,11 +10,11 @@ export interface AS2MimeNodeOptions {
   /** Shared part of the unique multipart boundary. */
   baseBoundary?: string
   /** Prefix for the boundary; default is '--LibAs2_'. */
-  boundaryPrefix?: string
+  boundaryPrefix?: false | string
   /** Content type of the node; will be auto-calculated from the filename if not set. */
   contentType?: string
   /** The content disposition of the node. */
-  contentDisposition?: 'inline' | 'attachment'
+  contentDisposition?: boolean | 'inline' | 'attachment'
   /** Optional message ID; if not provided, one will be generated. */
   messageId?: string
   /** Additional headers for the node. */

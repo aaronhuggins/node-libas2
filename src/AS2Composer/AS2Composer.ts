@@ -4,11 +4,15 @@ import {
   MessageDispositionOptions
 } from './Interfaces'
 import { AS2MimeNodeOptions, AS2MimeNode } from '../AS2MimeNode'
-import { isNullOrUndefined, agreementOptions } from '../Helpers'
-import { AS2Headers } from '../Interfaces'
+import {
+  isNullOrUndefined,
+  agreementOptions,
+  parseHeaderString
+} from '../Helpers'
+import { AS2Headers, RequestOptions } from '../Interfaces'
 import { STANDARD_HEADER } from '../Constants'
-import { Readable } from 'stream'
 
+/** Class for composing AS2 messages. */
 export class AS2Composer {
   constructor (options: AS2ComposerOptions) {
     this._message = { ...options.message }
@@ -117,31 +121,20 @@ export class AS2Composer {
     return this.message
   }
 
-  async request (): Promise<{
-    headers: AS2Headers
-    body: string | Buffer | Readable
-  }>
-  async request (
-    headersAsObject: true
-  ): Promise<{
-    headers: { [key: string]: string }
-    body: string | Buffer | Readable
-  }>
-  async request (
-    headersAsObject: boolean = false
-  ): Promise<{
-    headers: AS2Headers
-    body: string | Buffer | Readable
-  }> {
+  async toRequestOptions (url: string): Promise<RequestOptions> {
     if (this.message === undefined) {
       await this.compile()
     }
     const buffer = await this.message.build()
-    const [headers, ...body] = buffer.toString('utf8').split(/\r\n\r\n/gu)
+    const [headers, ...body] = buffer
+      .toString('utf8')
+      .split(/(\r\n|\n\r|\n)(\r\n|\n\r|\n)/gu)
 
     return {
-      headers: this.message.getHeaders(headersAsObject),
-      body: body.join('\r\n\r\n')
+      url,
+      headers: parseHeaderString(headers),
+      body: body.join('').trimLeft(),
+      method: 'POST'
     }
   }
 }

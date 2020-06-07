@@ -1,8 +1,8 @@
 import { NOT_IMPLEMENTED, CRLF } from '../Constants'
-import forge = require('node-forge')
+import * as forge from 'node-forge'
 import { AS2MimeNode } from '../AS2MimeNode'
 import { encryptionOptions, canonicalTransform } from '../Helpers'
-import MimeNode = require('nodemailer/lib/mime-node')
+import * as MimeNode from 'nodemailer/lib/mime-node'
 import {
   EncryptionOptions,
   SigningOptions,
@@ -41,9 +41,12 @@ interface pkcs7 {
   messageFromAsn1(asn1: forge.asn1.Asn1): PkcsEnvelopedData
 }
 
+/** Class for cryptography methods supported by AS2. */
 export class AS2Crypto {
   private static async buildNode (node: AS2MimeNode): Promise<Buffer> {
-    return await MimeNode.prototype.build.bind(node)()
+    return node.parsed
+      ? await node.build()
+      : await MimeNode.prototype.build.bind(node)()
   }
 
   /** A fix for signing with Nodemailer to produce verifiable SMIME;
@@ -81,15 +84,13 @@ export class AS2Crypto {
       forge.pki.certificateFromPem(options.cert)
     )
     if (recipient === null) {
-      throw new Error(
-        'Certificate provided was not used to encrypt message.'
-      )
+      throw new Error('Certificate provided was not used to encrypt message.')
     }
     p7.decrypt(recipient, forge.pki.privateKeyFromPem(options.key))
 
     // Parse Mime body from p7.content back to AS2MimeNode
     const buffer = Buffer.from(p7.content.getBytes(), 'binary').toString('utf8')
-    const revivedNode = await new AS2Parser({ content: buffer }).parse()
+    const revivedNode = await AS2Parser.parse(buffer)
 
     return revivedNode
   }
@@ -126,7 +127,7 @@ export class AS2Crypto {
   static async verify (
     node: AS2MimeNode,
     options: VerificationOptions
-  ): Promise<AS2MimeNode> {
+  ): Promise<boolean> {
     const contentPart = await AS2Crypto.buildNode(node.childNodes[0])
     const contentBuffer = forge.util.createBuffer(contentPart)
     const contentBufferNoCrLf = forge.util.createBuffer(
@@ -140,7 +141,7 @@ export class AS2Crypto {
     const msg = ((forge.pkcs7 as unknown) as pkcs7).messageFromAsn1(asn1)
     const verify = forgeVerify.bind(msg)
     // Deal with Nodemailer trailing CRLF bug by trying with and without CRLF
-    const verified =
+    const verified: boolean =
       verify({ certificate: options.cert, detached: contentBuffer }) ||
       verify({ certificate: options.cert, detached: contentBufferNoCrLf })
 
@@ -219,7 +220,9 @@ export class AS2Crypto {
     return rootNode
   }
 
-  /** Not yet implemented; do not use. */
+  /** Not yet implemented; do not use.
+   * @throws NOT_IMPLEMENTED
+  */
   static async compress (
     node: AS2MimeNode,
     options: any
@@ -227,7 +230,9 @@ export class AS2Crypto {
     throw NOT_IMPLEMENTED
   }
 
-  /** Not yet implemented. */
+  /** Not yet implemented.
+   * @throws NOT_IMPLEMENTED
+  */
   static async decompress (
     node: AS2MimeNode,
     options: any

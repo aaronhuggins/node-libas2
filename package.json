@@ -1,9 +1,14 @@
 {
   "name": "libas2",
-  "version": "0.1.0",
+  "version": "0.1.6",
   "description": "Implementation of the AS2 protocol as presented in RFC 4130 and related RFCs",
-  "main": "index.js",
+  "main": "dist/core.js",
+  "types": "dist/core.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
+    "prepublishOnly": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -15,12 +20,15 @@
   "author": "Aaron Huggins",
   "license": "MIT",
   "dependencies": {
-    "emailjs-mime-parser": "^2.0.7",
-    "mailparser": "^2.7.7",
+    "@nhs-llc/emailjs-mime-parser": "^2.1.0",
     "node-forge": "^0.9.1",
     "nodemailer": "^6.4.6"
   },
   "devDependencies": {
+    "@babel/plugin-proposal-class-properties": "^7.10.1",
+    "@babel/plugin-proposal-object-rest-spread": "^7.10.1",
+    "@babel/preset-env": "^7.10.2",
+    "@babel/preset-typescript": "^7.10.1",
     "@istanbuljs/nyc-config-typescript": "^1.0.1",
     "@types/mailparser": "^2.7.2",
     "@types/mocha": "^7.0.2",
@@ -30,6 +38,8 @@
     "dts-bundle-webpack": "^1.0.2",
     "gulp": "^4.0.2",
     "gulp-shell": "^0.8.0",
+    "jsdoc-babel": "^0.5.0",
+    "jsdoc-to-markdown": "^6.0.1",
     "mocha": "^7.1.2",
     "nyc": "^15.0.1",
     "source-map-support": "^0.5.19",

@@ -1,5 +1,5 @@
 import 'mocha'
-import { AS2Constants, AS2MimeNode } from '../core'
+import { AS2Constants, AS2MimeNode, AS2Parser } from '../core'
 import {
   openssl,
   LIBAS2_CERT,
@@ -8,7 +8,6 @@ import {
   LIBAS2_CERT_PATH,
   LIBAS2_KEY_PATH
 } from './Helpers'
-import { AS2Parser } from '../src/AS2Parser'
 
 describe('AS2MimeNode', async () => {
   it('should be verified by openssl', async () => {
@@ -53,7 +52,7 @@ describe('AS2MimeNode', async () => {
         des3: true
       }
     })
-    const parsed = await new AS2Parser({ content: output }).parse()
+    const parsed = await AS2Parser.parse(output)
     const opensslContent = parsed.childNodes[0].content.toString('utf8')
 
     if (opensslContent !== LIBAS2_EDI) {
