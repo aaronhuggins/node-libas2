@@ -16,7 +16,8 @@
     "as2",
     "RFC4130",
     "as2 protocol",
-    "mdn"
+    "mdn",
+    "edi"
   ],
   "author": "Aaron Huggins",
   "license": "MIT",
