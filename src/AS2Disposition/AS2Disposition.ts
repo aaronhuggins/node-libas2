@@ -1,6 +1,7 @@
 import { AS2MimeNode } from '../AS2MimeNode'
-import { AS2DispositionNotification, NotificationValue, AS2DispositionOptions } from './Interfaces'
+import { AS2DispositionOptions } from './Interfaces'
 import { parseHeaderString } from '../Helpers'
+import { AS2DispositionNotification } from './AS2DispositionNotification'
 
 const getReportNode = function getReportNode (node: AS2MimeNode): AS2MimeNode {
   if (!node) return
@@ -17,75 +18,80 @@ const getReportNode = function getReportNode (node: AS2MimeNode): AS2MimeNode {
   }
 }
 
-const toNotificationValue = function toNotificationValue (
+const toNotification = function toNotification (
+  key: string,
   value: string
-): NotificationValue {
-  const result: NotificationValue = { original: value }
-  const mic = /([A-Za-z0-9+\/=]+),\s*(.+)/gu
+): [string, any] {
+  let result: any = {}
   const parts = value.split(/;/gu).map(part => part.trim())
+  const newKey = (str: string) => str.toLowerCase()
+    .split('-')
+    .map((chars, index) => index === 0
+      ? chars.toLowerCase()
+      : chars.charAt(0).toUpperCase() + chars.toLowerCase().substring(1)
+    )
+    .join('')
 
-  if (
-    parts[0].toLowerCase() === 'rfc822' ||
-    parts[0].toLowerCase() === 'unknown'
-  ) {
-    result.value = parts.slice(1).join('; ')
-    result.type = parts[0]
-  } else if (
-    parts[0].toLowerCase().includes('automatic-action') ||
-    parts[0].toLowerCase().includes('manual-action')
-  ) {
-    const [type, action] = parts[0].split('/')
+  switch (key.toLowerCase()) {
+    case 'reporting-ua':
+    case 'mdn-gateway':
+    case 'original-message-id':
+      result = value
+      key = newKey(key)
+      break
+    case 'original-recipient':
+    case 'final-recipient':
+      result.value = parts.slice(1).join('; ')
+      result.type = parts[0]
+      key = newKey(key)
+      break
+    case 'disposition':
+      const [type, action] = parts[0].split('/')
 
-    result.value = action
-    result.type = type
+      result.value = action
+      result.type = type
 
-    for (const part of parts.slice(1)) {
-      if (result.attributes === undefined) result.attributes = {}
-      let index = part.indexOf('=')
-      if (index === -1) index = part.length
-      let key = part.slice(0, index).trim().toLowerCase()
-      let value: any = part.slice(index + 1).trim()
+      for (const part of parts.slice(1)) {
+        let index = part.indexOf('=')
+        if (index === -1) index = part.length
+        let key = part.slice(0, index).trim().toLowerCase()
+        let value: any = part.slice(index + 1).trim()
 
-      if (key.startsWith('processed') || key.startsWith('failed')) {
-        let [attrKey, attrProp] = key.split('/')
-        result.attributes.processed = attrKey === 'processed'
+        if (key.startsWith('processed') || key.startsWith('failed')) {
+          let [attrKey, attrProp] = key.split('/')
+          result.processed = attrKey === 'processed'
 
-        if (attrProp !== undefined) {
-          result.attributes.description = {
-            type: attrProp.toLowerCase(),
-            text: value
+          if (attrProp !== undefined) {
+            result.description = {
+              type: attrProp.toLowerCase(),
+              text: value
+            }
           }
+
+          continue
         }
 
-        continue
+        if (result.attributes === undefined) result.attributes = {}
+
+        if (result.attributes[key] === undefined) {
+          result.attributes[key] = value || true
+        }
       }
-
-      if (result.attributes[key] === undefined) {
-        result.attributes[key] = value || true
-      }
-    }
-  } else if (mic.test(value)) {
-    const [micValue, type] = value.split(',').map(val => val.trim())
-    result.value = micValue
-    result.type = type.toLowerCase()
-  } else {
-    result.value = parts[0]
-    result.type = parts[0].split('/')[0]
-
-    if (result.value === result.type) delete result.type
-
-    for (const part of parts.slice(1)) {
-      if (result.attributes === undefined) result.attributes = {}
-      let index = part.indexOf('=')
-      if (index === -1) index = part.length
-      const key = part.slice(0, index).trim().toLowerCase()
-      const value: any = part.slice(index + 1).trim()
-
-      result.attributes[key] = value || true
-    }
+      key = newKey(key)
+      break
+    case 'received-content-mic':
+      const [micValue, micalg] = value.split(',').map(val => val.trim())
+      result.mic = micValue
+      result.algorithm = micalg.toLowerCase()
+      key = newKey(key)
+      break
+    default:
+      result[key] = value
+      key = 'headers'
+      break
   }
 
-  return result
+  return [key, result]
 }
 
 /** Class for describing and constructing a Message Disposition Notification. */
@@ -104,11 +110,10 @@ export class AS2Disposition {
         // Get the human-readable message, the first part of the report.
         this.explanation = mdn.childNodes[0].content.toString('utf8').trim()
         // Get the message/disposition-notification and parse, which is the second part.
-        this.notification = parseHeaderString(
+        this.notification = new AS2DispositionNotification(parseHeaderString(
           mdn.childNodes[1].content.toString('utf8'),
-          true,
-          toNotificationValue
-        )
+          toNotification
+        ) as any)
         // Get the optional thid part, if present; it is the returned message content.
         this.returned = mdn.childNodes[2]
       }

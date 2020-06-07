@@ -1,24 +1,33 @@
 import { AS2Signing } from '../AS2Crypto'
-import { AS2DispositionNotification } from './Interfaces'
 import { LIBRAY_NAME_VERSION, CRLF } from '../Constants'
 import { hostname } from 'os'
 
-export class DispositionNotification {
-  constructor (notification ?: DispositionNotification) {
-    Object.assign(this, notification)
+export class AS2DispositionNotification {
+  constructor (notification?: AS2DispositionNotification) {
+    Object.assign(this, notification, { headers: Array.isArray(notification.headers)
+      ? Object.assign({}, ...notification.headers)
+      : notification.headers
+    })
   }
 
   // Per RFC-4130, only the final recipient and disposition are required.
   reportingUa?: string
   mdnGateway?: string
-  originalRecipient?: string
+  originalRecipient?: string | {
+    value: string
+    type: string
+  }
   originalMessageId?: string
-  receivedcontentMic?: {
+  // Received-Content-MIC is required if the receipt is a signed receipt.
+  receivedContentMic?: {
     mic: string,
     algorithm: AS2Signing
   }
   headers?: { [key: string]: string }
-  finalRecipient: string
+  finalRecipient: string | {
+    value: string
+    type: string
+  }
   disposition: {
     type: 'manual-action' | 'automatic-action'
     processed: boolean
@@ -28,7 +37,7 @@ export class DispositionNotification {
     }
   }
 
-  toNotification (): AS2DispositionNotification {
+  toNotification (): { [key: string]: string } {
     const result = {}
 
     for (const [key, value] of Object.entries(this.headers || {})) {
@@ -44,12 +53,12 @@ export class DispositionNotification {
     if (this.mdnGateway) result['MDN-Gateway'] = this.mdnGateway
 
     if (this.originalRecipient) {
-      result['Original-Recipient'] = 'rfc822' + '; ' + this.originalRecipient
+      result['Original-Recipient'] = typeof this.originalRecipient === 'string' ? 'rfc822; ' + this.originalRecipient : this.originalRecipient.type + '; ' + this.originalRecipient.value
     } else {
-      result['Original-Recipient'] = 'rfc822' + '; ' + this.finalRecipient
+      result['Original-Recipient'] = typeof this.finalRecipient === 'string' ? 'rfc822; ' + this.finalRecipient : this.finalRecipient.type + '; ' + this.finalRecipient.value
     }
 
-    result['Final-Recipient'] = 'rfc822' + '; ' + this.finalRecipient
+    result['Final-Recipient'] = typeof this.finalRecipient === 'string' ? 'rfc822; ' + this.finalRecipient : this.finalRecipient.type + '; ' + this.finalRecipient.value
 
     if (this.originalMessageId) result['Original-Message-ID'] = this.originalMessageId
 
@@ -58,8 +67,8 @@ export class DispositionNotification {
       '; ' + (this.disposition.processed ? 'processed' : 'failed') +
       (this.disposition.description ? '/' + this.disposition.description.type + '=' + this.disposition.description.text : '')
 
-    if (this.receivedcontentMic) {
-      result['Received-Content-MIC'] = this.receivedcontentMic
+    if (this.receivedContentMic) {
+      result['Received-Content-MIC'] = this.receivedContentMic.mic + ', ' + this.receivedContentMic.algorithm
     }
 
     return result

@@ -19,12 +19,12 @@ export function parseHeaderString (
 ): { [key: string]: string | string[] }
 export function parseHeaderString (
   headers: string,
-  callback: (value: string) => any
+  callback: (key: string, value: string) => [string, any]
 ): { [key: string]: any }
 export function parseHeaderString (
   headers: string,
   keyToLowerCase: boolean,
-  callback: (value: string) => any
+  callback: (key: string, value: string) => [string, any]
 ): { [key: string]: any }
 export function parseHeaderString (
   headers: string,
@@ -38,7 +38,7 @@ export function parseHeaderString (
     callback = keyToLowerCase
     keyToLowerCase = false
   }
-  if (!callback) callback = (value: string) => value
+  if (!callback) callback = (key: string, value: string) => [key, value]
 
   // Unfold header lines, split on newline, and trim whitespace from strings.
   const lines = headers
@@ -50,17 +50,19 @@ export function parseHeaderString (
   // Assign one or more values to each header key.
   for (const line of lines) {
     const index = line.indexOf(':')
-    let key = line.slice(0, index).trim()
-    const value = line.slice(index + 1).trim()
+    let [key, value] = callback(
+      line.slice(0, index).trim(),
+      line.slice(index + 1).trim()
+    )
 
     if (keyToLowerCase) key = key.toLowerCase()
 
     if (result[key] === undefined) {
-      result[key] = callback(value)
+      result[key] = value
     } else if (Array.isArray(result[key])) {
-      result[key].push(callback(value))
+      result[key].push(value)
     } else {
-      result[key] = [result[key], callback(value)]
+      result[key] = [result[key], value]
     }
   }
 
