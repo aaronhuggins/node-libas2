@@ -4,30 +4,35 @@ import { hostname } from 'os'
 
 export class AS2DispositionNotification {
   constructor (notification?: AS2DispositionNotification) {
-    Object.assign(this, notification, { headers: Array.isArray(notification.headers)
-      ? Object.assign({}, ...notification.headers)
-      : notification.headers
+    Object.assign(this, notification, {
+      headers: Array.isArray(notification.headers)
+        ? Object.assign({}, ...notification.headers)
+        : notification.headers
     })
   }
 
   // Per RFC-4130, only the final recipient and disposition are required.
   reportingUa?: string
   mdnGateway?: string
-  originalRecipient?: string | {
-    value: string
-    type: string
-  }
+  originalRecipient?:
+    | string
+    | {
+        value: string
+        type: string
+      }
   originalMessageId?: string
   // Received-Content-MIC is required if the receipt is a signed receipt.
   receivedContentMic?: {
-    mic: string,
+    mic: string
     algorithm: AS2Signing
   }
   headers?: { [key: string]: string }
-  finalRecipient: string | {
-    value: string
-    type: string
-  }
+  finalRecipient:
+    | string
+    | {
+        value: string
+        type: string
+      }
   disposition: {
     type: 'manual-action' | 'automatic-action'
     processed: boolean
@@ -53,28 +58,49 @@ export class AS2DispositionNotification {
     if (this.mdnGateway) result['MDN-Gateway'] = this.mdnGateway
 
     if (this.originalRecipient) {
-      result['Original-Recipient'] = typeof this.originalRecipient === 'string' ? 'rfc822; ' + this.originalRecipient : this.originalRecipient.type + '; ' + this.originalRecipient.value
+      result['Original-Recipient'] =
+        typeof this.originalRecipient === 'string'
+          ? 'rfc822; ' + this.originalRecipient
+          : this.originalRecipient.type + '; ' + this.originalRecipient.value
     } else {
-      result['Original-Recipient'] = typeof this.finalRecipient === 'string' ? 'rfc822; ' + this.finalRecipient : this.finalRecipient.type + '; ' + this.finalRecipient.value
+      result['Original-Recipient'] =
+        typeof this.finalRecipient === 'string'
+          ? 'rfc822; ' + this.finalRecipient
+          : this.finalRecipient.type + '; ' + this.finalRecipient.value
     }
 
-    result['Final-Recipient'] = typeof this.finalRecipient === 'string' ? 'rfc822; ' + this.finalRecipient : this.finalRecipient.type + '; ' + this.finalRecipient.value
+    result['Final-Recipient'] =
+      typeof this.finalRecipient === 'string'
+        ? 'rfc822; ' + this.finalRecipient
+        : this.finalRecipient.type + '; ' + this.finalRecipient.value
 
-    if (this.originalMessageId) result['Original-Message-ID'] = this.originalMessageId
+    if (this.originalMessageId)
+      result['Original-Message-ID'] = this.originalMessageId
 
-    result['Disposition'] = this.disposition.type +
-      '/' + (this.disposition.type === 'automatic-action' ? 'MDN-sent-automatically' : 'MDN-sent-manually') +
-      '; ' + (this.disposition.processed ? 'processed' : 'failed') +
-      (this.disposition.description ? '/' + this.disposition.description.type + '=' + this.disposition.description.text : '')
+    result['Disposition'] =
+      this.disposition.type +
+      '/' +
+      (this.disposition.type === 'automatic-action'
+        ? 'MDN-sent-automatically'
+        : 'MDN-sent-manually') +
+      '; ' +
+      (this.disposition.processed ? 'processed' : 'failed') +
+      (this.disposition.description
+        ? '/' +
+          this.disposition.description.type +
+          '=' +
+          this.disposition.description.text
+        : '')
 
     if (this.receivedContentMic) {
-      result['Received-Content-MIC'] = this.receivedContentMic.mic + ', ' + this.receivedContentMic.algorithm
+      result['Received-Content-MIC'] =
+        this.receivedContentMic.mic + ', ' + this.receivedContentMic.algorithm
     }
 
     return result
   }
 
-  toString() {
+  toString () {
     const notification = this.toNotification()
     const result = []
 

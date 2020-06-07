@@ -2,8 +2,6 @@ const fs = require('fs')
 const gulp = require('gulp')
 const shell = require('gulp-shell')
 
-
-
 gulp.task('mkdir', async done => {
   if (!fs.existsSync('coverage')) {
     fs.mkdirSync('coverage')

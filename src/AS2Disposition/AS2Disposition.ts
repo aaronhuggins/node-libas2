@@ -24,13 +24,16 @@ const toNotification = function toNotification (
 ): [string, any] {
   let result: any = {}
   const parts = value.split(/;/gu).map(part => part.trim())
-  const newKey = (str: string) => str.toLowerCase()
-    .split('-')
-    .map((chars, index) => index === 0
-      ? chars.toLowerCase()
-      : chars.charAt(0).toUpperCase() + chars.toLowerCase().substring(1)
-    )
-    .join('')
+  const newKey = (str: string) =>
+    str
+      .toLowerCase()
+      .split('-')
+      .map((chars, index) =>
+        index === 0
+          ? chars.toLowerCase()
+          : chars.charAt(0).toUpperCase() + chars.toLowerCase().substring(1)
+      )
+      .join('')
 
   switch (key.toLowerCase()) {
     case 'reporting-ua':
@@ -54,7 +57,10 @@ const toNotification = function toNotification (
       for (const part of parts.slice(1)) {
         let index = part.indexOf('=')
         if (index === -1) index = part.length
-        let key = part.slice(0, index).trim().toLowerCase()
+        let key = part
+          .slice(0, index)
+          .trim()
+          .toLowerCase()
         let value: any = part.slice(index + 1).trim()
 
         if (key.startsWith('processed') || key.startsWith('failed')) {
@@ -110,10 +116,12 @@ export class AS2Disposition {
         // Get the human-readable message, the first part of the report.
         this.explanation = mdn.childNodes[0].content.toString('utf8').trim()
         // Get the message/disposition-notification and parse, which is the second part.
-        this.notification = new AS2DispositionNotification(parseHeaderString(
-          mdn.childNodes[1].content.toString('utf8'),
-          toNotification
-        ) as any)
+        this.notification = new AS2DispositionNotification(
+          parseHeaderString(
+            mdn.childNodes[1].content.toString('utf8'),
+            toNotification
+          ) as any
+        )
         // Get the optional thid part, if present; it is the returned message content.
         this.returned = mdn.childNodes[2]
       }

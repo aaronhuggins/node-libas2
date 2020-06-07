@@ -1,4 +1,6 @@
-export * as AS2Constants from './src/Constants'
+import * as Constants from './src/Constants'
+
+export const AS2Constants = Constants
 export * from './src/Helpers'
 export * from './src/AS2MimeNode'
 export * from './src/AS2Composer'
