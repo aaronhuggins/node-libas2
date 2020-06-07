@@ -117,6 +117,11 @@ export class AS2Disposition {
         // Get the optional thid part, if present; it is the returned message content.
         this.returned = mdn.childNodes[2]
       }
+    } else {
+      this.messageId = AS2MimeNode.generateMessageId()
+      this.explanation = mdn.explanation
+      this.notification = mdn.notification
+      this.returned = mdn.returned
     }
   }
 
@@ -124,4 +129,6 @@ export class AS2Disposition {
   explanation: string
   notification: AS2DispositionNotification
   returned?: AS2MimeNode
+
+  toMimeNode () {}
 }
