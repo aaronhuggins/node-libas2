@@ -1,5 +1,7 @@
 import { AS2Encryption, AS2Signing } from './AS2Crypto'
+import { alternateName, version } from '../package.json'
 
+// ERRORS
 export const NOT_IMPLEMENTED = new Error('NOT YET IMPLEMENTED.')
 
 // STRINGS
@@ -11,6 +13,9 @@ export const SIGNATURE_FILENAME = 'smime.p7s'
 export const ENCRYPTION_FILENAME = 'smime.p7m'
 export const SIGNATURE_HEADER = `-----BEGIN PKCS7-----${CRLF}`
 export const SIGNATURE_FOOTER = `-----END PKCS7-----${CRLF}`
+export const LIBRARY_NAME = alternateName
+export const LIBRARY_VERSION = version
+export const LIBRAY_NAME_VERSION = alternateName + ' ' + version
 
 // ENUMERABLES
 export const GUARANTEED_TEXT = [

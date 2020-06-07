@@ -22,10 +22,10 @@ This library is not quite yet ready for production use. The API is still in flux
 
 ## Roadmap
 
-- Write code for composing MDN responses
+- Write code for composing MDN responses, completes support for AS2 version 1.0
 - Finish README
-- Support versions of AS2 greater than 1.0
-- Write implementation of CMS compression
+- Write implementation of CMS compression to support AS2 version 1.1 (see rfc4130 section 6.1)
+- Support versions of AS2 greater than 1.1
 
 ## API
 
