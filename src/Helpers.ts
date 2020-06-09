@@ -158,9 +158,11 @@ export async function request (
       delete options.body
       delete options.url
       options.method = options.method || 'POST'
-      Object.entries(params || {}).forEach(val =>
-        (url as URL).searchParams.append(...val)
-      )
+      Object.entries(params || {}).forEach(val => {
+        if (!isNullOrUndefined(val[1])) {
+          ;(url as URL).searchParams.append(...val)
+        }
+      })
       const responseBufs: Buffer[] = []
       const req = protocol.request(
         url,
