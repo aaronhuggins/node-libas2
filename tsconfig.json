@@ -10,7 +10,6 @@
     "outDir": "dist",
     "declaration": true,
     "allowSyntheticDefaultImports": true,
-    "resolveJsonModule": true,
     "typeRoots": ["node_modules/@types", "typings"],
     "types": ["node-forge", "mailparser", "mocha", "node", "nodemailer"]
   },

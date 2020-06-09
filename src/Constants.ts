@@ -1,5 +1,26 @@
 import { AS2Encryption, AS2MicAlgorithm, AS2Signing } from './AS2Crypto'
-import { alternateName, version } from '../package.json'
+import { dirname, resolve } from 'path'
+import { readFileSync } from 'fs'
+
+/** Walk up the directory tree searching for this module's package.json. */
+const getPackageJson = function getPackageJson (filename?: string, index: number = 0): any {
+  filename = filename === undefined ? module.filename : filename
+  let pkg
+
+  try {
+    pkg = JSON.parse(readFileSync(resolve(dirname(filename), 'package.json'), 'utf8'))
+  } catch (err) {}
+
+  if (pkg) {
+    return pkg
+  } else if (index < 4) {
+    return getPackageJson(dirname(filename), index += 1)
+  }
+
+  return {}
+}
+
+const { alternateName, version } = getPackageJson()
 
 // ERRORS
 export const NOT_IMPLEMENTED = new Error('NOT YET IMPLEMENTED.')

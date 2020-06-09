@@ -16,7 +16,7 @@ gulp.task('clean:index', shell.task(['del-cli ./index.js ./index.d.ts']))
 
 gulp.task('clean', gulp.parallel('clean:dist', 'clean:index'))
 
-gulp.task('compile', shell.task(['webpack']))
+gulp.task('compile', shell.task(['tsc']))
 
 gulp.task(
   'compile:docs',
