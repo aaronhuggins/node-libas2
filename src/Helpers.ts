@@ -2,7 +2,7 @@ import * as http from 'http'
 import * as https from 'https'
 import { URL } from 'url'
 import { AgreementOptions } from './AS2Composer'
-import { SIGNING, ENCRYPTION } from './Constants'
+import { SIGNING, ENCRYPTION, CRLF } from './Constants'
 import { AS2MimeNode } from './AS2MimeNode'
 import { SigningOptions, EncryptionOptions } from './AS2Crypto'
 import { RequestOptions, IncomingMessage } from './Interfaces'
@@ -19,12 +19,12 @@ export function parseHeaderString (
 ): { [key: string]: string | string[] }
 export function parseHeaderString (
   headers: string,
-  callback: (value: string) => any
+  callback: (key: string, value: string) => [string, any]
 ): { [key: string]: any }
 export function parseHeaderString (
   headers: string,
   keyToLowerCase: boolean,
-  callback: (value: string) => any
+  callback: (key: string, value: string) => [string, any]
 ): { [key: string]: any }
 export function parseHeaderString (
   headers: string,
@@ -38,7 +38,7 @@ export function parseHeaderString (
     callback = keyToLowerCase
     keyToLowerCase = false
   }
-  if (!callback) callback = (value: string) => value
+  if (!callback) callback = (key: string, value: string) => [key, value]
 
   // Unfold header lines, split on newline, and trim whitespace from strings.
   const lines = headers
@@ -50,23 +50,28 @@ export function parseHeaderString (
   // Assign one or more values to each header key.
   for (const line of lines) {
     const index = line.indexOf(':')
-    let key = line.slice(0, index).trim()
-    const value = line.slice(index + 1).trim()
+    let [key, value] = callback(
+      line.slice(0, index).trim(),
+      line.slice(index + 1).trim()
+    )
 
     if (keyToLowerCase) key = key.toLowerCase()
 
     if (result[key] === undefined) {
-      result[key] = callback(value)
+      result[key] = value
     } else if (Array.isArray(result[key])) {
-      result[key].push(callback(value))
+      result[key].push(value)
     } else {
-      result[key] = [result[key], callback(value)]
+      result[key] = [result[key], value]
     }
   }
 
   return result
 }
 
+/** Method for retrieving the protocol of a URL, dynamically.
+ * @throws URL is not one of either "string" or instance of "URL".
+ */
 export function getProtocol (url: string | URL): string {
   if (typeof url === 'string' || url instanceof URL) {
     return new URL(url as string).protocol.replace(':', '')
@@ -80,6 +85,7 @@ export function isNullOrUndefined (value: any): boolean {
   return value === undefined || value === null
 }
 
+/** Determine if a given string is one of PKCS7 MIME types. */
 export function isSMime (value: string) {
   return (
     value.toLowerCase().startsWith('application/pkcs7') ||
@@ -88,16 +94,14 @@ export function isSMime (value: string) {
 }
 
 /** Transforms a payload into a canonical text format before signing */
-export function canonicalTransform (
-  node: AS2MimeNode
-): void {
-  const newline = /\r\n|\r|\n/g
+export function canonicalTransform (node: AS2MimeNode): void {
+  const newline = /\r\n|\r|\n/gu
 
   if (
     node.getHeader('content-type').slice(0, 5) === 'text/' &&
     !isNullOrUndefined(node.content)
   ) {
-    node.content = (node.content as string).replace(newline, '\r\n')
+    node.content = (node.content as string).replace(newline, CRLF)
   }
 
   node.childNodes.forEach(canonicalTransform)
@@ -154,7 +158,9 @@ export async function request (
       delete options.body
       delete options.url
       options.method = options.method || 'POST'
-      Object.entries(params || {}).forEach(val => (url as URL).searchParams.append(...val))
+      Object.entries(params || {}).forEach(val =>
+        (url as URL).searchParams.append(...val)
+      )
       const responseBufs: Buffer[] = []
       const req = protocol.request(
         url,
