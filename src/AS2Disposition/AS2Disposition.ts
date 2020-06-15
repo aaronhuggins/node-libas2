@@ -128,7 +128,10 @@ export class AS2Disposition {
     } else {
       this.messageId = AS2MimeNode.generateMessageId()
       this.explanation = mdn.explanation
-      this.notification = mdn.notification
+      this.notification =
+        mdn.notification instanceof AS2DispositionNotification
+          ? mdn.notification
+          : new AS2DispositionNotification(mdn.notification)
       this.returned = mdn.returned
     }
   }
@@ -138,5 +141,28 @@ export class AS2Disposition {
   notification: AS2DispositionNotification
   returned?: AS2MimeNode
 
-  toMimeNode () {}
+  toMimeNode (): AS2MimeNode {
+    const rootNode = new AS2MimeNode({
+      contentType: 'multipart/report; report-type=disposition-notification',
+      messageId: this.messageId
+    })
+
+    rootNode.appendChild(
+      new AS2MimeNode({
+        contentType: 'text/plain',
+        content: this.explanation
+      })
+    )
+    rootNode.appendChild(
+      new AS2MimeNode({
+        contentType: 'message/disposition-notification',
+        content: this.notification.toString()
+      })
+    )
+    if (this.returned) {
+      rootNode.appendChild(this.returned)
+    }
+
+    return rootNode
+  }
 }

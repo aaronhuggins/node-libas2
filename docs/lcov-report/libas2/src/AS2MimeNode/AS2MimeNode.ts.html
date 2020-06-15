@@ -23,16 +23,16 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">85.33% </span>
+                <span class="strong">85.53% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>64/75</span>
+                <span class='fraction'>65/76</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">73.91% </span>
+                <span class="strong">75.32% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>51/69</span>
+                <span class='fraction'>58/77</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">86.36% </span>
+                <span class="strong">86.57% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>57/66</span>
+                <span class='fraction'>58/67</span>
             </div>
         
             
@@ -269,7 +269,17 @@
 <a name='L210'></a><a href='#L210'>210</a>
 <a name='L211'></a><a href='#L211'>211</a>
 <a name='L212'></a><a href='#L212'>212</a>
-<a name='L213'></a><a href='#L213'>213</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L213'></a><a href='#L213'>213</a>
+<a name='L214'></a><a href='#L214'>214</a>
+<a name='L215'></a><a href='#L215'>215</a>
+<a name='L216'></a><a href='#L216'>216</a>
+<a name='L217'></a><a href='#L217'>217</a>
+<a name='L218'></a><a href='#L218'>218</a>
+<a name='L219'></a><a href='#L219'>219</a>
+<a name='L220'></a><a href='#L220'>220</a>
+<a name='L221'></a><a href='#L221'>221</a>
+<a name='L222'></a><a href='#L222'>222</a>
+<a name='L223'></a><a href='#L223'>223</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
@@ -311,7 +321,9 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -328,12 +340,20 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">38x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">38x</span>
 <span class="cline-any cline-yes">38x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">38x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">38x</span>
 <span class="cline-any cline-yes">38x</span>
@@ -508,6 +528,7 @@ export interface AS2MimeNode {
   }&gt;
   filename: string
   date: Date
+  boundary: string
   boundaryPrefix: string
   content: string | Buffer | Readable
   contentType: string
@@ -528,6 +549,7 @@ export class AS2MimeNode extends MimeNode {
     const {
       filename,
       content,
+      boundary,
       baseBoundary,
       boundaryPrefix,
       contentType,
@@ -538,14 +560,22 @@ export class AS2MimeNode extends MimeNode {
       encrypt
     } = options
 &nbsp;
-    super(contentType, { filename, baseBoundary })
+    super(contentType, {
+      filename,
+      baseBoundary:
+        !isNullOrUndefined(boundaryPrefix) &amp;&amp; isNullOrUndefined(boundary)
+          ? baseBoundary
+          : undefined
+    })
 &nbsp;
     this.contentType = contentType
-    this.boundaryPrefix = isNullOrUndefined(boundaryPrefix)
-      ? '--LibAs2'
-      : boundaryPrefix === false
-      ? <span class="branch-0 cbranch-no" title="branch not covered" >''</span>
-      : boundaryPrefix
+    this.boundaryPrefix =
+      isNullOrUndefined(boundaryPrefix) &amp;&amp; isNullOrUndefined(boundary)
+        ? '--LibAs2'
+        : boundaryPrefix === false || <span class="branch-1 cbranch-no" title="branch not covered" >!isNullOrUndefined(boundary)</span>
+        ? ''
+        : <span class="branch-1 cbranch-no" title="branch not covered" >boundaryPrefix</span>
+    this.boundary = boundary
 &nbsp;
     if (!isNullOrUndefined(content)) this.setContent(content)
     if (!isNullOrUndefined(headers)) this.setHeader(headers)
@@ -700,7 +730,7 @@ export class AS2MimeNode extends MimeNode {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank">istanbul</a>
-                at Fri Jun 05 2020 14:46:57 GMT-0500 (Central Daylight Time)
+                at Mon Jun 15 2020 16:55:23 GMT-0500 (Central Daylight Time)
             </div>
         </div>
         <script src="../../../prettify.js"></script>
