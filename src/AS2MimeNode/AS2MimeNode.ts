@@ -25,6 +25,7 @@ export interface AS2MimeNode {
   }>
   filename: string
   date: Date
+  boundary: string
   boundaryPrefix: string
   content: string | Buffer | Readable
   contentType: string
@@ -45,6 +46,7 @@ export class AS2MimeNode extends MimeNode {
     const {
       filename,
       content,
+      boundary,
       baseBoundary,
       boundaryPrefix,
       contentType,
@@ -55,14 +57,22 @@ export class AS2MimeNode extends MimeNode {
       encrypt
     } = options
 
-    super(contentType, { filename, baseBoundary })
+    super(contentType, {
+      filename,
+      baseBoundary:
+        !isNullOrUndefined(boundaryPrefix) && isNullOrUndefined(boundary)
+          ? baseBoundary
+          : undefined
+    })
 
     this.contentType = contentType
-    this.boundaryPrefix = isNullOrUndefined(boundaryPrefix)
-      ? '--LibAs2'
-      : boundaryPrefix === false
-      ? ''
-      : boundaryPrefix
+    this.boundaryPrefix =
+      isNullOrUndefined(boundaryPrefix) && isNullOrUndefined(boundary)
+        ? '--LibAs2'
+        : boundaryPrefix === false || !isNullOrUndefined(boundary)
+        ? ''
+        : boundaryPrefix
+    this.boundary = boundary
 
     if (!isNullOrUndefined(content)) this.setContent(content)
     if (!isNullOrUndefined(headers)) this.setHeader(headers)

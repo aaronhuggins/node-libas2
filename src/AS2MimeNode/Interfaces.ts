@@ -7,6 +7,8 @@ export interface AS2MimeNodeOptions {
   filename?: string
   /** Content of the node. */
   content?: string | Buffer | Readable
+  /** Overrides the entire multipart boundary. */
+  boundary?: string
   /** Shared part of the unique multipart boundary. */
   baseBoundary?: string
   /** Prefix for the boundary; default is '--LibAs2_'. */
