@@ -55,11 +55,11 @@ export class AS2Parser {
         nodeLike.content === undefined || this.isStream(nodeLike.content)
           ? nodeLike.content
           : Buffer.from(nodeLike.content),
-      baseBoundary:
+      boundary:
         nodeLike._multipartBoundary === false
           ? undefined
           : nodeLike._multipartBoundary,
-      boundaryPrefix: ''
+      boundaryPrefix: false
     })
 
     if (!rootNode) rootNode = currentNode
@@ -85,8 +85,9 @@ export class AS2Parser {
   }
 
   static async parse (content: Buffer | Stream | string): Promise<AS2MimeNode> {
-    if (this.isStream(content))
+    if (this.isStream(content)) {
       content = await this.streamToBuffer(content as Stream)
+    }
     const result = parse(content as Buffer)
     const as2node = this.transformNodeLike(result)
 
