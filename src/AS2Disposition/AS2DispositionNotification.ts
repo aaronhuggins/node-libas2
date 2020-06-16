@@ -9,6 +9,14 @@ export class AS2DispositionNotification {
         ? Object.assign({}, ...notification.headers)
         : notification.headers
     })
+
+    if (!this.reportingUa) {
+      this.reportingUa = hostname() + '; ' + LIBRAY_NAME_VERSION
+    }
+
+    if (!this.originalRecipient) {
+      this.originalRecipient = this.finalRecipient
+    }
   }
 
   // Per RFC-4130, only the final recipient and disposition are required.
@@ -42,32 +50,21 @@ export class AS2DispositionNotification {
     }
   }
 
-  toNotification (): { [key: string]: string } {
+  toNotification? (): { [key: string]: string } {
     const result = {}
 
     for (const [key, value] of Object.entries(this.headers || {})) {
       result[key] = value
     }
 
-    if (this.reportingUa) {
-      result['Reporting-UA'] = this.reportingUa
-    } else {
-      result['Reporting-UA'] = hostname() + '; ' + LIBRAY_NAME_VERSION
-    }
+    result['Reporting-UA'] = this.reportingUa
 
     if (this.mdnGateway) result['MDN-Gateway'] = this.mdnGateway
 
-    if (this.originalRecipient) {
-      result['Original-Recipient'] =
-        typeof this.originalRecipient === 'string'
-          ? 'rfc822; ' + this.originalRecipient
-          : this.originalRecipient.type + '; ' + this.originalRecipient.value
-    } else {
-      result['Original-Recipient'] =
-        typeof this.finalRecipient === 'string'
-          ? 'rfc822; ' + this.finalRecipient
-          : this.finalRecipient.type + '; ' + this.finalRecipient.value
-    }
+    result['Original-Recipient'] =
+      typeof this.originalRecipient === 'string'
+        ? 'rfc822; ' + this.originalRecipient
+        : this.originalRecipient.type + '; ' + this.originalRecipient.value
 
     result['Final-Recipient'] =
       typeof this.finalRecipient === 'string'
@@ -100,7 +97,7 @@ export class AS2DispositionNotification {
     return result
   }
 
-  toString () {
+  toString? () {
     const notification = this.toNotification()
     const result = []
 
