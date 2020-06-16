@@ -32,11 +32,7 @@ should produce a valid AS2 message.
     key: Helpers_1.LIBAS2_KEY
   })
   const decryptedContent = decrypted.childNodes[0].content.toString('utf8')
-  if (decryptedContent !== Helpers_1.LIBAS2_EDI) {
-    throw new Error(
-      `Mime section not correctly signed.\nExpected: '${Helpers_1.LIBAS2_EDI}'\nReceived: '${decryptedContent}'`
-    )
-  }
+  assert.strictEqual(decryptedContent, Helpers_1.LIBAS2_EDI)
 }
 ```
 
@@ -76,9 +72,11 @@ should make a valid AS2 exchange.
   )
   const mdn = await result.mime()
   const message = await mdn.verify({ cert: Helpers_1.AS2_TESTING_CERT })
-  if (!message) {
-    throw new Error('Signed MDN could not be verified.')
-  }
+  assert.strictEqual(
+    message instanceof core_1.AS2MimeNode,
+    true,
+    'Signed MDN could not be verified.'
+  )
 }
 ```
 
@@ -96,11 +94,7 @@ should decrypt contents of parsed mime message.
     key: Helpers_1.LIBAS2_KEY
   })
   const decryptedContent = decrypted.content.toString('utf8')
-  if (decryptedContent !== Helpers_1.LIBAS2_EDI) {
-    throw new Error(
-      `Mime section not correctly decrypted.\nExpected: '${Helpers_1.LIBAS2_EDI}'\nReceived: '${decryptedContent}'`
-    )
-  }
+  assert.strictEqual(decryptedContent, Helpers_1.LIBAS2_EDI)
 }
 ```
 
@@ -112,9 +106,7 @@ should verify signed contents of parsed mime message.
   const verified = await core_1.AS2Crypto.verify(result, {
     cert: Helpers_1.LIBAS2_CERT
   })
-  if (!verified) {
-    throw new Error('Mime section could not be verified.')
-  }
+  assert.strictEqual(verified, true, 'Mime section could not be verified.')
 }
 ```
 
@@ -150,7 +142,7 @@ should construct disposition from complete options..
   const opts = {
     explanation:
       'Sample explanation. An error or a success message in human readable form might go here.',
-    notification: new AS2Disposition_1.AS2DispositionNotification({
+    notification: new core_1.AS2DispositionNotification({
       disposition: {
         type: 'automatic-action',
         processed: true
@@ -202,9 +194,7 @@ should be verified by openssl.
       certfile: Helpers_1.LIBAS2_CERT_PATH
     }
   })
-  if (!verified) {
-    throw new Error('Mime section not correctly signed.')
-  }
+  assert.strictEqual(verified, true, 'Mime section not correctly signed.')
 }
 ```
 
@@ -235,11 +225,7 @@ should be decrypted by openssl.
   })
   const parsed = await core_1.AS2Parser.parse(output)
   const opensslContent = parsed.childNodes[0].content.toString('utf8')
-  if (opensslContent !== Helpers_1.LIBAS2_EDI) {
-    throw new Error(
-      `Mime section not correctly encrypted.\nExpected: '${Helpers_1.LIBAS2_EDI}'\nReceived: '${opensslContent}'`
-    )
-  }
+  assert.strictEqual(opensslContent, Helpers_1.LIBAS2_EDI)
 }
 ```
 
@@ -257,11 +243,7 @@ should parse mime message to AS2MimeNode and match parsed contents.
       `Result was not an AS2MimeNode.\nExpected: 'AS2MimeNode'\nReceived: '${result.constructor.name}'`
     )
   }
-  if (Helpers_1.ENCRYPTED_CONTENT !== result.raw) {
-    throw new Error(
-      `Mime section not correctly parsed.\nExpected: '${Helpers_1.ENCRYPTED_CONTENT}'\nReceived: '${result.raw}'`
-    )
-  }
+  assert.strictEqual(result.raw, Helpers_1.ENCRYPTED_CONTENT)
 }
 ```
 
@@ -273,16 +255,11 @@ should parse stream to AS2MimeNode.
   stream.push(Helpers_1.ENCRYPTED_CONTENT)
   stream.push(null)
   const result = await core_1.AS2Parser.parse(stream)
-  if (!(result instanceof core_1.AS2MimeNode)) {
-    throw new Error(
-      `Result was not an AS2MimeNode.\nExpected: 'AS2MimeNode'\nReceived: '${result.constructor.name}'`
-    )
-  }
-  if (Helpers_1.ENCRYPTED_CONTENT !== result.raw) {
-    throw new Error(
-      `Mime section not correctly parsed.\nExpected: '${Helpers_1.ENCRYPTED_CONTENT}'\nReceived: '${result.raw}'`
-    )
-  }
+  assert.strictEqual(
+    result instanceof core_1.AS2MimeNode,
+    true,
+    `Result was not an AS2MimeNode.\nExpected: 'AS2MimeNode'\nReceived: '${result.constructor.name}'`
+  )
 }
 ```
 
@@ -291,19 +268,12 @@ should parse mdn to AS2MimeNode and generate an AS2Disposition.
 ```js
 ;async () => {
   const result = await core_1.AS2Parser.parse(Helpers_1.SIGNED_MDN)
-  if (!(result instanceof core_1.AS2MimeNode)) {
-    throw new Error(
-      `Result was not an AS2MimeNode.\nExpected: 'AS2MimeNode'\nReceived: '${result.constructor.name}'`
-    )
-  }
-  // console.log(result)
+  assert.strictEqual(
+    result instanceof core_1.AS2MimeNode,
+    true,
+    `Result was not an AS2MimeNode.\nExpected: 'AS2MimeNode'\nReceived: '${result.constructor.name}'`
+  )
   const mdn = new core_1.AS2Disposition(result)
-  if (result.messageId() !== mdn.messageId) {
-    throw new Error(
-      `Mime section not correctly parsed.\nExpected: '${result.messageId()}'\nReceived: '${
-        mdn.messageId
-      }'`
-    )
-  }
+  assert.strictEqual(result.messageId(), mdn.messageId)
 }
 ```

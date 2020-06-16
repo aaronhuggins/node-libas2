@@ -4,6 +4,7 @@ import {
   AS2Composer,
   AS2ComposerOptions,
   AS2Crypto,
+  AS2MimeNode,
   request
 } from '../core'
 import {
@@ -12,6 +13,7 @@ import {
   LIBAS2_CERT,
   LIBAS2_KEY
 } from './Helpers'
+import * as assert from 'assert'
 
 const options: AS2ComposerOptions = {
   message: {
@@ -53,11 +55,7 @@ describe('AS2Composer', async () => {
     })
     const decryptedContent = decrypted.childNodes[0].content.toString('utf8')
 
-    if (decryptedContent !== LIBAS2_EDI) {
-      throw new Error(
-        `Mime section not correctly signed.\nExpected: '${LIBAS2_EDI}'\nReceived: '${decryptedContent}'`
-      )
-    }
+    assert.strictEqual(decryptedContent, LIBAS2_EDI)
   }).timeout(1000)
 
   it('should make a valid AS2 exchange', async () => {
@@ -93,8 +91,11 @@ describe('AS2Composer', async () => {
     )
     const mdn = await result.mime()
     const message = await mdn.verify({ cert: AS2_TESTING_CERT })
-    if (!message) {
-      throw new Error('Signed MDN could not be verified.')
-    }
+
+    assert.strictEqual(
+      message instanceof AS2MimeNode,
+      true,
+      'Signed MDN could not be verified.'
+    )
   }).timeout(5000)
 })

@@ -7,6 +7,7 @@ import {
   ENCRYPTED_CONTENT,
   SIGNED_CONTENT
 } from './Helpers'
+import * as assert from 'assert'
 
 describe('AS2Crypto', async () => {
   it('should decrypt contents of parsed mime message', async () => {
@@ -17,19 +18,13 @@ describe('AS2Crypto', async () => {
     })
     const decryptedContent = decrypted.content.toString('utf8')
 
-    if (decryptedContent !== LIBAS2_EDI) {
-      throw new Error(
-        `Mime section not correctly decrypted.\nExpected: '${LIBAS2_EDI}'\nReceived: '${decryptedContent}'`
-      )
-    }
+    assert.strictEqual(decryptedContent, LIBAS2_EDI)
   })
 
   it('should verify signed contents of parsed mime message', async () => {
     const result = await AS2Parser.parse(SIGNED_CONTENT)
     const verified = await AS2Crypto.verify(result, { cert: LIBAS2_CERT })
 
-    if (!verified) {
-      throw new Error('Mime section could not be verified.')
-    }
+    assert.strictEqual(verified, true, 'Mime section could not be verified.')
   })
 })

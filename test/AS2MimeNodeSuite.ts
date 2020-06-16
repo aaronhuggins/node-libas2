@@ -8,6 +8,7 @@ import {
   LIBAS2_CERT_PATH,
   LIBAS2_KEY_PATH
 } from './Helpers'
+import * as assert from 'assert'
 
 describe('AS2MimeNode', async () => {
   it('should be verified by openssl', async () => {
@@ -28,9 +29,7 @@ describe('AS2MimeNode', async () => {
       }
     })
 
-    if (!verified) {
-      throw new Error('Mime section not correctly signed.')
-    }
+    assert.strictEqual(verified, true, 'Mime section not correctly signed.')
   })
 
   it('should be decrypted by openssl', async () => {
@@ -55,10 +54,6 @@ describe('AS2MimeNode', async () => {
     const parsed = await AS2Parser.parse(output)
     const opensslContent = parsed.childNodes[0].content.toString('utf8')
 
-    if (opensslContent !== LIBAS2_EDI) {
-      throw new Error(
-        `Mime section not correctly encrypted.\nExpected: '${LIBAS2_EDI}'\nReceived: '${opensslContent}'`
-      )
-    }
+    assert.strictEqual(opensslContent, LIBAS2_EDI)
   })
 })

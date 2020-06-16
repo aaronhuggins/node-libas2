@@ -1,11 +1,11 @@
 import {
   AS2Disposition,
   AS2DispositionOptions,
+  AS2DispositionNotification,
   AS2MimeNode,
   AS2Constants
 } from '../core'
 import * as assert from 'assert'
-import { AS2DispositionNotification } from '../src/AS2Disposition'
 
 describe('AS2Disposition', () => {
   it('should construct disposition from plain object options.', async () => {
