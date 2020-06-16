@@ -110,6 +110,13 @@ should verify signed contents of parsed mime message.
 }
 ```
 
+should throw error on compression methods.
+
+```js
+assert.rejects(core_1.AS2Crypto.compress(new core_1.AS2MimeNode({}), {}))
+assert.rejects(core_1.AS2Crypto.decompress(new core_1.AS2MimeNode({}), {}))
+```
+
 <a name="as2disposition"></a>
 
 # AS2Disposition

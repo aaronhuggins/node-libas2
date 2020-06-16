@@ -1,5 +1,5 @@
 import 'mocha'
-import { AS2Parser, AS2Crypto } from '../core'
+import { AS2Crypto, AS2MimeNode, AS2Parser } from '../core'
 import {
   LIBAS2_CERT,
   LIBAS2_KEY,
@@ -26,5 +26,10 @@ describe('AS2Crypto', async () => {
     const verified = await AS2Crypto.verify(result, { cert: LIBAS2_CERT })
 
     assert.strictEqual(verified, true, 'Mime section could not be verified.')
+  })
+
+  it('should throw error on compression methods', () => {
+    assert.rejects(AS2Crypto.compress(new AS2MimeNode({}), {}))
+    assert.rejects(AS2Crypto.decompress(new AS2MimeNode({}), {}))
   })
 })
