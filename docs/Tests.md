@@ -2,6 +2,7 @@
 
 - [AS2Composer](#as2composer)
 - [AS2Crypto](#as2crypto)
+- [AS2Disposition](#as2disposition)
 - [AS2MimeNode](#as2mimenode)
 - [AS2Parser](#as2parser)
   <a name=""></a>
@@ -114,6 +115,66 @@ should verify signed contents of parsed mime message.
   if (!verified) {
     throw new Error('Mime section could not be verified.')
   }
+}
+```
+
+<a name="as2disposition"></a>
+
+# AS2Disposition
+
+should construct disposition from plain object options..
+
+```js
+;async () => {
+  const opts = {
+    explanation:
+      'Sample explanation. An error or a success message in human readable form might go here.',
+    notification: {
+      disposition: {
+        type: 'automatic-action',
+        processed: true
+      },
+      finalRecipient: 'some-recipient'
+    }
+  }
+  const disposition = new core_1.AS2Disposition(opts)
+  const mime = disposition.toMimeNode()
+  assert.strictEqual(mime instanceof core_1.AS2MimeNode, true)
+}
+```
+
+should construct disposition from complete options..
+
+```js
+;async () => {
+  const opts = {
+    explanation:
+      'Sample explanation. An error or a success message in human readable form might go here.',
+    notification: new AS2Disposition_1.AS2DispositionNotification({
+      disposition: {
+        type: 'automatic-action',
+        processed: true
+      },
+      finalRecipient: 'some-recipient',
+      originalMessageId: core_1.AS2MimeNode.generateMessageId(),
+      mdnGateway: 'NOPE.FAKE.NOTREAL',
+      receivedContentMic: {
+        mic:
+          'VGhlc2UgYXJlIHRoZSB2b3lhZ2VzIG9mIHRoZSBzdGFyc2hpcCBFbnRlcnByaXNlLg==',
+        algorithm: core_1.AS2Constants.SIGNING.SHA256
+      },
+      headers: {
+        'X-CUSTOM-DATA': 'Some MDNs might have custom headers.'
+      }
+    }),
+    returned: new core_1.AS2MimeNode({
+      content: 'Example',
+      contentType: 'text/plain'
+    })
+  }
+  const disposition = new core_1.AS2Disposition(opts)
+  const mime = disposition.toMimeNode()
+  assert.strictEqual(mime instanceof core_1.AS2MimeNode, true)
 }
 ```
 
