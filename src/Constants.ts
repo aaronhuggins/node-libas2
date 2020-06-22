@@ -27,9 +27,6 @@ const getPackageJson = function getPackageJson (
 
 const { alternateName, version } = getPackageJson()
 
-// ERRORS
-export const NOT_IMPLEMENTED = new Error('NOT YET IMPLEMENTED.')
-
 // STRINGS
 export const CRLF = '\r\n'
 export const MIME_VERSION = '1.0'
@@ -71,4 +68,22 @@ export const STANDARD_HEADER = {
   MDN_TO: 'Disposition-Notification-To',
   MDN_OPTIONS: 'Disposition-Notification-Options',
   MDN_URL: 'Receipt-Delivery-Option'
+}
+
+export const EXPLANATION = {
+  SUCCESS:
+    'The message was received successfully. This is no guarantee that the message contents have been processed.',
+  FAILED_DECRYPTION:
+    'The message was received, but could not be decrypted; the contents cannot be processed.',
+  FAILED_VERIFICATION:
+    'The message was received, but could not be verified; the contents cannot be trusted to be the same contents that were sent.',
+  FAILED_GENERALLY: 'The message could not be received or processed.'
+}
+
+export const ERROR = {
+  CONTENT_VERIFY: 'Could not verify signature against contents.',
+  CERT_DECRYPT: 'Certificate provided was not used to encrypt message.',
+  DISPOSITION_NODE:
+    'Mime node must be provided in order to create outgoing disposition.',
+  NOT_IMPLEMENTED: 'NOT YET IMPLEMENTED!'
 }

@@ -1,12 +1,16 @@
 import {
-  NOT_IMPLEMENTED,
   CRLF,
   ENCRYPTION_FILENAME,
-  SIGNATURE_FILENAME
+  SIGNATURE_FILENAME,
+  ERROR
 } from '../Constants'
 import * as forge from 'node-forge'
 import { AS2MimeNode } from '../AS2MimeNode'
-import { encryptionOptions, canonicalTransform } from '../Helpers'
+import {
+  encryptionOptions,
+  canonicalTransform,
+  isNullOrUndefined
+} from '../Helpers'
 import * as MimeNode from 'nodemailer/lib/mime-node'
 import {
   EncryptionOptions,
@@ -88,8 +92,8 @@ export class AS2Crypto {
     const recipient: any = p7.findRecipient(
       forge.pki.certificateFromPem(options.cert)
     )
-    if (recipient === null) {
-      throw new Error('Certificate provided was not used to encrypt message.')
+    if (isNullOrUndefined(recipient)) {
+      throw new Error(ERROR.CERT_DECRYPT)
     }
     p7.decrypt(recipient, forge.pki.privateKeyFromPem(options.key))
 
@@ -226,22 +230,22 @@ export class AS2Crypto {
   }
 
   /** Not yet implemented; do not use.
-   * @throws NOT_IMPLEMENTED
+   * @throws ERROR.NOT_IMPLEMENTED
    */
   static async compress (
     node: AS2MimeNode,
     options: any
   ): Promise<AS2MimeNode> {
-    throw NOT_IMPLEMENTED
+    throw new Error(ERROR.NOT_IMPLEMENTED)
   }
 
-  /** Not yet implemented.
-   * @throws NOT_IMPLEMENTED
+  /** Not yet implemented; do not use.
+   * @throws ERROR.NOT_IMPLEMENTED
    */
   static async decompress (
     node: AS2MimeNode,
     options: any
   ): Promise<AS2MimeNode> {
-    throw NOT_IMPLEMENTED
+    throw new Error(ERROR.NOT_IMPLEMENTED)
   }
 }

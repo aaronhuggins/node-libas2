@@ -1,6 +1,5 @@
 import * as http from 'http'
 import * as https from 'https'
-import { URL } from 'url'
 import { AgreementOptions } from './AS2Composer'
 import { SIGNING, ENCRYPTION, CRLF } from './Constants'
 import { AS2MimeNode } from './AS2MimeNode'
@@ -8,6 +7,21 @@ import { SigningOptions, EncryptionOptions } from './AS2Crypto'
 import { RequestOptions, IncomingMessage } from './Interfaces'
 import { Socket } from 'net'
 import { AS2Parser } from './AS2Parser'
+
+export function getReportNode (node: AS2MimeNode): AS2MimeNode {
+  if (!node) return
+
+  if (
+    node.contentType.includes('multipart/report') &&
+    node.contentType.includes('disposition-notification')
+  ) {
+    return node
+  } else {
+    for (const childNode of node.childNodes || []) {
+      return getReportNode(childNode)
+    }
+  }
+}
 
 /** Method for converting a string of headers into key:value pairs. */
 export function parseHeaderString (

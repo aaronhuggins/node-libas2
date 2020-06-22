@@ -1,22 +1,9 @@
 import { AS2MimeNode } from '../AS2MimeNode'
-import { AS2DispositionOptions } from './Interfaces'
-import { parseHeaderString } from '../Helpers'
+import { AS2DispositionOptions, OutgoingDispositionOptions } from './Interfaces'
+import { parseHeaderString, getReportNode, isNullOrUndefined } from '../Helpers'
 import { AS2DispositionNotification } from './AS2DispositionNotification'
-
-const getReportNode = function getReportNode (node: AS2MimeNode): AS2MimeNode {
-  if (!node) return
-
-  if (
-    node.contentType.includes('multipart/report') &&
-    node.contentType.includes('disposition-notification')
-  ) {
-    return node
-  } else {
-    for (const childNode of node.childNodes || []) {
-      return getReportNode(childNode)
-    }
-  }
-}
+import { EXPLANATION, ERROR } from '../Constants'
+import { VerificationOptions } from '../AS2Crypto'
 
 const toNotification = function toNotification (
   key: string,
@@ -125,14 +112,19 @@ export class AS2Disposition {
         // Get the optional thid part, if present; it is the returned message content.
         this.returned = mdn.childNodes[2]
       }
-    } else {
-      this.messageId = AS2MimeNode.generateMessageId()
+    } else if (mdn.explanation && mdn.notification) {
       this.explanation = mdn.explanation
       this.notification =
         mdn.notification instanceof AS2DispositionNotification
           ? mdn.notification
           : new AS2DispositionNotification(mdn.notification)
-      this.returned = mdn.returned
+      this.returned =
+        typeof mdn.returned === 'boolean' ? undefined : mdn.returned
+      this.messageId = AS2MimeNode.generateMessageId()
+    } else {
+      throw new Error(
+        'Argument must be either options to construct a disposition report, or a disposition report as an AS2MimeNode'
+      )
     }
   }
 
@@ -164,5 +156,97 @@ export class AS2Disposition {
     }
 
     return rootNode
+  }
+
+  /** Try to decrypt and/or verify a mime node and construct an outgoing message disposition. */
+  static async outgoing (
+    options: OutgoingDispositionOptions
+  ): Promise<AS2MimeNode> {
+    const notification: AS2DispositionNotification = {
+      finalRecipient: options.node.getHeader('As2-To'),
+      disposition: {
+        processed: true,
+        type: 'automatic-action'
+      }
+    }
+    let explanation = EXPLANATION.SUCCESS
+    let rootNode: AS2MimeNode = options.node
+    let errored = false
+
+    if (isNullOrUndefined(options.node)) {
+      throw new Error(ERROR.DISPOSITION_NODE)
+    }
+
+    if (typeof options.encrypted !== 'undefined') {
+      try {
+        rootNode = await rootNode.decrypt(options.encrypted)
+      } catch (error) {
+        errored = true
+        notification.disposition.processed = false
+        notification.disposition.description = {
+          type: 'failure',
+          text: (error as Error).message
+        }
+        explanation = EXPLANATION.FAILED_DECRYPTION
+      }
+    }
+
+    if (typeof options.signed !== 'undefined' && !errored) {
+      try {
+        rootNode = await rootNode.verify(options.signed)
+      } catch (error) {
+        errored = true
+        notification.disposition.processed = false
+        notification.disposition.description = {
+          type: 'failure',
+          text: (error as Error).message
+        }
+        explanation = EXPLANATION.FAILED_GENERALLY
+      }
+
+      if (isNullOrUndefined(rootNode) && !errored) {
+        errored = true
+        notification.disposition.processed = false
+        notification.disposition.description = {
+          type: 'failure',
+          text: 'Could not verify signature'
+        }
+        explanation = EXPLANATION.FAILED_VERIFICATION
+      }
+    }
+
+    const mdn = new AS2Disposition({
+      explanation,
+      notification,
+      returned: options.returnNode ? options.node : undefined
+    })
+
+    if (typeof options.signDisposition !== 'undefined') {
+      return await mdn.toMimeNode().sign(options.signDisposition)
+    }
+
+    return mdn.toMimeNode()
+  }
+
+  /** Deconstruct a mime node into an incoming message disposition. */
+  static async incoming (
+    node: AS2MimeNode,
+    signed?: VerificationOptions
+  ): Promise<AS2Disposition> {
+    let rootNode: AS2MimeNode = node
+
+    if (isNullOrUndefined(node)) {
+      throw new Error(ERROR.DISPOSITION_NODE)
+    }
+
+    if (typeof signed !== 'undefined') {
+      rootNode = await node.verify(signed)
+
+      if (isNullOrUndefined(rootNode)) {
+        throw new Error(ERROR.CONTENT_VERIFY)
+      }
+    }
+
+    return new AS2Disposition(rootNode)
   }
 }

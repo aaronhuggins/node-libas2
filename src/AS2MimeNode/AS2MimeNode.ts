@@ -14,6 +14,7 @@ import {
   DecryptionOptions,
   VerificationOptions
 } from '../AS2Crypto'
+import { AS2Disposition } from '../AS2Disposition'
 import { hostname } from 'os'
 
 /** Class for describing and constructing a MIME document. */
@@ -162,6 +163,21 @@ export class AS2MimeNode extends MimeNode {
     }
 
     return messageId
+  }
+
+  async dispositionOut (options?: {
+    returnNode?: boolean
+    signDisposition?: SigningOptions
+    signed?: VerificationOptions
+    encrypted?: DecryptionOptions
+  }) {
+    options = isNullOrUndefined(options) ? {} : options
+
+    return await AS2Disposition.outgoing({ ...options, node: this })
+  }
+
+  async dispositionIn (signed?: VerificationOptions) {
+    return await AS2Disposition.incoming(this, signed)
   }
 
   async sign (options?: SigningOptions): Promise<AS2MimeNode> {
