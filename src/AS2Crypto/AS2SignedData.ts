@@ -125,7 +125,7 @@ export class AS2SignedData {
       const certPemFile = new PemFile(cert)
       const certAsn1 = asn1js.fromBER(certPemFile.data)
       const certificate = new pkijs.Certificate({ schema: certAsn1.result })
-  
+
       for (let i = 0; i < this.signed.signerInfos.length; i += 1) {
         const signerInfo = this.signed.signerInfos[i]
   
@@ -160,7 +160,7 @@ export class AS2SignedData {
     return Buffer.from(signedDataBuffer)
   }
 
-  async verify (cert?: string): Promise<boolean> {
+  async verify (cert?: string | Buffer, debugMode?: boolean): Promise<boolean> {
     const index = this._findSigner(cert)
 
     if (!isNullOrUndefined(cert) && index === -1) {
@@ -169,7 +169,8 @@ export class AS2SignedData {
 
     return await this.signed.verify({
       signer: index === -1 ? 0 : index,
-      data: this.data
+      data: this.data,
+      extendedMode: debugMode
     })
   }
 }

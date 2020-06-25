@@ -85,6 +85,8 @@ export async function openssl (options: {
     if (options.printError) console.log(error)
     if (options.arguments.verify === true) {
       return error.message.toLowerCase() === 'verification successful'
+    } else if (options.command === 'req') {
+      return error
     }
     throw error
   }

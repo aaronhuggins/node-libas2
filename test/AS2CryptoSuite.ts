@@ -5,9 +5,12 @@ import {
   LIBAS2_KEY,
   LIBAS2_EDI,
   ENCRYPTED_CONTENT,
-  SIGNED_CONTENT
+  SIGNED_CONTENT,
+  openssl
 } from './Helpers'
 import * as assert from 'assert'
+import { writeFileSync, readFileSync } from 'fs'
+import { AS2SignedData } from '../src/AS2Crypto/AS2SignedData'
 
 describe('AS2Crypto', async () => {
   it('should decrypt contents of parsed mime message', async () => {
@@ -28,16 +31,52 @@ describe('AS2Crypto', async () => {
     assert.strictEqual(verified, true, 'Mime section could not be verified.')
   })
 
-  it('rando test thing', async () => {
-    const mime = new AS2MimeNode({
-      contentType: 'text/plain',
-      content: 'Hello, world!'
+  it('should verify cms message produced by openssl', async () => {
+    writeFileSync('test/temp-data/payload', 'Something to Sign\n')
+    await openssl({
+      command: 'req',
+      arguments: {
+        new: true,
+        x509: true,
+        nodes: true,
+        keyout: 'test/temp-data/x509.key',
+        out: 'test/temp-data/x509.pub',
+        subj: '/CN=CoronaPub'
+      }
     })
-    const result = await AS2Crypto.sign(mime, {
-      cert: LIBAS2_CERT,
-      key: LIBAS2_KEY,
-      micalg: 'sha-256'
+    await openssl({
+      command: 'cms',
+      arguments: {
+        sign: true,
+        signer: 'test/temp-data/x509.pub',
+        inkey: 'test/temp-data/x509.key',
+        outform: 'DER',
+        out: 'test/temp-data/signature-cms.bin',
+        in: 'test/temp-data/payload'
+      }
     })
+
+    const osslVerified = await openssl({
+      command: 'cms',
+      arguments: {
+        verify: true,
+        CAfile: 'test/temp-data/x509.pub',
+        inkey: 'test/temp-data/x509.pub',
+        inform: 'DER',
+        in: 'test/temp-data/signature-cms.bin',
+        content: 'test/temp-data/payload'
+      }
+    })
+
+    assert.strictEqual(osslVerified, true, 'OpenSSL verification')
+
+    const certAsPem = readFileSync('test/temp-data/x509.pub')
+    const payloadAsBin = readFileSync('test/temp-data/payload')
+    const sig_as_der = readFileSync('test/temp-data/signature-cms.bin')
+    const signedData = new AS2SignedData(payloadAsBin, sig_as_der)
+    const pkijsVerified = await signedData.verify(certAsPem)
+
+    assert.strictEqual(pkijsVerified, true, 'PKIjs verification')
   })
 
   it('should throw error on compression methods', () => {
