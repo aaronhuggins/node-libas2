@@ -120,7 +120,7 @@ export class AS2SignedData {
     await this.signed.sign(privateKey, index, algorithm, this.data)
   }
 
-  private _findSigner (cert?: string): number {
+  private _findSigner (cert?: string | Buffer): number {
     if (!isNullOrUndefined(cert)) {
       const certPemFile = new PemFile(cert)
       const certAsn1 = asn1js.fromBER(certPemFile.data)
@@ -175,12 +175,12 @@ export class AS2SignedData {
 }
 
 export interface SignMethodOptions {
-  cert: string,
-  key: string,
+  cert: string | Buffer,
+  key: string | Buffer,
   algorithm: string,
   addSigners?: Array<{
-    cert: string,
-    key: string,
+    cert: string | Buffer,
+    key: string | Buffer,
     algorithm: string,
   }>
 }
