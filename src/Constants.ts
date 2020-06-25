@@ -39,11 +39,11 @@ export const LIBRARY_VERSION = version
 export const LIBRAY_NAME_VERSION = alternateName + ' ' + version
 
 // NAMESPACES
-export const SIGNING = {
-  SHA1: 'sha1' as AS2Signing,
-  SHA256: 'sha256' as AS2Signing,
-  SHA384: 'sha384' as AS2Signing,
-  SHA512: 'sha512' as AS2Signing
+export const SIGNING: { [key: string]: AS2Signing } = {
+  SHA1: 'sha-1',
+  SHA256: 'sha-256',
+  SHA384: 'sha-384',
+  SHA512: 'sha-512'
 }
 
 export const MIC_ALGORITHM = {

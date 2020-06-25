@@ -9,6 +9,7 @@ import {
   LIBAS2_KEY_PATH
 } from './Helpers'
 import * as assert from 'assert'
+import { AS2Crypto } from '../src/AS2Crypto'
 
 describe('AS2MimeNode', async () => {
   it('should be verified by openssl', async () => {
@@ -18,6 +19,7 @@ describe('AS2MimeNode', async () => {
       sign: { cert: LIBAS2_CERT, key: LIBAS2_KEY },
       content: LIBAS2_EDI
     })
+    // const signedMime = await new AS2Crypto().sign(smime, { cert: LIBAS2_CERT, key: LIBAS2_KEY, micalg: 'sha-256' })
     const signed = await smime.build()
     const verified = await openssl({
       command: 'cms',

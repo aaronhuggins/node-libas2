@@ -23,8 +23,11 @@
   "license": "MIT",
   "dependencies": {
     "@nhs-llc/emailjs-mime-parser": "^2.1.0",
+    "@peculiar/webcrypto": "^1.1.1",
+    "asn1js": "^2.0.26",
     "node-forge": "^0.9.1",
-    "nodemailer": "^6.4.6"
+    "nodemailer": "^6.4.6",
+    "pkijs": "^2.1.89"
   },
   "devDependencies": {
     "@babel/plugin-proposal-class-properties": "^7.10.1",
@@ -37,6 +40,7 @@
     "@types/node": "^13.13.4",
     "@types/node-forge": "^0.9.3",
     "@types/nodemailer": "^6.4.0",
+    "@types/pkijs": "0.0.4",
     "dts-bundle-webpack": "^1.0.2",
     "gulp": "^4.0.2",
     "gulp-shell": "^0.8.0",

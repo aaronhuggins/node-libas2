@@ -52,17 +52,20 @@ export const run = async function run (
 export async function openssl (options: {
   command: string
   input?: Buffer
-  arguments?: { [key: string]: string | boolean }
+  arguments: { [key: string]: string | boolean }
+  printError?: boolean
 }): Promise<string>
 export async function openssl (options: {
   command: string
   input?: Buffer
-  arguments?: { verify: true; [key: string]: string | boolean }
+  arguments: { verify: true; [key: string]: string | boolean }
+  printError?: boolean
 }): Promise<boolean>
 export async function openssl (options: {
   command: string
   input?: Buffer
-  arguments?: { [key: string]: string | boolean }
+  arguments: { [key: string]: string | boolean },
+  printError?: boolean
 }): Promise<string | boolean> {
   const args = [options.command]
 
@@ -79,6 +82,7 @@ export async function openssl (options: {
   try {
     return normalizeLineBreaks(await run('openssl', args, options.input))
   } catch (error) {
+    if (options.printError) console.log(error)
     if (options.arguments.verify === true) {
       return error.message.toLowerCase() === 'verification successful'
     }

@@ -28,6 +28,18 @@ describe('AS2Crypto', async () => {
     assert.strictEqual(verified, true, 'Mime section could not be verified.')
   })
 
+  it('rando test thing', async () => {
+    const mime = new AS2MimeNode({
+      contentType: 'text/plain',
+      content: 'Hello, world!'
+    })
+    const result = await AS2Crypto.sign(mime, {
+      cert: LIBAS2_CERT,
+      key: LIBAS2_KEY,
+      micalg: 'sha-256'
+    })
+  })
+
   it('should throw error on compression methods', () => {
     assert.rejects(AS2Crypto.compress(new AS2MimeNode({}), {}))
     assert.rejects(AS2Crypto.decompress(new AS2MimeNode({}), {}))

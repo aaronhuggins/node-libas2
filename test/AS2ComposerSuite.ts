@@ -32,7 +32,7 @@ const options: AS2ComposerOptions = {
       sign: {
         importance: 'required',
         protocol: 'pkcs7-signature',
-        micalg: 'sha256'
+        micalg: 'sha-256'
       }
     },
     headers: { not: ['real'] }

@@ -22,6 +22,15 @@ import { AS2Parser } from '../AS2Parser'
 import { randomBytes } from 'crypto'
 import { verify as forgeVerify } from './ForgeVerify'
 
+// New PKI.js imports
+import { PemFile } from './PemFile'
+import * as asn1js from 'asn1js'
+import { Crypto } from '@peculiar/webcrypto'
+import * as pkijs from 'pkijs/build/index'
+import { AS2SignedData } from './AS2SignedData'
+
+const webcrypto = new Crypto()
+
 interface PkcsEnvelopedData extends forge.pkcs7.PkcsEnvelopedData {
   content: forge.util.ByteStringBuffer
   authenticatedAttributes?: any[]
@@ -52,6 +61,68 @@ interface pkcs7 {
 
 /** Class for cryptography methods supported by AS2. */
 export class AS2Crypto {
+  constructor () {
+    pkijs.setEngine(
+      'newEngine',
+      webcrypto,
+      new pkijs.CryptoEngine({
+        name: '@peculiar/webcrypto',
+        crypto: webcrypto,
+        subtle: webcrypto.subtle
+      })
+    )
+  }
+
+  /** Method to sign data against a certificate and key pair. */
+  static async sign (
+    node: AS2MimeNode,
+    options: SigningOptions
+  ): Promise<AS2MimeNode> {
+    const rootNode = new AS2MimeNode({
+      contentType: `multipart/signed; protocol="application/pkcs7-signature"; micalg=${options.micalg};`,
+      encrypt: (node as any)._encrypt
+    })
+    const contentNode = rootNode.appendChild(node) as AS2MimeNode
+    const contentHeaders: Array<{
+      key: string
+      value: string
+    }> = (contentNode as any)._headers
+
+    for (let i = 0, len = contentHeaders.length; i < len; i++) {
+      const header = contentHeaders[i]
+
+      if (header.key.toLowerCase() === 'content-type') continue
+
+      rootNode.setHeader(header.key, header.value)
+      contentHeaders.splice(i, 1)
+      i--
+      len--
+    }
+
+    canonicalTransform(contentNode)
+
+    const canonical = AS2Crypto.removeTrailingCrLf(
+      await AS2Crypto.buildNode(contentNode)
+    )
+
+    const signedData = await new AS2SignedData(canonical)
+    const derBuffer = await signedData.sign({
+      cert: options.cert,
+      key: options.key,
+      algorithm: options.micalg
+    })
+
+    rootNode.appendChild(
+      new AS2MimeNode({
+        filename: SIGNATURE_FILENAME,
+        contentType: 'application/pkcs7-signature',
+        content: derBuffer
+      })
+    ) as AS2MimeNode
+
+    return rootNode
+  }
+
   private static async buildNode (node: AS2MimeNode): Promise<Buffer> {
     return node.parsed
       ? await node.build()
@@ -158,7 +229,7 @@ export class AS2Crypto {
   }
 
   /** Method to sign data against a certificate and key pair. */
-  static async sign (
+  /* static async sign (
     node: AS2MimeNode,
     options: SigningOptions
   ): Promise<AS2MimeNode> {
@@ -227,7 +298,7 @@ export class AS2Crypto {
     ) as AS2MimeNode
 
     return rootNode
-  }
+  } */
 
   /** Not yet implemented; do not use.
    * @throws ERROR.NOT_IMPLEMENTED
