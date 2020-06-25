@@ -20,16 +20,7 @@ import {
 } from './Interfaces'
 import { AS2Parser } from '../AS2Parser'
 import { randomBytes } from 'crypto'
-import { verify as forgeVerify } from './ForgeVerify'
-
-// New PKI.js imports
-import { PemFile } from './PemFile'
-import * as asn1js from 'asn1js'
-import { Crypto } from '@peculiar/webcrypto'
-import * as pkijs from 'pkijs/build/index'
 import { AS2SignedData } from './AS2SignedData'
-
-const webcrypto = new Crypto()
 
 interface PkcsEnvelopedData extends forge.pkcs7.PkcsEnvelopedData {
   content: forge.util.ByteStringBuffer
@@ -61,18 +52,6 @@ interface pkcs7 {
 
 /** Class for cryptography methods supported by AS2. */
 export class AS2Crypto {
-  constructor () {
-    pkijs.setEngine(
-      'newEngine',
-      webcrypto,
-      new pkijs.CryptoEngine({
-        name: '@peculiar/webcrypto',
-        crypto: webcrypto,
-        subtle: webcrypto.subtle
-      })
-    )
-  }
-
   private static async buildNode (node: AS2MimeNode): Promise<Buffer> {
     return node.parsed
       ? await node.build()
