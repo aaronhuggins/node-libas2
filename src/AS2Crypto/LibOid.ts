@@ -38,7 +38,7 @@ export class LibObjectID {
       ['1.2.840.113549.1.1.7', 'RSAES-OAEP'],
       ['1.2.840.113549.1.1.8', 'mgf1'],
       ['1.2.840.113549.1.1.9', 'pSpecified'],
-      ['1.2.840.113549.1.1.10', 'RSASSA-PSS'],
+      ['1.2.840.113549.1.1.10', 'RSA-PSS'],
       ['1.2.840.113549.1.1.11', 'sha-256WithRSAEncryption'],
       ['1.2.840.113549.1.1.12', 'sha-384WithRSAEncryption'],
       ['1.2.840.113549.1.1.13', 'sha-512WithRSAEncryption'],

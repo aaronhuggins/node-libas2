@@ -3,11 +3,12 @@ import * as pkijs from 'pkijs/build/index'
 import { Crypto } from '@peculiar/webcrypto'
 import { PemFile } from './PemFile'
 import { ObjectID } from './LibOid'
+import { isNullOrUndefined } from '../Helpers'
 
 const webcrypto = new Crypto()
 
 export class AS2SignedData {
-  constructor (data: Buffer) {
+  constructor (data: Buffer, signedData?: Buffer) {
     pkijs.setEngine(
       'newEngine',
       webcrypto,
@@ -19,14 +20,22 @@ export class AS2SignedData {
     )
 
     this.data = data
-    this.signed = new pkijs.SignedData({
-      version: 1,
-      encapContentInfo: new pkijs.EncapsulatedContentInfo({
-        eContentType: new ObjectID({ name: 'data' }).id
-      }),
-      signerInfos: [],
-      certificates: []
-    })
+    // console.log(data.toString('utf8'))
+    if (isNullOrUndefined(signedData)) {
+      this.signed = new pkijs.SignedData({
+        version: 1,
+        encapContentInfo: new pkijs.EncapsulatedContentInfo({
+          eContentType: new ObjectID({ name: 'data' }).id
+        }),
+        signerInfos: [],
+        certificates: []
+      })
+    } else {
+      const bufferBer = new Uint8Array(signedData).buffer
+      const signedDataContentAsn1 = asn1js.fromBER(bufferBer)
+      const signedDataContent = new pkijs.ContentInfo({ schema: signedDataContentAsn1.result })
+      this.signed = new pkijs.SignedData({ schema: signedDataContent.content })
+    }
   }
 
   data: Buffer
@@ -36,6 +45,7 @@ export class AS2SignedData {
     signerInfos: any[]
     certificates: any[]
     sign: (...args: any) => void
+    verify: (...args: any) => boolean
     toSchema: (...args: any) => any
   }
 
@@ -78,6 +88,16 @@ export class AS2SignedData {
     return position - 1
   }
 
+  private _getCertAlgorithmId (certificate: any) {
+    const rsaPssId = new ObjectID({ name: 'RSA-PSS'}).id
+
+    if (certificate.signatureAlgorithm.algorithmId === rsaPssId) {
+      return rsaPssId
+    }
+
+    return certificate.subjectPublicKeyInfo.algorithm.algorithmId
+  }
+
   private async _addSigner ({ cert, key, algorithm }: SignMethodOptions) {
     const crypto = pkijs.getCrypto()
     const certPemFile = new PemFile(cert)
@@ -87,14 +107,38 @@ export class AS2SignedData {
       { name: algorithm },
       this.data
     )
+    const privateKeyOptions = crypto.getAlgorithmByOID(this._getCertAlgorithmId(certificate))
+
+    if ('hash' in privateKeyOptions) {
+      privateKeyOptions.hash.name = algorithm
+    }
+
     const keyPemFile = new PemFile(key)
-    const privateKey = await webcrypto.subtle.importKey('pkcs8', keyPemFile.data, {
-      name: 'RSA-PSS',
-      hash: algorithm
-    }, true, ['sign'])
+    const privateKey = await webcrypto.subtle.importKey('pkcs8', keyPemFile.data, privateKeyOptions, true, ['sign'])
     const index = this._addSignerInfo(certificate, messageDigest)
 
     await this.signed.sign(privateKey, index, algorithm, this.data)
+  }
+
+  private _findSigner (cert?: string): number {
+    if (!isNullOrUndefined(cert)) {
+      const certPemFile = new PemFile(cert)
+      const certAsn1 = asn1js.fromBER(certPemFile.data)
+      const certificate = new pkijs.Certificate({ schema: certAsn1.result })
+  
+      for (let i = 0; i < this.signed.signerInfos.length; i += 1) {
+        const signerInfo = this.signed.signerInfos[i]
+  
+        if (
+          certificate.issuer.isEqual(signerInfo.sid.issuer) &&
+          certificate.serialNumber.isEqual(signerInfo.sid.serialNumber)
+        ) {
+          return i
+        }
+      }
+    }
+
+    return -1
   }
 
   async sign ({ cert, key, algorithm, addSigners }: SignMethodOptions): Promise<Buffer> {
@@ -114,6 +158,19 @@ export class AS2SignedData {
     const signedDataBuffer = signedDataSchema.toBER()
 
     return Buffer.from(signedDataBuffer)
+  }
+
+  async verify (cert?: string): Promise<boolean> {
+    const index = this._findSigner(cert)
+
+    if (!isNullOrUndefined(cert) && index === -1) {
+      return false
+    }
+
+    return await this.signed.verify({
+      signer: index === -1 ? 0 : index,
+      data: this.data
+    })
   }
 }
 

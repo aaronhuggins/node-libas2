@@ -159,23 +159,20 @@ export class AS2Crypto {
     options: VerificationOptions
   ): Promise<boolean> {
     const contentPart = await AS2Crypto.buildNode(node.childNodes[0])
-    const contentBuffer = forge.util.createBuffer(contentPart)
-    const contentBufferNoCrLf = forge.util.createBuffer(
-      AS2Crypto.removeTrailingCrLf(contentPart)
-    )
+    const contentPartNoCrLf = AS2Crypto.removeTrailingCrLf(contentPart)
     const signaturePart = Buffer.isBuffer(node.childNodes[1].content)
       ? node.childNodes[1].content
       : Buffer.from(node.childNodes[1].content as string, 'base64')
-    const der = forge.util.createBuffer(signaturePart)
-    const asn1 = forge.asn1.fromDer(der)
-    const msg = ((forge.pkcs7 as unknown) as pkcs7).messageFromAsn1(asn1)
-    const verify = forgeVerify.bind(msg)
-    // Deal with Nodemailer trailing CRLF bug by trying with and without CRLF
-    const verified: boolean =
-      verify({ certificate: options.cert, detached: contentBuffer }) ||
-      verify({ certificate: options.cert, detached: contentBufferNoCrLf })
+    const signedData = new AS2SignedData(contentPart, signaturePart)
 
-    return verified
+    // Deal with Nodemailer trailing CRLF bug by trying with and without CRLF
+    if (await signedData.verify(options.cert)) {
+      return true
+    }
+
+    const signedDataNoCrLf = new AS2SignedData(contentPartNoCrLf, signaturePart)
+
+    return await signedDataNoCrLf.verify(options.cert)
   }
 
   /** Method to sign data against a certificate and key pair. */
@@ -210,7 +207,7 @@ export class AS2Crypto {
       await AS2Crypto.buildNode(contentNode)
     )
 
-    const signedData = await new AS2SignedData(canonical)
+    const signedData = new AS2SignedData(canonical)
     const derBuffer = await signedData.sign({
       cert: options.cert,
       key: options.key,
