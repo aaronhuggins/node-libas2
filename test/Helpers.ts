@@ -99,7 +99,7 @@ export const LIBAS2_EDI = readFileSync(LIBAS2_EDI_PATH, 'utf8')
 export const LIBAS2_CERT = readFileSync(LIBAS2_CERT_PATH, 'utf8')
 export const LIBAS2_KEY = readFileSync(LIBAS2_KEY_PATH, 'utf8')
 export const AS2_TESTING_CERT = readFileSync(
-  'test/test-data/as2Testing.cer',
+  'test/test-data/as2testing.cer',
   'utf8'
 )
 // Normalize line breaks for test files; original environment saved the files as crlf.
