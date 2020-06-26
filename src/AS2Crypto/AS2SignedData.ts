@@ -19,7 +19,7 @@ export class AS2SignedData {
       })
     )
 
-    this.data = data
+    this.data = new Uint8Array(data).buffer
     // console.log(data.toString('utf8'))
     if (isNullOrUndefined(signedData)) {
       this.signed = new pkijs.SignedData({
@@ -38,7 +38,7 @@ export class AS2SignedData {
     }
   }
 
-  data: Buffer
+  data: ArrayBuffer
   signed: {
     version: number
     encapContentInfo: any
