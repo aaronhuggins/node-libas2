@@ -4,12 +4,10 @@ import {
   SIGNATURE_FILENAME,
   ERROR
 } from '../Constants'
-import * as forge from 'node-forge'
 import { AS2MimeNode } from '../AS2MimeNode'
 import {
   encryptionOptions,
-  canonicalTransform,
-  isNullOrUndefined
+  canonicalTransform
 } from '../Helpers'
 import * as MimeNode from 'nodemailer/lib/mime-node'
 import {
@@ -22,34 +20,6 @@ import { AS2Parser } from '../AS2Parser'
 import { randomBytes } from 'crypto'
 import { AS2SignedData } from './AS2SignedData'
 import { AS2EnvelopedData } from './AS2EnvelopedData'
-
-interface PkcsEnvelopedData extends forge.pkcs7.PkcsEnvelopedData {
-  content: forge.util.ByteStringBuffer
-  authenticatedAttributes?: any[]
-  certificates: Array<{
-    publicKey: any
-  }>
-  rawCapture: {
-    signature: string
-    digestAlgorithm: forge.util.ByteStringBuffer
-    signerInfos: any[]
-    authenticatedAttributes?: Array<{
-      tagClass: number
-      type: number
-      constructed: boolean
-      composed: boolean
-      value: any[]
-    }>
-  }
-  findRecipient(certificate: forge.pki.Certificate): forge.pki.Certificate
-  decrypt(certificate: forge.pki.Certificate, key: forge.pki.PrivateKey): void
-  addSigner(options: any): void
-}
-
-interface pkcs7 {
-  messageFromPem(pem: string): PkcsEnvelopedData
-  messageFromAsn1(asn1: forge.asn1.Asn1): PkcsEnvelopedData
-}
 
 /** Class for cryptography methods supported by AS2. */
 export class AS2Crypto {
