@@ -9,9 +9,8 @@ import {
   openssl
 } from './Helpers'
 import * as assert from 'assert'
-import { readFileSync } from 'fs'
+import { readFileSync, writeFileSync } from 'fs'
 import { AS2SignedData } from '../src/AS2Crypto/AS2SignedData'
-import { execSync } from 'child_process'
 
 describe('AS2Crypto', async () => {
   it('should decrypt contents of parsed mime message', async () => {
@@ -33,7 +32,17 @@ describe('AS2Crypto', async () => {
   })
 
   it('should verify cms message produced by openssl', async () => {
-    execSync("echo Something to Sign > test/temp-data/payload")
+    /* 
+     * Issue: https://github.com/ahuggins-nhs/node-libas2/issues/9
+     * Payload MUST be canonicalized to CRLF in order for libraries to verify.
+     * OpenSSL command line will ALWAYS canonicalize payloads as a convenience.
+     * Thus, if "echo Something to Sign > payload" is ran on Linux, OpenSSL will
+     * sign different content then what is read in by Javascript.
+     * This is the reason that an SMIME signature or a signature with the payload
+     * attached can be verified; the content accompanies the signature in the
+     * form it was signed.
+    */
+    writeFileSync('test/temp-data/payload', 'Something to Sign\r\n')
     await openssl({
       command: 'req',
       arguments: {
