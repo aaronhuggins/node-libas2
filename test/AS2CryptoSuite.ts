@@ -1,5 +1,5 @@
 import 'mocha'
-import { AS2Crypto, AS2MimeNode, AS2Parser } from '../core'
+import { AS2Crypto, AS2MimeNode, AS2Parser, objectIds, ObjectID, PemFile } from '../core'
 import {
   LIBAS2_CERT,
   LIBAS2_KEY,
@@ -86,6 +86,39 @@ describe('AS2Crypto', async () => {
     const pkijsVerified = await signedData.verify(certAsPem)
 
     assert.strictEqual(pkijsVerified, true, 'PKIjs verification')
+  })
+
+  it('should look up cms oid info by name and id', () => {
+    const byId = objectIds.byId('1.2.840.113549.1.7.1')
+    const byName = objectIds.byName('encryptedData')
+    const objectId = new ObjectID({ id: '1.2.840.113549.1.7.6' })
+    const exists = objectIds.has('unreal')
+
+    assert.strictEqual(byId.name, 'data')
+    assert.strictEqual(byName.id, '1.2.840.113549.1.7.6')
+    assert.strictEqual(objectId.name, 'encryptedData')
+    assert.strictEqual(exists, false)
+    assert.throws(() => {
+      new ObjectID({})
+    })
+  })
+
+  it('should parse a pem file to der and infer type', () => {
+    const undefinedOrNullPem = new PemFile(null)
+    const keyPem = new PemFile(LIBAS2_KEY.replace('PRIVATE KEY', 'PUBLIC KEY'))
+    const certificateDerPem = Buffer.from(LIBAS2_CERT
+      .split('\n') // Split on new line
+      .filter(line => !line.includes('-BEGIN') && !line.includes('-END')) // Remove header/trailer
+      .map(line => line.trim()) // Trim extra white space
+      .join(''), 'base64')
+    const fromDerPem = PemFile.fromDer(certificateDerPem, 'CERTIFICATE')
+
+    assert.strictEqual(fromDerPem.data instanceof ArrayBuffer, true)
+    assert.strictEqual(keyPem.type, 'PUBLIC_KEY')
+    assert.strictEqual(typeof undefinedOrNullPem.type, 'undefined')
+    assert.doesNotThrow(() => {
+      PemFile.fromDer(certificateDerPem)
+    })
   })
 
   it('should throw error on compression methods', () => {

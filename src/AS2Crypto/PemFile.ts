@@ -10,8 +10,8 @@ type PemFileType = 'UNKNOWN' | 'PRIVATE_KEY' | 'PUBLIC_KEY' | 'CERTIFICATE'
  */
 export class PemFile {
   constructor (data: Buffer | string) {
-    this.type = 'UNKNOWN'
     if (isNullOrUndefined(data) || data === '') return
+    this.type = 'UNKNOWN'
 
     if (Buffer.isBuffer(data)) {
       data = data.toString('utf8')

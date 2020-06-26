@@ -191,7 +191,7 @@ export class ObjectID {
     if (!isNullOrUndefined(name)) {
       return objectIds.byName(name)
     } else {
-      return objectIds.byName(id)
+      return objectIds.byId(id)
     }
   }
 
