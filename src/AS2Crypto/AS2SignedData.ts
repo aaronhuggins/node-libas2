@@ -20,7 +20,7 @@ export class AS2SignedData {
     )
 
     this.data = new Uint8Array(data).buffer
-    // console.log(data.toString('utf8'))
+
     if (isNullOrUndefined(signedData)) {
       this.signed = new pkijs.SignedData({
         version: 1,
@@ -47,6 +47,13 @@ export class AS2SignedData {
     sign: (...args: any) => void
     verify: (...args: any) => boolean
     toSchema: (...args: any) => any
+  }
+
+  private _toCertificate (cert: string | Buffer) {
+    const certPemFile = new PemFile(cert)
+    const certAsn1 = asn1js.fromBER(certPemFile.data)
+
+    return new pkijs.Certificate({ schema: certAsn1.result })
   }
 
   private _addSignerInfo(certificate: any, messageDigest: ArrayBuffer): number {
@@ -100,9 +107,7 @@ export class AS2SignedData {
 
   private async _addSigner ({ cert, key, algorithm }: SignMethodOptions) {
     const crypto = pkijs.getCrypto()
-    const certPemFile = new PemFile(cert)
-    const certAsn1 = asn1js.fromBER(certPemFile.data)
-    const certificate = new pkijs.Certificate({ schema: certAsn1.result })
+    const certificate = this._toCertificate(cert)
     const messageDigest = await crypto.digest(
       { name: algorithm },
       this.data
@@ -122,9 +127,7 @@ export class AS2SignedData {
 
   private _findSigner (cert?: string | Buffer): number {
     if (!isNullOrUndefined(cert)) {
-      const certPemFile = new PemFile(cert)
-      const certAsn1 = asn1js.fromBER(certPemFile.data)
-      const certificate = new pkijs.Certificate({ schema: certAsn1.result })
+      const certificate = this._toCertificate(cert)
 
       for (let i = 0; i < this.signed.signerInfos.length; i += 1) {
         const signerInfo = this.signed.signerInfos[i]

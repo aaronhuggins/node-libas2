@@ -21,6 +21,7 @@ import {
 import { AS2Parser } from '../AS2Parser'
 import { randomBytes } from 'crypto'
 import { AS2SignedData } from './AS2SignedData'
+import { AS2EnvelopedData } from './AS2EnvelopedData'
 
 interface PkcsEnvelopedData extends forge.pkcs7.PkcsEnvelopedData {
   content: forge.util.ByteStringBuffer
@@ -86,19 +87,8 @@ export class AS2Crypto {
     const data: Buffer = Buffer.isBuffer(node.content)
       ? node.content
       : Buffer.from(node.content as string, 'base64')
-    const der = forge.util.createBuffer(data)
-    const asn1 = forge.asn1.fromDer(der)
-    const p7 = ((forge.pkcs7 as unknown) as pkcs7).messageFromAsn1(asn1)
-    const recipient: any = p7.findRecipient(
-      forge.pki.certificateFromPem(options.cert)
-    )
-    if (isNullOrUndefined(recipient)) {
-      throw new Error(ERROR.CERT_DECRYPT)
-    }
-    p7.decrypt(recipient, forge.pki.privateKeyFromPem(options.key))
-
-    // Parse Mime body from p7.content back to AS2MimeNode
-    const buffer = Buffer.from(p7.content.getBytes(), 'binary').toString('utf8')
+    const envelopedData = new AS2EnvelopedData(data, true)
+    const buffer = await envelopedData.decrypt(options.cert, options.key)
     const revivedNode = await AS2Parser.parse(buffer)
 
     return revivedNode
@@ -118,14 +108,9 @@ export class AS2Crypto {
     canonicalTransform(node)
 
     const buffer = await AS2Crypto.buildNode(node)
-    const p7 = forge.pkcs7.createEnvelopedData() as PkcsEnvelopedData
+    const envelopedData = new AS2EnvelopedData(buffer)
 
-    p7.addRecipient(forge.pki.certificateFromPem(options.cert))
-    p7.content = forge.util.createBuffer(buffer.toString('utf8'))
-    ;(p7 as any).encrypt(undefined, forge.pki.oids[options.encryption])
-
-    const der = forge.asn1.toDer(p7.toAsn1())
-    const derBuffer = Buffer.from(der.getBytes(), 'binary')
+    const derBuffer = await envelopedData.encrypt(options.cert, options.encryption)
 
     rootNode.setContent(derBuffer)
 

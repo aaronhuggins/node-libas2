@@ -39,7 +39,12 @@ export const LIBRARY_VERSION = version
 export const LIBRAY_NAME_VERSION = alternateName + ' ' + version
 
 // NAMESPACES
-export const SIGNING: { [key: string]: AS2Signing } = {
+export const SIGNING: {
+  SHA1: AS2Signing
+  SHA256: AS2Signing
+  SHA384: AS2Signing
+  SHA512: AS2Signing
+} = {
   SHA1: 'sha-1',
   SHA256: 'sha-256',
   SHA384: 'sha-384',
@@ -53,12 +58,14 @@ export const MIC_ALGORITHM = {
   SHA512: 'sha-512' as AS2MicAlgorithm
 }
 
-export const ENCRYPTION = {
-  _3DES: 'des-EDE3-CBC' as AS2Encryption,
-  AES128: 'aes128-CBC' as AS2Encryption,
-  AES192: 'aes192-CBC' as AS2Encryption,
-  AES256: 'aes256-CBC' as AS2Encryption,
-  DES3: 'des-EDE3-CBC' as AS2Encryption
+export const ENCRYPTION: {
+  AES128: AS2Encryption
+  AES192: AS2Encryption
+  AES256: AS2Encryption
+} = {
+  AES128: 'aes-128-CBC',
+  AES192: 'aes-192-CBC',
+  AES256: 'aes-256-CBC'
 }
 
 export const STANDARD_HEADER = {

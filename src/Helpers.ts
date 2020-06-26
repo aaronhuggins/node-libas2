@@ -130,7 +130,7 @@ export function signingOptions (sign: SigningOptions): SigningOptions {
 export function encryptionOptions (
   encrypt: EncryptionOptions
 ): EncryptionOptions {
-  return { cert: '', encryption: ENCRYPTION._3DES, ...encrypt }
+  return { cert: '', encryption: ENCRYPTION.AES256, ...encrypt }
 }
 
 /** Normalizes agreement options. */

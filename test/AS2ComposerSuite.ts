@@ -25,7 +25,7 @@ const options: AS2ComposerOptions = {
     recipient: 'libas2community',
     sender: 'as2testing',
     sign: { cert: LIBAS2_CERT, key: LIBAS2_KEY },
-    encrypt: { cert: LIBAS2_CERT, encryption: AS2Constants.ENCRYPTION._3DES },
+    encrypt: { cert: LIBAS2_CERT, encryption: AS2Constants.ENCRYPTION.AES128 },
     mdn: {
       to: 'WHATEVER@WHATWHAT.EXAMPLE',
       deliveryUrl: 'http://whatwhat.example/as2',
@@ -72,7 +72,7 @@ describe('AS2Composer', async () => {
         },
         encrypt: {
           cert: AS2_TESTING_CERT,
-          encryption: AS2Constants.ENCRYPTION.DES3
+          encryption: AS2Constants.ENCRYPTION.AES128
         },
         mdn: {
           to: 'mycompanyAS2@example-message.net',

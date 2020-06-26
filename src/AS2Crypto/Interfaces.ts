@@ -5,10 +5,9 @@ export type AS2Signing = // 'sha1' | 'sha256' | 'sha384' | 'sha512' |
 export type AS2MicAlgorithm = 'sha1' | 'sha-256' | 'sha-384' | 'sha-512'
 
 export type AS2Encryption =
-  | 'des-EDE3-CBC'
-  | 'aes128-CBC'
-  | 'aes192-CBC'
-  | 'aes256-CBC'
+  'aes-128-CBC'
+  | 'aes-192-CBC'
+  | 'aes-256-CBC'
 
 export interface EncryptionOptions {
   /** PEM-based public certificate contents. */

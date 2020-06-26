@@ -34,9 +34,41 @@ describe('AS2Crypto', async () => {
 
   it('should verify cms message produced by openssl', async () => {
     execSync("echo Something to Sign > test/temp-data/payload")
-    execSync("openssl req -new -x509 -nodes -keyout test/temp-data/x509.key -out test/temp-data/x509.pub -subj /CN=CoronaPub")
-    execSync("openssl cms -sign -signer test/temp-data/x509.pub -inkey test/temp-data/x509.key -outform DER -out test/temp-data/signature-cms.bin -in test/temp-data/payload")
-    execSync("openssl cms -verify -CAfile test/temp-data/x509.pub -inkey test/temp-data/x509.pub -inform DER -in test/temp-data/signature-cms.bin -content test/temp-data/payload")
+    await openssl({
+      command: 'req',
+      arguments: {
+        new: true,
+        x509: true,
+        nodes: true,
+        keyout: 'test/temp-data/x509.key',
+        out: 'test/temp-data/x509.pub',
+        subj: '/CN=SampleCert'
+      }
+    })
+    await openssl({
+      command: 'cms',
+      arguments: {
+        sign: true,
+        signer: 'test/temp-data/x509.pub',
+        inkey: 'test/temp-data/x509.key',
+        outform: 'DER',
+        out: 'test/temp-data/signature-cms.bin',
+        in: 'test/temp-data/payload'
+      }
+    })
+    const osslVerified = await openssl({
+      command: 'cms',
+      arguments: {
+        verify: true,
+        CAfile: 'test/temp-data/x509.pub',
+        inkey: 'test/temp-data/x509.pub',
+        inform: 'DER',
+        in: 'test/temp-data/signature-cms.bin',
+        content: 'test/temp-data/payload'
+      }
+    })
+
+    assert.strictEqual(osslVerified, true, 'OpenSSL verification')
 
     const certAsPem = readFileSync('test/temp-data/x509.pub')
     const payloadAsBin = readFileSync('test/temp-data/payload')
