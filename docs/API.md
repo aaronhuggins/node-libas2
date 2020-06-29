@@ -7,6 +7,8 @@
 <dd><p>Class for cryptography methods supported by AS2.</p></dd>
 <dt><a href="#AS2Disposition">AS2Disposition</a></dt>
 <dd><p>Class for describing and constructing a Message Disposition Notification.</p></dd>
+<dt><a href="#AS2DispositionNotification">AS2DispositionNotification</a></dt>
+<dd><p>Class for dealing with disposition notification headers.</p></dd>
 <dt><a href="#AS2MimeNode">AS2MimeNode</a></dt>
 <dd><p>Class for describing and constructing a MIME document.</p></dd>
 <dt><a href="#AS2Parser">AS2Parser</a></dt>
@@ -59,6 +61,10 @@
 <dd><p>Options for decrypting payloads.</p></dd>
 <dt><a href="#VerificationOptions">VerificationOptions</a> : <code>object</code></dt>
 <dd><p>Options for decrypting payloads.</p></dd>
+<dt><a href="#AS2DispositionOptions">AS2DispositionOptions</a> : <code>object</code></dt>
+<dd><p>Options for composing a message disposition notification (MDN).</p></dd>
+<dt><a href="#OutgoingDispositionOptions">OutgoingDispositionOptions</a> : <code>object</code></dt>
+<dd><p>Options for generating an outgoing MDN.</p></dd>
 </dl>
 
 <a name="AS2Composer"></a>
@@ -227,21 +233,83 @@
 **Kind**: global class  
 
 * [AS2Disposition](#AS2Disposition)
-    * [.outgoing()](#AS2Disposition.outgoing)
-    * [.incoming()](#AS2Disposition.incoming)
+    * _instance_
+        * [.toMimeNode()](#AS2Disposition+toMimeNode) ⇒ [<code>AS2MimeNode</code>](#AS2MimeNode)
+    * _static_
+        * [.outgoing(options)](#AS2Disposition.outgoing) ⇒ [<code>Promise.&lt;AS2MimeNode&gt;</code>](#AS2MimeNode)
+        * [.incoming(node, [signed])](#AS2Disposition.incoming) ⇒ [<code>Promise.&lt;AS2Disposition&gt;</code>](#AS2Disposition)
 
+<a name="AS2Disposition+toMimeNode"></a>
+
+### aS2Disposition.toMimeNode() ⇒ [<code>AS2MimeNode</code>](#AS2MimeNode)
+<p>This instance to an AS2MimeNode.</p>
+
+**Kind**: instance method of [<code>AS2Disposition</code>](#AS2Disposition)  
+**Returns**: [<code>AS2MimeNode</code>](#AS2MimeNode) - <ul>
+<li>An MDN as an AS2MimeNode.</li>
+</ul>  
 <a name="AS2Disposition.outgoing"></a>
 
-### AS2Disposition.outgoing()
-<p>Try to decrypt and/or verify a mime node and construct an outgoing message disposition.</p>
+### AS2Disposition.outgoing(options) ⇒ [<code>Promise.&lt;AS2MimeNode&gt;</code>](#AS2MimeNode)
+<p>Convenience method to decrypt and/or verify a mime node and construct an outgoing message disposition.</p>
 
 **Kind**: static method of [<code>AS2Disposition</code>](#AS2Disposition)  
+**Returns**: [<code>Promise.&lt;AS2MimeNode&gt;</code>](#AS2MimeNode) - <ul>
+<li>The generated outgoing MDN as an AS2MimeNode.</li>
+</ul>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| options | [<code>OutgoingDispositionOptions</code>](#OutgoingDispositionOptions) | <p>The options for generating an outgoing MDN.</p> |
+
 <a name="AS2Disposition.incoming"></a>
 
-### AS2Disposition.incoming()
+### AS2Disposition.incoming(node, [signed]) ⇒ [<code>Promise.&lt;AS2Disposition&gt;</code>](#AS2Disposition)
 <p>Deconstruct a mime node into an incoming message disposition.</p>
 
 **Kind**: static method of [<code>AS2Disposition</code>](#AS2Disposition)  
+**Returns**: [<code>Promise.&lt;AS2Disposition&gt;</code>](#AS2Disposition) - <p>The incoming message disposition notification.</p>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| node | [<code>AS2MimeNode</code>](#AS2MimeNode) | <p>An AS2MimeNode containing an incoming MDN.</p> |
+| [signed] | [<code>VerificationOptions</code>](#VerificationOptions) | <p>Options for verifying the MDN if necessary.</p> |
+
+<a name="AS2DispositionNotification"></a>
+
+## AS2DispositionNotification
+<p>Class for dealing with disposition notification headers.</p>
+
+**Kind**: global class  
+
+* [AS2DispositionNotification](#AS2DispositionNotification)
+    * [new AS2DispositionNotification([notification], [notificationType])](#new_AS2DispositionNotification_new)
+    * [.toNotification()](#AS2DispositionNotification+toNotification) ⇒ <code>object</code>
+    * [.toString()](#AS2DispositionNotification+toString) ⇒ <code>string</code>
+
+<a name="new_AS2DispositionNotification_new"></a>
+
+### new AS2DispositionNotification([notification], [notificationType])
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| [notification] | [<code>AS2DispositionNotification</code>](#AS2DispositionNotification) |  | <p>A raw instance of AS2DispositionNotification.</p> |
+| [notificationType] | <code>&#x27;incoming&#x27;</code> \| <code>&#x27;outgoing&#x27;</code> | <code>&#x27;outgoing&#x27;</code> | <p>The type of notification; default is 'outgoing'.</p> |
+
+<a name="AS2DispositionNotification+toNotification"></a>
+
+### aS2DispositionNotification.toNotification() ⇒ <code>object</code>
+<p>Converts this instance to a plain key/value-pair object.</p>
+
+**Kind**: instance method of [<code>AS2DispositionNotification</code>](#AS2DispositionNotification)  
+**Returns**: <code>object</code> - <p>This instance as key/value pairs.</p>  
+<a name="AS2DispositionNotification+toString"></a>
+
+### aS2DispositionNotification.toString() ⇒ <code>string</code>
+<p>This instance to a string.</p>
+
+**Kind**: instance method of [<code>AS2DispositionNotification</code>](#AS2DispositionNotification)  
+**Returns**: <code>string</code> - <p>a raw string instance.</p>  
 <a name="AS2MimeNode"></a>
 
 ## AS2MimeNode
@@ -429,4 +497,34 @@
 | Name | Type |
 | --- | --- |
 | cert | <code>string</code> \| <code>Buffer</code> | 
+
+<a name="AS2DispositionOptions"></a>
+
+## AS2DispositionOptions : <code>object</code>
+<p>Options for composing a message disposition notification (MDN).</p>
+
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type |
+| --- | --- |
+| explanation | <code>string</code> | 
+| notification | [<code>AS2DispositionNotification</code>](#AS2DispositionNotification) | 
+| [returned] | [<code>AS2MimeNode</code>](#AS2MimeNode) \| <code>boolean</code> | 
+
+<a name="OutgoingDispositionOptions"></a>
+
+## OutgoingDispositionOptions : <code>object</code>
+<p>Options for generating an outgoing MDN.</p>
+
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type |
+| --- | --- |
+| node | [<code>AS2MimeNode</code>](#AS2MimeNode) | 
+| [returnNode] | <code>boolean</code> | 
+| [signDisposition] | [<code>SigningOptions</code>](#SigningOptions) | 
+| [signed] | [<code>VerificationOptions</code>](#VerificationOptions) | 
+| [encrypted] | [<code>DecryptionOptions</code>](#DecryptionOptions) | 
 

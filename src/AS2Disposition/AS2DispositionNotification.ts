@@ -3,6 +3,10 @@ import { LIBRAY_NAME_VERSION, CRLF } from '../Constants'
 import { hostname } from 'os'
 import { isNullOrUndefined } from '../Helpers'
 
+/** Class for dealing with disposition notification headers.
+ * @param {AS2DispositionNotification} [notification] - A raw instance of AS2DispositionNotification.
+ * @param {'incoming'|'outgoing'} [notificationType='outgoing'] - The type of notification; default is 'outgoing'.
+*/
 export class AS2DispositionNotification {
   constructor (
     notification?: AS2DispositionNotification,
@@ -58,6 +62,10 @@ export class AS2DispositionNotification {
     }
   }
 
+  /**
+   * Converts this instance to a plain key/value-pair object.
+   * @returns {object} This instance as key/value pairs.
+   */
   toNotification? (): { [key: string]: string } {
     const result = {}
 
@@ -105,7 +113,11 @@ export class AS2DispositionNotification {
     return result
   }
 
-  toString? () {
+  /**
+   * This instance to a string.
+   * @returns {string} a raw string instance.
+   */
+  toString? (): string {
     const notification = this.toNotification()
     const result = []
 

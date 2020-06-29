@@ -5,6 +5,22 @@ import { AS2DispositionNotification } from './AS2DispositionNotification'
 import { EXPLANATION, ERROR } from '../Constants'
 import { VerificationOptions } from '../AS2Crypto'
 
+/** Options for composing a message disposition notification (MDN).
+ * @typedef {object} AS2DispositionOptions
+ * @property {string} explanation
+ * @property {AS2DispositionNotification} notification
+ * @property {AS2MimeNode|boolean} [returned]
+*/
+
+/** Options for generating an outgoing MDN.
+ * @typedef {object} OutgoingDispositionOptions
+ * @property {AS2MimeNode} node
+ * @property {boolean} [returnNode]
+ * @property {SigningOptions} [signDisposition]
+ * @property {VerificationOptions} [signed]
+ * @property {DecryptionOptions} [encrypted]
+*/
+
 const toNotification = function toNotification (
   key: string,
   value: string
@@ -134,6 +150,10 @@ export class AS2Disposition {
   notification: AS2DispositionNotification
   returned?: AS2MimeNode
 
+  /**
+   * This instance to an AS2MimeNode.
+   * @returns {AS2MimeNode} - An MDN as an AS2MimeNode.
+   */
   toMimeNode (): AS2MimeNode {
     const rootNode = new AS2MimeNode({
       contentType: 'multipart/report; report-type=disposition-notification',
@@ -159,7 +179,10 @@ export class AS2Disposition {
     return rootNode
   }
 
-  /** Try to decrypt and/or verify a mime node and construct an outgoing message disposition. */
+  /** Convenience method to decrypt and/or verify a mime node and construct an outgoing message disposition.
+   * @param {OutgoingDispositionOptions} - The options for generating an outgoing MDN.
+   * @returns {Promise<AS2MimeNode>} - The generated outgoing MDN as an AS2MimeNode.
+  */
   static async outgoing (
     options: OutgoingDispositionOptions
   ): Promise<AS2MimeNode> {
@@ -233,7 +256,11 @@ export class AS2Disposition {
     return mdn.toMimeNode()
   }
 
-  /** Deconstruct a mime node into an incoming message disposition. */
+  /** Deconstruct a mime node into an incoming message disposition.
+   * @param {AS2MimeNode} node - An AS2MimeNode containing an incoming MDN.
+   * @param {VerificationOptions} [signed] - Options for verifying the MDN if necessary.
+   * @returns {Promise<AS2Disposition>} The incoming message disposition notification.
+  */
   static async incoming (
     node: AS2MimeNode,
     signed?: VerificationOptions
