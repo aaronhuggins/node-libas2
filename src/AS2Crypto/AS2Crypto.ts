@@ -205,7 +205,7 @@ export class AS2Crypto {
         contentType: 'application/pkcs7-signature',
         content: derBuffer
       })
-    ) as AS2MimeNode
+    )
 
     return rootNode
   }
