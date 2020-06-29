@@ -3,7 +3,7 @@
 A pure Javascript/Typescript implementation of the AS2 protocol.
 
 [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://github.com/standard/eslint-config-standard-with-typescript)
-<!-- [![codecov](https://codecov.io/gh/ahuggins-nhs/node-x12/branch/master/graph/badge.svg)](https://codecov.io/gh/ahuggins-nhs/node-x12) -->
+[![codecov](https://codecov.io/gh/ahuggins-nhs/node-libas2/branch/master/graph/badge.svg)](https://codecov.io/gh/ahuggins-nhs/node-libas2)
 ![GitHub last commit](https://img.shields.io/github/last-commit/ahuggins-nhs/node-libas2)
 ![GitHub contributors](https://img.shields.io/github/contributors/ahuggins-nhs/node-libas2)
 ![npm collaborators](https://img.shields.io/npm/collaborators/libas2)<br />
