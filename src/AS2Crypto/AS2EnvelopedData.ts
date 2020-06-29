@@ -3,7 +3,6 @@ import * as pkijs from 'pkijs/build/index'
 import { Crypto } from '@peculiar/webcrypto'
 import { PemFile } from './PemFile'
 import { ObjectID } from './LibOid'
-import { isNullOrUndefined } from '../Helpers'
 
 const webcrypto = new Crypto()
 
@@ -66,12 +65,12 @@ export class AS2EnvelopedData {
       case 'aes-192-cbc':
         return {
           name: aesCbc,
-          length: 128
+          length: 192
         }
       case 'aes-256-cbc':
         return {
           name: aesCbc,
-          length: 128
+          length: 256
         }
       default:
         throw new Error('Unsupported algorithm: ' + encryption)
@@ -79,7 +78,6 @@ export class AS2EnvelopedData {
   }
 
   async encrypt (cert: string | Buffer, encryption: string) {
-    const crypto = pkijs.getCrypto()
     const certificate = this._toCertificate(cert)
 
     this.enveloped.addRecipientByCertificate(certificate)
