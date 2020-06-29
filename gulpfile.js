@@ -28,7 +28,7 @@ gulp.task(
 gulp.task(
   'compile:tests',
   shell.task([
-    'nyc --report-dir ./docs mocha --reporter=markdown > ./docs/Tests.md'
+    'nyc --reporter=lcovonly --report-dir ./docs mocha --reporter=markdown > ./docs/Tests.md'
   ])
 )
 
