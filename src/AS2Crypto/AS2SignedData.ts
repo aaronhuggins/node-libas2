@@ -47,8 +47,8 @@ export class AS2SignedData {
     encapContentInfo: any
     signerInfos: any[]
     certificates: any[]
-    sign: (...args: any) => void
-    verify: (...args: any) => boolean
+    sign: (...args: any) => Promise<void>
+    verify: (...args: any) => Promise<boolean>
     toSchema: (...args: any) => any
   }
 
