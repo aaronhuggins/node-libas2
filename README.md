@@ -69,3 +69,5 @@ See the [API document](/docs/API.md) for complete information.
 > **Help Wanted:** Any experience writing test suites for AS2 would be welcome.
 
 Contributions, especially from those familiar with the AS2 protocol, are welcome. If you can improve the code, please fork it and fire off a pull request.
+
+This project uses Standard JS, specifically through `prettier-standard`; please format pull requests before submitting to avoid having your contributions incorrectly attributed in the pull request by a code formatting.
