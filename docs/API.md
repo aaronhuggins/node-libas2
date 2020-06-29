@@ -65,6 +65,8 @@
 <dd><p>Options for composing a message disposition notification (MDN).</p></dd>
 <dt><a href="#OutgoingDispositionOptions">OutgoingDispositionOptions</a> : <code>object</code></dt>
 <dd><p>Options for generating an outgoing MDN.</p></dd>
+<dt><a href="#ParseOptions">ParseOptions</a> : <code>object</code></dt>
+<dd><p>Options for parsing a MIME document; useful if there is no access to the underlying raw response.</p></dd>
 </dl>
 
 <a name="AS2Composer"></a>
@@ -523,6 +525,19 @@
 <p>Class for parsing a MIME document to an AS2MimeNode tree.</p>
 
 **Kind**: global class  
+<a name="AS2Parser.parse"></a>
+
+### AS2Parser.parse(content) ⇒ [<code>Promise.&lt;AS2MimeNode&gt;</code>](#AS2MimeNode)
+
+<p>Parse a raw MIME document into an AS2MimeNode.</p>
+
+**Kind**: static method of [<code>AS2Parser</code>](#AS2Parser)  
+**Returns**: [<code>Promise.&lt;AS2MimeNode&gt;</code>](#AS2MimeNode) - <p>The MIME document as an AS2MimeNode.</p>
+
+| Param   | Type                                                                                                            | Description                                       |
+| ------- | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| content | <code>Buffer</code> \| <code>Stream</code> \| <code>string</code> \| [<code>ParseOptions</code>](#ParseOptions) | <p>A raw MIME message or ParseOptions object.</p> |
+
 <a name="getPackageJson"></a>
 
 ## getPackageJson()
@@ -749,3 +764,17 @@
 | [signDisposition] | [<code>SigningOptions</code>](#SigningOptions)           |
 | [signed]          | [<code>VerificationOptions</code>](#VerificationOptions) |
 | [encrypted]       | [<code>DecryptionOptions</code>](#DecryptionOptions)     |
+
+<a name="ParseOptions"></a>
+
+## ParseOptions : <code>object</code>
+
+<p>Options for parsing a MIME document; useful if there is no access to the underlying raw response.</p>
+
+**Kind**: global typedef  
+**Properties**
+
+| Name    | Type                                                              | Description                                                                                                                |
+| ------- | ----------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| headers | <code>Array.&lt;string&gt;</code> \| <code>object</code>          | <p>Either an object like Node.js <code>IncomingMessage.headers</code> or like <code>IncomingMessage.rawHeaders</code>.</p> |
+| content | <code>Buffer</code> \| <code>Stream</code> \| <code>string</code> | <p>The raw body of the MIME document.</p>                                                                                  |
