@@ -19,7 +19,7 @@ const getPackageJson = function getPackageJson (
   if (pkg) {
     return pkg
   } else if (index < 4) {
-    return getPackageJson(dirname(filename), (index += 1))
+    return getPackageJson(dirname(filename), index + 1)
   }
 
   return {}
