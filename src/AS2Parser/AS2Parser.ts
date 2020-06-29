@@ -84,13 +84,44 @@ export class AS2Parser {
     return currentNode
   }
 
-  static async parse (content: Buffer | Stream | string): Promise<AS2MimeNode> {
-    if (this.isStream(content)) {
+  static async parse (
+    content: Buffer | Stream | string | ParseOptions
+  ): Promise<AS2MimeNode> {
+    const options: ParseOptions = content as ParseOptions
+    if (
+      typeof options.headers !== 'undefined' &&
+      typeof options.content !== 'undefined'
+    ) {
+      if (this.isStream(options.content)) {
+        options.content = await this.streamToBuffer(options.content as Stream)
+      }
+      if (Buffer.isBuffer(options.content)) {
+        options.content = options.content.toString('utf8')
+      }
+      let headers = ''
+      if (Array.isArray(options.headers)) {
+        for (let i = 0; i < options.headers.length; i += 2) {
+          headers += options.headers[i] + ': ' + options.headers[i + 1] + '\r\n'
+        }
+      } else {
+        for (const [key, val] of Object.entries(options.headers)) {
+          headers += key + ': ' + val + '\r\n'
+        }
+      }
+
+      content = headers + '\r\n' + (options.content as string).trimLeft()
+    } else if (this.isStream(content)) {
       content = await this.streamToBuffer(content as Stream)
     }
-    const result = parse(content as Buffer)
+
+    const result = parse(content as string | Buffer)
     const as2node = this.transformNodeLike(result)
 
     return as2node
   }
+}
+
+interface ParseOptions {
+  headers: string[] | { [key: string]: string }
+  content: Buffer | Stream | string
 }

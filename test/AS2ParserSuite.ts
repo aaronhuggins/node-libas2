@@ -1,5 +1,10 @@
 import 'mocha'
-import { AS2MimeNode, AS2Parser, AS2Disposition } from '../core'
+import {
+  AS2MimeNode,
+  AS2Parser,
+  AS2Disposition,
+  parseHeaderString
+} from '../core'
 import { ENCRYPTED_CONTENT, SIGNED_MDN } from './Helpers'
 import { Duplex } from 'stream'
 import * as assert from 'assert'
@@ -31,6 +36,32 @@ describe('AS2Parser', async () => {
         (result as any).constructor.name
       }'`
     )
+  })
+
+  it('should parse options to AS2MimeNode', async () => {
+    const [headers, ...body] = ENCRYPTED_CONTENT.split(
+      /(\r\n|\n\r|\n)(\r\n|\n\r|\n)/gu
+    )
+    const stream = new Duplex()
+    stream.push(body.join('').trimLeft())
+    stream.push(null)
+    // Should handle header object like Node IncomingMessage.headers
+    const resultWithHeaderObject = await AS2Parser.parse({
+      headers: parseHeaderString(headers) as any,
+      content: stream
+    })
+    // Should handle header object like Node IncomingMessage.rawHeaders
+    const resultWithHeaderArray = await AS2Parser.parse({
+      headers: headers
+        .replace(/(\r\n|\n\r|\n)( |\t)/gu, ' ')
+        .split(/\n|: /gu)
+        .map(line => line.trim())
+        .filter(line => line !== ''),
+      content: body.join('').trimLeft()
+    })
+
+    assert.strictEqual(resultWithHeaderObject instanceof AS2MimeNode, true)
+    assert.strictEqual(resultWithHeaderArray instanceof AS2MimeNode, true)
   })
 
   it('should parse mdn to AS2MimeNode and generate an AS2Disposition', async () => {
