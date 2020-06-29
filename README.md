@@ -26,11 +26,13 @@ This library is not quite yet ready for production use. The API is still in flux
 ## Usage
 
 Install it from the [npm repository](https://www.npmjs.com/package/libas2):
+
 ```console
 npm install --save libas2
 ```
 
 Then require it in your project:
+
 ```js
 const { AS2Composer } = require('libas2')
 ```
@@ -38,6 +40,7 @@ const { AS2Composer } = require('libas2')
 The TypeScript code is compiled to JavaScript and distributed via NPM. If you wish to use the TypeScript code directly you can [download the zip](https://github.com/ahuggins-nhs/libas2/releases/latest) and unpack it locally.
 
 Then import it in your project:
+
 ```typescript
 import { AS2Composer } from './libas2/core.ts'
 ```
@@ -63,4 +66,6 @@ See the [API document](/docs/API.md) for complete information.
 
 ## Contribute
 
-> TODO
+> **Help Wanted:** Any experience writing test suites for AS2 would be welcome.
+
+Contributions, especially from those familiar with the AS2 protocol, are welcome. If you can improve the code, please fork it and fire off a pull request.

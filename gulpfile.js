@@ -27,9 +27,7 @@ gulp.task(
 
 gulp.task(
   'compile:tests',
-  shell.task([
-    'mocha --reporter=markdown > ./docs/Tests.md'
-  ])
+  shell.task(['mocha --reporter=markdown > ./docs/Tests.md'])
 )
 
 gulp.task('mocha', shell.task(['mocha']))
