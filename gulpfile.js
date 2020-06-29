@@ -21,7 +21,13 @@ gulp.task('compile', shell.task(['tsc']))
 gulp.task(
   'compile:docs',
   shell.task([
-    'jsdoc2md --no-cache --files ./src/**/*.ts --configure ./jsdoc2md.json > ./docs/API.md',
+    'jsdoc2md --no-cache --files ./src/**/*.ts --configure ./jsdoc2md.json > ./docs/API.md'
+  ])
+)
+
+gulp.task(
+  'compile:tests',
+  shell.task([
     'nyc --report-dir ./docs mocha --reporter=markdown > ./docs/Tests.md'
   ])
 )
