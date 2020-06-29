@@ -28,7 +28,7 @@ gulp.task(
 gulp.task(
   'compile:tests',
   shell.task([
-    'nyc --reporter=lcovonly --report-dir ./docs mocha --reporter=markdown > ./docs/Tests.md'
+    'mocha --reporter=markdown > ./docs/Tests.md'
   ])
 )
 
@@ -54,7 +54,10 @@ gulp.task(
   })
 )
 
-gulp.task('codecov', shell.task(['codecov -t FOOBAR']))
+gulp.task(
+  'codecov',
+  shell.task(['codecov -t 7f3b18f1-5a06-49da-be74-b71410c39432'])
+)
 
 gulp.task(
   'test',
