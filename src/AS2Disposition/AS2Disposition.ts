@@ -10,7 +10,7 @@ import { VerificationOptions } from '../AS2Crypto'
  * @property {string} explanation
  * @property {AS2DispositionNotification} notification
  * @property {AS2MimeNode|boolean} [returned]
-*/
+ */
 
 /** Options for generating an outgoing MDN.
  * @typedef {object} OutgoingDispositionOptions
@@ -19,7 +19,7 @@ import { VerificationOptions } from '../AS2Crypto'
  * @property {SigningOptions} [signDisposition]
  * @property {VerificationOptions} [signed]
  * @property {DecryptionOptions} [encrypted]
-*/
+ */
 
 const toNotification = function toNotification (
   key: string,
@@ -182,7 +182,7 @@ export class AS2Disposition {
   /** Convenience method to decrypt and/or verify a mime node and construct an outgoing message disposition.
    * @param {OutgoingDispositionOptions} - The options for generating an outgoing MDN.
    * @returns {Promise<AS2MimeNode>} - The generated outgoing MDN as an AS2MimeNode.
-  */
+   */
   static async outgoing (
     options: OutgoingDispositionOptions
   ): Promise<AS2MimeNode> {
@@ -260,7 +260,7 @@ export class AS2Disposition {
    * @param {AS2MimeNode} node - An AS2MimeNode containing an incoming MDN.
    * @param {VerificationOptions} [signed] - Options for verifying the MDN if necessary.
    * @returns {Promise<AS2Disposition>} The incoming message disposition notification.
-  */
+   */
   static async incoming (
     node: AS2MimeNode,
     signed?: VerificationOptions

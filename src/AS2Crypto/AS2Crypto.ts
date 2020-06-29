@@ -20,35 +20,35 @@ import { AS2EnvelopedData } from './AS2EnvelopedData'
 
 /** List of supported signing algorithms.
  * @typedef {'sha-1'|'sha-256'|'sha-384'|'sha-512'} AS2Signing
-*/
+ */
 
 /** List of supported encryption algorithms.
  * @typedef {'aes-128-CBC' | 'aes-192-CBC' | 'aes-256-CBC'} AS2Encryption
-*/
+ */
 
 /** Options for encrypting payloads.
  * @typedef {object} EncryptionOptions
  * @property {string|Buffer} cert
  * @property {AS2Encryption} encryption
-*/
+ */
 
 /** Options for decrypting payloads.
  * @typedef {object} DecryptionOptions
  * @property {string|Buffer} cert
  * @property {string|Buffer} key
-*/
+ */
 
 /** Options for decrypting payloads.
  * @typedef {object} SigningOptions
  * @property {string|Buffer} cert
  * @property {string|Buffer} key
  * @property {AS2Signing} algorithm
-*/
+ */
 
 /** Options for decrypting payloads.
  * @typedef {object} VerificationOptions
  * @property {string|Buffer} cert
-*/
+ */
 
 /** Class for cryptography methods supported by AS2. */
 export class AS2Crypto {
@@ -62,7 +62,7 @@ export class AS2Crypto {
    * the library joins multipart boundaries without the part's trailing CRLF,
    * where OpenSSL and other SMIME clients keep each part's last CRLF.
    * @private
-  */
+   */
   private static removeTrailingCrLf (buffer: Buffer): Buffer {
     const trailingBytes = buffer.slice(buffer.length - 2, buffer.length)
 
@@ -73,7 +73,7 @@ export class AS2Crypto {
 
   /** Crux to generate UUID-like random strings
    * @returns {string} A UUID-like random string.
-  */
+   */
   static generateUniqueId (): string {
     const byteLengths = [4, 2, 2, 2, 6]
 
@@ -86,7 +86,7 @@ export class AS2Crypto {
    * @param {AS2MimeNode} node - The AS2MimeNode to decrypt.
    * @param {DecryptionOptions} options - Options to decrypt the MIME message.
    * @returns {Promise<AS2MimeNode>} The decrypted MIME as an AS2MimeNode.
-  */
+   */
   static async decrypt (
     node: AS2MimeNode,
     options: DecryptionOptions
@@ -105,7 +105,7 @@ export class AS2Crypto {
    * @param {AS2MimeNode} node - The AS2MimeNode to encrypt.
    * @param {EncryptionOptions} options - Options to encrypt the MIME message.
    * @returns {Promise<AS2MimeNode>} The encrypted MIME as an AS2MimeNode.
-  */
+   */
   static async encrypt (
     node: AS2MimeNode,
     options: EncryptionOptions
@@ -134,7 +134,7 @@ export class AS2Crypto {
    * @param {AS2MimeNode} node - The AS2MimeNode to verify.
    * @param {VerificationOptions} options - Options to verify the MIME message.
    * @returns {Promise<boolean>} A boolean indicating if the message was verified.
-  */
+   */
   static async verify (
     node: AS2MimeNode,
     options: VerificationOptions
@@ -160,7 +160,7 @@ export class AS2Crypto {
    * @param {AS2MimeNode} node - The AS2MimeNode to sign.
    * @param {EncryptionOptions} options - Options to sign the MIME message.
    * @returns {Promise<AS2MimeNode>} The signed MIME as a multipart AS2MimeNode.
-  */
+   */
   static async sign (
     node: AS2MimeNode,
     options: SigningOptions

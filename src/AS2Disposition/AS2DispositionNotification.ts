@@ -6,7 +6,7 @@ import { isNullOrUndefined } from '../Helpers'
 /** Class for dealing with disposition notification headers.
  * @param {AS2DispositionNotification} [notification] - A raw instance of AS2DispositionNotification.
  * @param {'incoming'|'outgoing'} [notificationType='outgoing'] - The type of notification; default is 'outgoing'.
-*/
+ */
 export class AS2DispositionNotification {
   constructor (
     notification?: AS2DispositionNotification,
