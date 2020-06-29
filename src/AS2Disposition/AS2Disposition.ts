@@ -60,20 +60,20 @@ const toNotification = function toNotification (
       for (const part of parts.slice(1)) {
         let index = part.indexOf('=')
         if (index === -1) index = part.length
-        let key = part
+        let partKey = part
           .slice(0, index)
           .trim()
           .toLowerCase()
-        let value: any = part.slice(index + 1).trim()
+        let partValue: any = part.slice(index + 1).trim()
 
-        if (key.startsWith('processed') || key.startsWith('failed')) {
-          let [attrKey, attrProp] = key.split('/')
+        if (partKey.startsWith('processed') || partKey.startsWith('failed')) {
+          let [attrKey, attrProp] = partKey.split('/')
           result.processed = attrKey === 'processed'
 
           if (attrProp !== undefined) {
             result.description = {
               type: attrProp.toLowerCase(),
-              text: value
+              text: partValue
             }
           }
 
@@ -82,8 +82,8 @@ const toNotification = function toNotification (
 
         if (result.attributes === undefined) result.attributes = {}
 
-        if (result.attributes[key] === undefined) {
-          result.attributes[key] = value || true
+        if (result.attributes[partKey] === undefined) {
+          result.attributes[partKey] = partValue || true
         }
       }
       key = newKey(key)
@@ -233,7 +233,6 @@ export class AS2Disposition {
       }
 
       if (isNullOrUndefined(rootNode) && !errored) {
-        errored = true
         notification.disposition.processed = false
         notification.disposition.description = {
           type: 'failure',
