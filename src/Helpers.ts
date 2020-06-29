@@ -164,22 +164,21 @@ export async function request (
 ): Promise<IncomingMessage> {
   return new Promise((resolve, reject) => {
     try {
-      const { params } = options
-      let { body, url } = options
-      url = new URL(url as string)
-      body = isNullOrUndefined(body) ? '' : body
-      const protocol = getProtocol(url) === 'https' ? https : http
+      const { params, body, url } = options
+      const internalUrl = new URL(url as string)
+      const internalBody = isNullOrUndefined(body) ? '' : body
+      const protocol = getProtocol(internalUrl) === 'https' ? https : http
       delete options.body
       delete options.url
       options.method = options.method || 'POST'
       Object.entries(params || {}).forEach(val => {
         if (!isNullOrUndefined(val[1])) {
-          ;(url as URL).searchParams.append(...val)
+          internalUrl.searchParams.append(...val)
         }
       })
       const responseBufs: Buffer[] = []
       const req = protocol.request(
-        url,
+        internalUrl,
         options,
         (response: IncomingMessage) => {
           const bodyBufs: Buffer[] = []
@@ -207,7 +206,7 @@ export async function request (
       req.on('socket', (socket: Socket) => {
         socket.on('data', (data: Buffer) => responseBufs.push(data))
       })
-      req.write(body)
+      req.write(internalBody)
       req.end()
     } catch (error) {
       reject(error)
