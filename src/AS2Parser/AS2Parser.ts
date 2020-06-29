@@ -124,7 +124,7 @@ export class AS2Parser {
       content = await this.streamToBuffer(content as Stream)
     }
 
-    const result = parse(content as string | Buffer)
+    const result = parse(content)
     const as2node = this.transformNodeLike(result)
 
     return as2node
