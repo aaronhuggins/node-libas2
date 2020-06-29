@@ -5,8 +5,6 @@
 <dd><p>Class for composing AS2 messages.</p></dd>
 <dt><a href="#AS2Crypto">AS2Crypto</a></dt>
 <dd><p>Class for cryptography methods supported by AS2.</p></dd>
-<dt><a href="#PemFile">PemFile</a></dt>
-<dd><p>Takes  a DER-encoded PEM format file as a buffer or string and outputs an object with the inferred type and BER data.</p></dd>
 <dt><a href="#AS2Disposition">AS2Disposition</a></dt>
 <dd><p>Class for describing and constructing a Message Disposition Notification.</p></dd>
 <dt><a href="#AS2MimeNode">AS2MimeNode</a></dt>
@@ -49,6 +47,18 @@
 <dd><p>Options for composing an AS2 message.</p></dd>
 <dt><a href="#MessageDispositionOptions">MessageDispositionOptions</a> : <code>object</code></dt>
 <dd><p>Options for composing an AS2 message.</p></dd>
+<dt><a href="#AS2Signing">AS2Signing</a> : <code>&#x27;sha-1&#x27;</code> | <code>&#x27;sha-256&#x27;</code> | <code>&#x27;sha-384&#x27;</code> | <code>&#x27;sha-512&#x27;</code></dt>
+<dd><p>List of supported signing algorithms.</p></dd>
+<dt><a href="#AS2Encryption">AS2Encryption</a> : <code>&#x27;aes-128-CBC&#x27;</code> | <code>&#x27;aes-192-CBC&#x27;</code> | <code>&#x27;aes-256-CBC&#x27;</code></dt>
+<dd><p>List of supported encryption algorithms.</p></dd>
+<dt><a href="#EncryptionOptions">EncryptionOptions</a> : <code>object</code></dt>
+<dd><p>Options for encrypting payloads.</p></dd>
+<dt><a href="#DecryptionOptions">DecryptionOptions</a> : <code>object</code></dt>
+<dd><p>Options for decrypting payloads.</p></dd>
+<dt><a href="#SigningOptions">SigningOptions</a> : <code>object</code></dt>
+<dd><p>Options for decrypting payloads.</p></dd>
+<dt><a href="#VerificationOptions">VerificationOptions</a> : <code>object</code></dt>
+<dd><p>Options for decrypting payloads.</p></dd>
 </dl>
 
 <a name="AS2Composer"></a>
@@ -122,53 +132,73 @@
 **Kind**: global class  
 
 * [AS2Crypto](#AS2Crypto)
-    * [.removeTrailingCrLf()](#AS2Crypto.removeTrailingCrLf)
-    * [.generateUniqueId()](#AS2Crypto.generateUniqueId)
-    * [.decrypt()](#AS2Crypto.decrypt)
-    * [.encrypt()](#AS2Crypto.encrypt)
-    * [.verify()](#AS2Crypto.verify)
-    * [.sign()](#AS2Crypto.sign)
+    * [.generateUniqueId()](#AS2Crypto.generateUniqueId) ⇒ <code>string</code>
+    * [.decrypt(node, options)](#AS2Crypto.decrypt) ⇒ [<code>Promise.&lt;AS2MimeNode&gt;</code>](#AS2MimeNode)
+    * [.encrypt(node, options)](#AS2Crypto.encrypt) ⇒ [<code>Promise.&lt;AS2MimeNode&gt;</code>](#AS2MimeNode)
+    * [.verify(node, options)](#AS2Crypto.verify) ⇒ <code>Promise.&lt;boolean&gt;</code>
+    * [.sign(node, options)](#AS2Crypto.sign) ⇒ [<code>Promise.&lt;AS2MimeNode&gt;</code>](#AS2MimeNode)
     * [.compress()](#AS2Crypto.compress)
     * [.decompress()](#AS2Crypto.decompress)
 
-<a name="AS2Crypto.removeTrailingCrLf"></a>
-
-### AS2Crypto.removeTrailingCrLf()
-<p>A fix for signing with Nodemailer to produce verifiable SMIME;
-the library joins multipart boundaries without the part's trailing CRLF,
-where OpenSSL and other SMIME clients keep each part's last CRLF.</p>
-
-**Kind**: static method of [<code>AS2Crypto</code>](#AS2Crypto)  
 <a name="AS2Crypto.generateUniqueId"></a>
 
-### AS2Crypto.generateUniqueId()
+### AS2Crypto.generateUniqueId() ⇒ <code>string</code>
 <p>Crux to generate UUID-like random strings</p>
 
 **Kind**: static method of [<code>AS2Crypto</code>](#AS2Crypto)  
+**Returns**: <code>string</code> - <p>A UUID-like random string.</p>  
 <a name="AS2Crypto.decrypt"></a>
 
-### AS2Crypto.decrypt()
+### AS2Crypto.decrypt(node, options) ⇒ [<code>Promise.&lt;AS2MimeNode&gt;</code>](#AS2MimeNode)
 <p>Method to decrypt an AS2MimeNode from a PKCS7 encrypted AS2MimeNode.</p>
 
 **Kind**: static method of [<code>AS2Crypto</code>](#AS2Crypto)  
+**Returns**: [<code>Promise.&lt;AS2MimeNode&gt;</code>](#AS2MimeNode) - <p>The decrypted MIME as an AS2MimeNode.</p>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| node | [<code>AS2MimeNode</code>](#AS2MimeNode) | <p>The AS2MimeNode to decrypt.</p> |
+| options | [<code>DecryptionOptions</code>](#DecryptionOptions) | <p>Options to decrypt the MIME message.</p> |
+
 <a name="AS2Crypto.encrypt"></a>
 
-### AS2Crypto.encrypt()
+### AS2Crypto.encrypt(node, options) ⇒ [<code>Promise.&lt;AS2MimeNode&gt;</code>](#AS2MimeNode)
 <p>Method to envelope an AS2MimeNode in an encrypted AS2MimeNode.</p>
 
 **Kind**: static method of [<code>AS2Crypto</code>](#AS2Crypto)  
+**Returns**: [<code>Promise.&lt;AS2MimeNode&gt;</code>](#AS2MimeNode) - <p>The encrypted MIME as an AS2MimeNode.</p>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| node | [<code>AS2MimeNode</code>](#AS2MimeNode) | <p>The AS2MimeNode to encrypt.</p> |
+| options | [<code>EncryptionOptions</code>](#EncryptionOptions) | <p>Options to encrypt the MIME message.</p> |
+
 <a name="AS2Crypto.verify"></a>
 
-### AS2Crypto.verify()
+### AS2Crypto.verify(node, options) ⇒ <code>Promise.&lt;boolean&gt;</code>
 <p>Method to verify data has not been modified from a signature.</p>
 
 **Kind**: static method of [<code>AS2Crypto</code>](#AS2Crypto)  
+**Returns**: <code>Promise.&lt;boolean&gt;</code> - <p>A boolean indicating if the message was verified.</p>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| node | [<code>AS2MimeNode</code>](#AS2MimeNode) | <p>The AS2MimeNode to verify.</p> |
+| options | [<code>VerificationOptions</code>](#VerificationOptions) | <p>Options to verify the MIME message.</p> |
+
 <a name="AS2Crypto.sign"></a>
 
-### AS2Crypto.sign()
+### AS2Crypto.sign(node, options) ⇒ [<code>Promise.&lt;AS2MimeNode&gt;</code>](#AS2MimeNode)
 <p>Method to sign data against a certificate and key pair.</p>
 
 **Kind**: static method of [<code>AS2Crypto</code>](#AS2Crypto)  
+**Returns**: [<code>Promise.&lt;AS2MimeNode&gt;</code>](#AS2MimeNode) - <p>The signed MIME as a multipart AS2MimeNode.</p>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| node | [<code>AS2MimeNode</code>](#AS2MimeNode) | <p>The AS2MimeNode to sign.</p> |
+| options | [<code>EncryptionOptions</code>](#EncryptionOptions) | <p>Options to sign the MIME message.</p> |
+
 <a name="AS2Crypto.compress"></a>
 
 ### AS2Crypto.compress()
@@ -188,27 +218,6 @@ where OpenSSL and other SMIME clients keep each part's last CRLF.</p>
 **Throws**:
 
 - <p>ERROR.NOT_IMPLEMENTED</p>
-
-<a name="PemFile"></a>
-
-## PemFile
-<p>Takes  a DER-encoded PEM format file as a buffer or string and outputs an object with the inferred type and BER data.</p>
-
-**Kind**: global class  
-**Properties**
-
-| Name | Type | Description |
-| --- | --- | --- |
-| type | <code>string</code> | <p>The type of PEM file; one of PRIVATE_KEY, PUBLIC_KEY, CERTIFICATE, or UNKNOWN</p> |
-| data | <code>ArrayBuffer</code> | <p>The data of the DER-encoded PEM as a BER array buffer.</p> |
-
-<a name="new_PemFile_new"></a>
-
-### new PemFile(bufferOrString)
-
-| Param | Type | Description |
-| --- | --- | --- |
-| bufferOrString | <code>Buffer</code> \| <code>string</code> | <p>The data of the PEM-encoded file.</p> |
 
 <a name="AS2Disposition"></a>
 
@@ -334,8 +343,8 @@ where OpenSSL and other SMIME clients keep each part's last CRLF.</p>
 | --- | --- |
 | sender | <code>string</code> | 
 | recipient | <code>string</code> | 
-| sign | <code>SigningOptions</code> | 
-| encrypt | <code>EncryptionOptions</code> | 
+| sign | [<code>SigningOptions</code>](#SigningOptions) | 
+| encrypt | [<code>EncryptionOptions</code>](#EncryptionOptions) | 
 | mdn | [<code>MessageDispositionOptions</code>](#MessageDispositionOptions) | 
 | version | <code>string</code> | 
 | headers | <code>AS2Headers</code> | 
@@ -355,5 +364,69 @@ where OpenSSL and other SMIME clients keep each part's last CRLF.</p>
 | [sign] | <code>object</code> | 
 | sign.importance | <code>&#x27;required&#x27;</code> \| <code>&#x27;optional&#x27;</code> | 
 | sign.protocol | <code>&#x27;pkcs7-signature&#x27;</code> | 
-| sign.micalg | <code>AS2Signing</code> | 
+| sign.micalg | [<code>AS2Signing</code>](#AS2Signing) | 
+
+<a name="AS2Signing"></a>
+
+## AS2Signing : <code>&#x27;sha-1&#x27;</code> \| <code>&#x27;sha-256&#x27;</code> \| <code>&#x27;sha-384&#x27;</code> \| <code>&#x27;sha-512&#x27;</code>
+<p>List of supported signing algorithms.</p>
+
+**Kind**: global typedef  
+<a name="AS2Encryption"></a>
+
+## AS2Encryption : <code>&#x27;aes-128-CBC&#x27;</code> \| <code>&#x27;aes-192-CBC&#x27;</code> \| <code>&#x27;aes-256-CBC&#x27;</code>
+<p>List of supported encryption algorithms.</p>
+
+**Kind**: global typedef  
+<a name="EncryptionOptions"></a>
+
+## EncryptionOptions : <code>object</code>
+<p>Options for encrypting payloads.</p>
+
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type |
+| --- | --- |
+| cert | <code>string</code> \| <code>Buffer</code> | 
+| encryption | [<code>AS2Encryption</code>](#AS2Encryption) | 
+
+<a name="DecryptionOptions"></a>
+
+## DecryptionOptions : <code>object</code>
+<p>Options for decrypting payloads.</p>
+
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type |
+| --- | --- |
+| cert | <code>string</code> \| <code>Buffer</code> | 
+| key | <code>string</code> \| <code>Buffer</code> | 
+
+<a name="SigningOptions"></a>
+
+## SigningOptions : <code>object</code>
+<p>Options for decrypting payloads.</p>
+
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type |
+| --- | --- |
+| cert | <code>string</code> \| <code>Buffer</code> | 
+| key | <code>string</code> \| <code>Buffer</code> | 
+| algorithm | [<code>AS2Signing</code>](#AS2Signing) | 
+
+<a name="VerificationOptions"></a>
+
+## VerificationOptions : <code>object</code>
+<p>Options for decrypting payloads.</p>
+
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type |
+| --- | --- |
+| cert | <code>string</code> \| <code>Buffer</code> | 
 

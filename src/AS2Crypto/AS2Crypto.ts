@@ -18,6 +18,38 @@ import { randomBytes } from 'crypto'
 import { AS2SignedData } from './AS2SignedData'
 import { AS2EnvelopedData } from './AS2EnvelopedData'
 
+/** List of supported signing algorithms.
+ * @typedef {'sha-1'|'sha-256'|'sha-384'|'sha-512'} AS2Signing
+*/
+
+/** List of supported encryption algorithms.
+ * @typedef {'aes-128-CBC' | 'aes-192-CBC' | 'aes-256-CBC'} AS2Encryption
+*/
+
+/** Options for encrypting payloads.
+ * @typedef {object} EncryptionOptions
+ * @property {string|Buffer} cert
+ * @property {AS2Encryption} encryption
+*/
+
+/** Options for decrypting payloads.
+ * @typedef {object} DecryptionOptions
+ * @property {string|Buffer} cert
+ * @property {string|Buffer} key
+*/
+
+/** Options for decrypting payloads.
+ * @typedef {object} SigningOptions
+ * @property {string|Buffer} cert
+ * @property {string|Buffer} key
+ * @property {AS2Signing} algorithm
+*/
+
+/** Options for decrypting payloads.
+ * @typedef {object} VerificationOptions
+ * @property {string|Buffer} cert
+*/
+
 /** Class for cryptography methods supported by AS2. */
 export class AS2Crypto {
   private static async buildNode (node: AS2MimeNode): Promise<Buffer> {
@@ -28,8 +60,10 @@ export class AS2Crypto {
 
   /** A fix for signing with Nodemailer to produce verifiable SMIME;
    * the library joins multipart boundaries without the part's trailing CRLF,
-   * where OpenSSL and other SMIME clients keep each part's last CRLF. */
-  static removeTrailingCrLf (buffer: Buffer): Buffer {
+   * where OpenSSL and other SMIME clients keep each part's last CRLF.
+   * @private
+  */
+  private static removeTrailingCrLf (buffer: Buffer): Buffer {
     const trailingBytes = buffer.slice(buffer.length - 2, buffer.length)
 
     return trailingBytes.toString('utf8') === CRLF
@@ -37,7 +71,9 @@ export class AS2Crypto {
       : buffer
   }
 
-  /** Crux to generate UUID-like random strings */
+  /** Crux to generate UUID-like random strings
+   * @returns {string} A UUID-like random string.
+  */
   static generateUniqueId (): string {
     const byteLengths = [4, 2, 2, 2, 6]
 
@@ -46,7 +82,11 @@ export class AS2Crypto {
       .join('-')
   }
 
-  /** Method to decrypt an AS2MimeNode from a PKCS7 encrypted AS2MimeNode. */
+  /** Method to decrypt an AS2MimeNode from a PKCS7 encrypted AS2MimeNode.
+   * @param {AS2MimeNode} node - The AS2MimeNode to decrypt.
+   * @param {DecryptionOptions} options - Options to decrypt the MIME message.
+   * @returns {Promise<AS2MimeNode>} The decrypted MIME as an AS2MimeNode.
+  */
   static async decrypt (
     node: AS2MimeNode,
     options: DecryptionOptions
@@ -61,7 +101,11 @@ export class AS2Crypto {
     return revivedNode
   }
 
-  /** Method to envelope an AS2MimeNode in an encrypted AS2MimeNode. */
+  /** Method to envelope an AS2MimeNode in an encrypted AS2MimeNode.
+   * @param {AS2MimeNode} node - The AS2MimeNode to encrypt.
+   * @param {EncryptionOptions} options - Options to encrypt the MIME message.
+   * @returns {Promise<AS2MimeNode>} The encrypted MIME as an AS2MimeNode.
+  */
   static async encrypt (
     node: AS2MimeNode,
     options: EncryptionOptions
@@ -86,7 +130,11 @@ export class AS2Crypto {
     return rootNode
   }
 
-  /** Method to verify data has not been modified from a signature. */
+  /** Method to verify data has not been modified from a signature.
+   * @param {AS2MimeNode} node - The AS2MimeNode to verify.
+   * @param {VerificationOptions} options - Options to verify the MIME message.
+   * @returns {Promise<boolean>} A boolean indicating if the message was verified.
+  */
   static async verify (
     node: AS2MimeNode,
     options: VerificationOptions
@@ -108,13 +156,17 @@ export class AS2Crypto {
     return await signedDataNoCrLf.verify(options.cert)
   }
 
-  /** Method to sign data against a certificate and key pair. */
+  /** Method to sign data against a certificate and key pair.
+   * @param {AS2MimeNode} node - The AS2MimeNode to sign.
+   * @param {EncryptionOptions} options - Options to sign the MIME message.
+   * @returns {Promise<AS2MimeNode>} The signed MIME as a multipart AS2MimeNode.
+  */
   static async sign (
     node: AS2MimeNode,
     options: SigningOptions
   ): Promise<AS2MimeNode> {
     const rootNode = new AS2MimeNode({
-      contentType: `multipart/signed; protocol="application/pkcs7-signature"; micalg=${options.micalg};`,
+      contentType: `multipart/signed; protocol="application/pkcs7-signature"; micalg=${options.algorithm};`,
       encrypt: (node as any)._encrypt
     })
     const contentNode = rootNode.appendChild(node) as AS2MimeNode
@@ -144,7 +196,7 @@ export class AS2Crypto {
     const derBuffer = await signedData.sign({
       cert: options.cert,
       key: options.key,
-      algorithm: options.micalg
+      algorithm: options.algorithm
     })
 
     rootNode.appendChild(

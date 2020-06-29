@@ -91,7 +91,7 @@ describe('AS2Composer', async () => {
         sign: {
           cert: LIBAS2_CERT,
           key: LIBAS2_KEY,
-          micalg: AS2Constants.SIGNING.SHA256
+          algorithm: AS2Constants.SIGNING.SHA256
         },
         encrypt: {
           cert: AS2_TESTING_CERT,

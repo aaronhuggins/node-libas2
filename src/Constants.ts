@@ -1,4 +1,4 @@
-import { AS2Encryption, AS2MicAlgorithm, AS2Signing } from './AS2Crypto'
+import { AS2Encryption, AS2Signing } from './AS2Crypto'
 import { dirname, resolve } from 'path'
 import { readFileSync } from 'fs'
 
@@ -49,13 +49,6 @@ export const SIGNING: {
   SHA256: 'sha-256',
   SHA384: 'sha-384',
   SHA512: 'sha-512'
-}
-
-export const MIC_ALGORITHM = {
-  SHA1: 'sha1' as AS2MicAlgorithm,
-  SHA256: 'sha-256' as AS2MicAlgorithm,
-  SHA384: 'sha-384' as AS2MicAlgorithm,
-  SHA512: 'sha-512' as AS2MicAlgorithm
 }
 
 export const ENCRYPTION: {

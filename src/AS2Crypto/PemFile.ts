@@ -2,12 +2,6 @@ import { isNullOrUndefined } from '../Helpers'
 
 type PemFileType = 'UNKNOWN' | 'PRIVATE_KEY' | 'PUBLIC_KEY' | 'CERTIFICATE'
 
-/**
- * Takes  a DER-encoded PEM format file as a buffer or string and outputs an object with the inferred type and BER data.
- * @param {Buffer|string} bufferOrString - The data of the PEM-encoded file.
- * @property {string} type - The type of PEM file; one of PRIVATE_KEY, PUBLIC_KEY, CERTIFICATE, or UNKNOWN
- * @property {ArrayBuffer} data - The data of the DER-encoded PEM as a BER array buffer.
- */
 export class PemFile {
   constructor (data: Buffer | string) {
     if (isNullOrUndefined(data) || data === '') return

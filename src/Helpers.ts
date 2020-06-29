@@ -123,7 +123,7 @@ export function canonicalTransform (node: AS2MimeNode): void {
 
 /** Normalizes certificate signing options. */
 export function signingOptions (sign: SigningOptions): SigningOptions {
-  return { cert: '', key: '', chain: [], micalg: SIGNING.SHA256, ...sign }
+  return { cert: '', key: '', algorithm: SIGNING.SHA256, ...sign }
 }
 
 /** Normalizes encryption options. */
