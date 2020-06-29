@@ -1,5 +1,12 @@
 import 'mocha'
-import { AS2Constants, AS2MimeNode, AS2Parser } from '../core'
+import {
+  AS2Constants,
+  AS2MimeNode,
+  AS2Parser,
+  getReportNode,
+  parseHeaderString,
+  getProtocol
+} from '../core'
 import {
   openssl,
   LIBAS2_CERT,
@@ -58,5 +65,23 @@ describe('AS2MimeNode', async () => {
     const opensslContent = parsed.childNodes[0].content.toString('utf8')
 
     assert.strictEqual(opensslContent, LIBAS2_EDI)
+  })
+
+  it('should pass helper tests', () => {
+    const reportNode = getReportNode(null)
+    const parseHeaderResult = parseHeaderString(null)
+    const parseHeaderMultiple = parseHeaderString(
+      `Header: 1\r\n
+      Header: 2\r\n
+      Header: 3\r\n`,
+      true
+    )
+
+    assert.strictEqual(typeof reportNode === 'undefined', true)
+    assert.deepStrictEqual(parseHeaderResult, {})
+    assert.deepStrictEqual(parseHeaderMultiple, { header: ['1', '2', '3'] })
+    assert.throws(() => {
+      getProtocol(null)
+    })
   })
 })
