@@ -1,6 +1,6 @@
 # libas2
 
-A pure Javascript/Typescript implementation of the AS2 protocol.
+A pure Javascript/Typescript implementation of the AS2 protocol. This project assumes that it fully implements Applicability Statement 2 (AS2) version 1.0 per RFC 4130. Best effort has been made to achieve tests which cover the different aspects of the RFC, but **this is not a certified library**. The project does not have access to Drummond certification, which is considered to be the standards body in certifying compatibility with AS2, so good sense should be used when using this library as the AS2 layer in an application.
 
 [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://github.com/standard/eslint-config-standard-with-typescript)
 [![codecov](https://codecov.io/gh/ahuggins-nhs/node-libas2/branch/master/graph/badge.svg)](https://codecov.io/gh/ahuggins-nhs/node-libas2)
@@ -21,11 +21,26 @@ A pure Javascript/Typescript implementation of the AS2 protocol.
 
 **BETA SOFTWARE**
 
-This library is not quite yet ready for production use. The API is still in flux, but nearly finished. These will be settled soon to allow for a production release. Documentation of the API is only partially complete and won't be until the API is solidified.
+This library is not quite yet ready for production use. The API is still in flux, but nearly finished. This will be settled soon to allow for a production version 1.0.0 release. Documentation of the API is complete and work is being done to keep the documentation up-to-date.
 
 ## Usage
 
-> TODO
+Install it from the [npm repository](https://www.npmjs.com/package/libas2):
+```console
+npm install --save libas2
+```
+
+Then require it in your project:
+```js
+const { AS2Composer } = require('libas2')
+```
+
+The TypeScript code is compiled to JavaScript and distributed via NPM. If you wish to use the TypeScript code directly you can [download the zip](https://github.com/ahuggins-nhs/libas2/releases/latest) and unpack it locally.
+
+Then import it in your project:
+```typescript
+import { AS2Composer } from './libas2/core.ts'
+```
 
 ## Features
 
@@ -44,7 +59,7 @@ This library is not quite yet ready for production use. The API is still in flux
 
 ## API
 
-> TODO
+See the [API document](/docs/API.md) for complete information.
 
 ## Contribute
 
