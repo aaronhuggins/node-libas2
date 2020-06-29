@@ -18,7 +18,7 @@ import {
 import * as assert from 'assert'
 
 describe('AS2MimeNode', async () => {
-  it('should be verified by openssl', async () => {
+  it('signed should be verified by openssl', async () => {
     const smime = new AS2MimeNode({
       filename: 'message.edi',
       contentType: 'application/edi-x12',
@@ -39,7 +39,34 @@ describe('AS2MimeNode', async () => {
     assert.strictEqual(verified, true, 'Mime section not correctly signed.')
   })
 
-  it('should be decrypted by openssl', async () => {
+  it('encrypted should be decrypted by openssl', async () => {
+    const smime = new AS2MimeNode({
+      filename: 'message.edi',
+      contentType: 'application/edi-x12',
+      encrypt: {
+        cert: LIBAS2_CERT,
+        encryption: AS2Constants.ENCRYPTION.AES128
+      },
+      content: LIBAS2_EDI
+    })
+    const encrypted = await smime.build()
+    const output = await openssl({
+      command: 'cms',
+      input: encrypted,
+      arguments: {
+        decrypt: true,
+        recip: LIBAS2_CERT_PATH,
+        inkey: LIBAS2_KEY_PATH,
+        des3: true
+      }
+    })
+    const parsed = await AS2Parser.parse(output)
+    const opensslContent = parsed.content.toString('utf8')
+
+    assert.strictEqual(opensslContent, LIBAS2_EDI)
+  })
+
+  it('signed and encrypted should be decrypted by openssl', async () => {
     const smime = new AS2MimeNode({
       filename: 'message.edi',
       contentType: 'application/edi-x12',
@@ -65,6 +92,18 @@ describe('AS2MimeNode', async () => {
     const opensslContent = parsed.childNodes[0].content.toString('utf8')
 
     assert.strictEqual(opensslContent, LIBAS2_EDI)
+  })
+
+  it('should set message id', () => {
+    const mime = new AS2MimeNode({
+      filename: 'message.edi',
+      contentType: 'application/edi-x12',
+      contentDisposition: 'attachment',
+      content: LIBAS2_EDI
+    })
+    const messageId = mime.messageId(true)
+
+    assert.strictEqual(mime.messageId(), messageId)
   })
 
   it('should pass helper tests', () => {
