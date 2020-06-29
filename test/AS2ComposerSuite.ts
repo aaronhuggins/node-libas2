@@ -11,9 +11,14 @@ import {
   AS2_TESTING_CERT,
   LIBAS2_EDI,
   LIBAS2_CERT,
-  LIBAS2_KEY
+  LIBAS2_KEY,
+  SIGNED_MDN
 } from './Helpers'
 import * as assert from 'assert'
+import { DateTime } from 'luxon'
+import * as nock from 'nock'
+import { parseHeaderString } from '../src/Helpers'
+import { AS2Parser } from '../src/AS2Parser'
 
 const options: AS2ComposerOptions = {
   message: {
@@ -59,6 +64,24 @@ describe('AS2Composer', async () => {
   }).timeout(1000)
 
   it('should make a valid AS2 exchange', async () => {
+    // AS2 testing server is only available between 5:30 AM and 7 PM, Central time.
+    // Main development takes place in time zone America/Chicago.
+    const now = DateTime.utc().setZone('America/Chicago')
+    const startTime = now.set({ hour: 5, minute: 30, second: 0 })
+    const endTime = now.set({ hour: 19, minute: 0, second: 0 })
+    const inServiceHours = now > startTime && now < endTime
+
+    if (!inServiceHours) {
+      // If now is outside the service hours, nock is used to provide a pre-defined mdn.
+      const [headers, ...body] = SIGNED_MDN.split(
+        /(\r\n|\n\r|\n)(\r\n|\n\r|\n)/gu
+      )
+
+      nock('https://as2testing.centralus.cloudapp.azure.com')
+        .post('/pub/Receive.rsb')
+        .reply(200, body.join('').trimLeft(), parseHeaderString(headers))
+    }
+
     // Test using ArcESB; this is a Drummond certified product.
     const composer = new AS2Composer({
       message: options.message,
@@ -89,7 +112,12 @@ describe('AS2Composer', async () => {
         'https://as2testing.centralus.cloudapp.azure.com/pub/Receive.rsb'
       )
     )
-    const mdn = await result.mime()
+    const mdn = inServiceHours
+      ? await result.mime()
+      : await AS2Parser.parse({
+          headers: result.rawHeaders,
+          content: result.rawBody
+        })
     const message = await mdn.verify({ cert: AS2_TESTING_CERT })
 
     assert.strictEqual(
