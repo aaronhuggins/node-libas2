@@ -1,1 +1,1 @@
-declare module 'pkijs/build/index';
+declare module 'pkijs/build/index'

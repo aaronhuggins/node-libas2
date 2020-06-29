@@ -33,7 +33,9 @@ export class AS2SignedData {
     } else {
       const bufferBer = new Uint8Array(signedData).buffer
       const signedDataContentAsn1 = asn1js.fromBER(bufferBer)
-      const signedDataContent = new pkijs.ContentInfo({ schema: signedDataContentAsn1.result })
+      const signedDataContent = new pkijs.ContentInfo({
+        schema: signedDataContentAsn1.result
+      })
       this.signed = new pkijs.SignedData({ schema: signedDataContent.content })
     }
   }
@@ -56,47 +58,50 @@ export class AS2SignedData {
     return new pkijs.Certificate({ schema: certAsn1.result })
   }
 
-  private _addSignerInfo(certificate: any, messageDigest: ArrayBuffer): number {
+  private _addSignerInfo (
+    certificate: any,
+    messageDigest: ArrayBuffer
+  ): number {
     this.signed.certificates.push(certificate)
-    const position = this.signed.signerInfos.push(new pkijs.SignerInfo({
-      sid: new pkijs.IssuerAndSerialNumber({
-        issuer: certificate.issuer,
-        serialNumber: certificate.serialNumber
-      }),
-      signedAttrs: new pkijs.SignedAndUnsignedAttributes({
-        type: 0,
-        attributes: [
-          new pkijs.Attribute({
-            type: new ObjectID({ name: 'contentType' }).id,
-            values: [
-              new asn1js.ObjectIdentifier({
-                value: new ObjectID({ name: 'data' }).id,
-              })
-            ]
-          }),
-          new pkijs.Attribute({
-            type: new ObjectID({ name: 'signingTime' }).id,
-            values: [
-              new asn1js.UTCTime({ valueDate: new Date() })
-            ]
-          }),
-          new pkijs.Attribute({
-            type: new ObjectID({ name: 'messageDigest' }).id,
-            values: [
-              new asn1js.OctetString({
-                valueHex: messageDigest
-              })
-            ]
-          })
-        ]
+    const position = this.signed.signerInfos.push(
+      new pkijs.SignerInfo({
+        sid: new pkijs.IssuerAndSerialNumber({
+          issuer: certificate.issuer,
+          serialNumber: certificate.serialNumber
+        }),
+        signedAttrs: new pkijs.SignedAndUnsignedAttributes({
+          type: 0,
+          attributes: [
+            new pkijs.Attribute({
+              type: new ObjectID({ name: 'contentType' }).id,
+              values: [
+                new asn1js.ObjectIdentifier({
+                  value: new ObjectID({ name: 'data' }).id
+                })
+              ]
+            }),
+            new pkijs.Attribute({
+              type: new ObjectID({ name: 'signingTime' }).id,
+              values: [new asn1js.UTCTime({ valueDate: new Date() })]
+            }),
+            new pkijs.Attribute({
+              type: new ObjectID({ name: 'messageDigest' }).id,
+              values: [
+                new asn1js.OctetString({
+                  valueHex: messageDigest
+                })
+              ]
+            })
+          ]
+        })
       })
-    }))
+    )
 
     return position - 1
   }
 
   private _getCertAlgorithmId (certificate: any) {
-    const rsaPssId = new ObjectID({ name: 'RSA-PSS'}).id
+    const rsaPssId = new ObjectID({ name: 'RSA-PSS' }).id
 
     if (certificate.signatureAlgorithm.algorithmId === rsaPssId) {
       return rsaPssId
@@ -108,18 +113,23 @@ export class AS2SignedData {
   private async _addSigner ({ cert, key, algorithm }: SignMethodOptions) {
     const crypto = pkijs.getCrypto()
     const certificate = this._toCertificate(cert)
-    const messageDigest = await crypto.digest(
-      { name: algorithm },
-      this.data
+    const messageDigest = await crypto.digest({ name: algorithm }, this.data)
+    const privateKeyOptions = crypto.getAlgorithmByOID(
+      this._getCertAlgorithmId(certificate)
     )
-    const privateKeyOptions = crypto.getAlgorithmByOID(this._getCertAlgorithmId(certificate))
 
     if ('hash' in privateKeyOptions) {
       privateKeyOptions.hash.name = algorithm
     }
 
     const keyPemFile = new PemFile(key)
-    const privateKey = await webcrypto.subtle.importKey('pkcs8', keyPemFile.data, privateKeyOptions, true, ['sign'])
+    const privateKey = await webcrypto.subtle.importKey(
+      'pkcs8',
+      keyPemFile.data,
+      privateKeyOptions,
+      true,
+      ['sign']
+    )
     const index = this._addSignerInfo(certificate, messageDigest)
 
     await this.signed.sign(privateKey, index, algorithm, this.data)
@@ -131,7 +141,7 @@ export class AS2SignedData {
 
       for (let i = 0; i < this.signed.signerInfos.length; i += 1) {
         const signerInfo = this.signed.signerInfos[i]
-  
+
         if (
           certificate.issuer.isEqual(signerInfo.sid.issuer) &&
           certificate.serialNumber.isEqual(signerInfo.sid.serialNumber)
@@ -144,7 +154,12 @@ export class AS2SignedData {
     return -1
   }
 
-  async sign ({ cert, key, algorithm, addSigners }: SignMethodOptions): Promise<Buffer> {
+  async sign ({
+    cert,
+    key,
+    algorithm,
+    addSigners
+  }: SignMethodOptions): Promise<Buffer> {
     await this._addSigner({ cert, key, algorithm })
 
     if (Array.isArray(addSigners)) {
@@ -179,12 +194,12 @@ export class AS2SignedData {
 }
 
 export interface SignMethodOptions {
-  cert: string | Buffer,
-  key: string | Buffer,
-  algorithm: string,
+  cert: string | Buffer
+  key: string | Buffer
+  algorithm: string
   addSigners?: Array<{
-    cert: string | Buffer,
-    key: string | Buffer,
-    algorithm: string,
+    cert: string | Buffer
+    key: string | Buffer
+    algorithm: string
   }>
 }

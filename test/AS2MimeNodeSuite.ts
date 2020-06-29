@@ -37,7 +37,10 @@ describe('AS2MimeNode', async () => {
       filename: 'message.edi',
       contentType: 'application/edi-x12',
       sign: { cert: LIBAS2_CERT, key: LIBAS2_KEY },
-      encrypt: { cert: LIBAS2_CERT, encryption: AS2Constants.ENCRYPTION.AES128 },
+      encrypt: {
+        cert: LIBAS2_CERT,
+        encryption: AS2Constants.ENCRYPTION.AES128
+      },
       content: LIBAS2_EDI
     })
     const encrypted = await smime.build()

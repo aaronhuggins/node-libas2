@@ -1,5 +1,12 @@
 import 'mocha'
-import { AS2Crypto, AS2MimeNode, AS2Parser, objectIds, ObjectID, PemFile } from '../core'
+import {
+  AS2Crypto,
+  AS2MimeNode,
+  AS2Parser,
+  objectIds,
+  ObjectID,
+  PemFile
+} from '../core'
 import {
   LIBAS2_CERT,
   LIBAS2_KEY,
@@ -32,7 +39,7 @@ describe('AS2Crypto', async () => {
   })
 
   it('should verify cms message produced by openssl', async () => {
-    /* 
+    /*
      * Issue: https://github.com/ahuggins-nhs/node-libas2/issues/9
      * Payload MUST be canonicalized to CRLF in order for libraries to verify.
      * OpenSSL command line will ALWAYS canonicalize payloads as a convenience.
@@ -41,7 +48,7 @@ describe('AS2Crypto', async () => {
      * This is the reason that an SMIME signature or a signature with the payload
      * attached can be verified; the content accompanies the signature in the
      * form it was signed.
-    */
+     */
     writeFileSync('test/temp-data/payload', 'Something to Sign\r\n')
     await openssl({
       command: 'req',
@@ -106,11 +113,13 @@ describe('AS2Crypto', async () => {
   it('should parse a pem file to der and infer type', () => {
     const undefinedOrNullPem = new PemFile(null)
     const keyPem = new PemFile(LIBAS2_KEY.replace('PRIVATE KEY', 'PUBLIC KEY'))
-    const certificateDerPem = Buffer.from(LIBAS2_CERT
-      .split('\n') // Split on new line
-      .filter(line => !line.includes('-BEGIN') && !line.includes('-END')) // Remove header/trailer
-      .map(line => line.trim()) // Trim extra white space
-      .join(''), 'base64')
+    const certificateDerPem = Buffer.from(
+      LIBAS2_CERT.split('\n') // Split on new line
+        .filter(line => !line.includes('-BEGIN') && !line.includes('-END')) // Remove header/trailer
+        .map(line => line.trim()) // Trim extra white space
+        .join(''),
+      'base64'
+    )
     const fromDerPem = PemFile.fromDer(certificateDerPem, 'CERTIFICATE')
 
     assert.strictEqual(fromDerPem.data instanceof ArrayBuffer, true)

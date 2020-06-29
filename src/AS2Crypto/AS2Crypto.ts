@@ -5,10 +5,7 @@ import {
   ERROR
 } from '../Constants'
 import { AS2MimeNode } from '../AS2MimeNode'
-import {
-  encryptionOptions,
-  canonicalTransform
-} from '../Helpers'
+import { encryptionOptions, canonicalTransform } from '../Helpers'
 import * as MimeNode from 'nodemailer/lib/mime-node'
 import {
   EncryptionOptions,
@@ -79,8 +76,10 @@ export class AS2Crypto {
 
     const buffer = await AS2Crypto.buildNode(node)
     const envelopedData = new AS2EnvelopedData(buffer)
-
-    const derBuffer = await envelopedData.encrypt(options.cert, options.encryption)
+    const derBuffer = await envelopedData.encrypt(
+      options.cert,
+      options.encryption
+    )
 
     rootNode.setContent(derBuffer)
 

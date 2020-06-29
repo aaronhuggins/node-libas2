@@ -20,13 +20,23 @@ export class PemFile {
     const lines = data.split('\n')
     let contents = ''
 
-    if (lines[0].toLowerCase().includes('private key')) this.type = 'PRIVATE_KEY'
-    if (lines[0].toLowerCase().includes('public key')) this.type = 'PUBLIC_KEY'
-    if (lines[0].toLowerCase().includes('certificate')) this.type = 'CERTIFICATE'
+    if (lines[0].toLowerCase().includes('private key')) {
+      this.type = 'PRIVATE_KEY'
+    }
+    if (lines[0].toLowerCase().includes('public key')) {
+      this.type = 'PUBLIC_KEY'
+    }
+    if (lines[0].toLowerCase().includes('certificate')) {
+      this.type = 'CERTIFICATE'
+    }
 
     for (let line of lines) {
       line = line.trim()
-      if (line.length > 0 && !line.toLowerCase().includes('-begin') && !line.toLowerCase().includes('-end')) {
+      if (
+        line.length > 0 &&
+        !line.toLowerCase().includes('-begin') &&
+        !line.toLowerCase().includes('-end')
+      ) {
         contents += line + '\r\n'
       }
     }

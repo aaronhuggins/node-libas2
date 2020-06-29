@@ -5,7 +5,7 @@ export class LibObjectID {
     this.map = new Map(map)
   }
 
-  private map: Map<string,string>
+  private map: Map<string, string>
 
   byId (id: string): ObjectID {
     const name = this.map.get(id)
@@ -122,7 +122,10 @@ export class LibObjectID {
       ['2.5.4.13', 'description'],
       ['2.5.4.15', 'businessCategory'],
       ['2.5.4.17', 'postalCode'],
-      ['1.3.6.1.4.1.311.60.2.1.2', 'jurisdictionOfIncorporationStateOrProvinceName'],
+      [
+        '1.3.6.1.4.1.311.60.2.1.2',
+        'jurisdictionOfIncorporationStateOrProvinceName'
+      ],
       ['1.3.6.1.4.1.311.60.2.1.3', 'jurisdictionOfIncorporationCountryName'],
 
       // X.509 extension OIDs
@@ -183,7 +186,7 @@ export class LibObjectID {
 export const objectIds = LibObjectID.init()
 
 export class ObjectID {
-  constructor ({ name, id }: { name?: string, id?: string }) {
+  constructor ({ name, id }: { name?: string; id?: string }) {
     if (isNullOrUndefined(name) && isNullOrUndefined(id)) {
       throw new Error('Cannot find ObjectID by undefined or null values.')
     }

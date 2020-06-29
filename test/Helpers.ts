@@ -64,7 +64,7 @@ export async function openssl (options: {
 export async function openssl (options: {
   command: string
   input?: Buffer
-  arguments: { [key: string]: string | boolean },
+  arguments: { [key: string]: string | boolean }
   printError?: boolean
 }): Promise<string | boolean> {
   const args = [options.command]

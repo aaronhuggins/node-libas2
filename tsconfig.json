@@ -11,7 +11,14 @@
     "declaration": true,
     "allowSyntheticDefaultImports": true,
     "typeRoots": ["node_modules/@types", "typings"],
-    "types": ["node-forge", "mailparser", "mocha", "node", "nodemailer", "pkijs/build"]
+    "types": [
+      "node-forge",
+      "mailparser",
+      "mocha",
+      "node",
+      "nodemailer",
+      "pkijs/build"
+    ]
   },
 
   "exclude": ["node_modules", "dist", "test"]

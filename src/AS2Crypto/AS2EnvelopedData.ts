@@ -22,8 +22,12 @@ export class AS2EnvelopedData {
     if (enveloped) {
       const bufferBer = new Uint8Array(data).buffer
       const envelopedDataContentAsn1 = asn1js.fromBER(bufferBer)
-      const envelopedDataContent = new pkijs.ContentInfo({ schema: envelopedDataContentAsn1.result })
-      this.enveloped = new pkijs.EnvelopedData({ schema: envelopedDataContent.content })
+      const envelopedDataContent = new pkijs.ContentInfo({
+        schema: envelopedDataContentAsn1.result
+      })
+      this.enveloped = new pkijs.EnvelopedData({
+        schema: envelopedDataContent.content
+      })
     } else {
       this.data = new Uint8Array(data).buffer
       this.enveloped = new pkijs.EnvelopedData()
@@ -41,7 +45,7 @@ export class AS2EnvelopedData {
   }
 
   private _getCertAlgorithmId (certificate: any) {
-    const rsaPssId = new ObjectID({ name: 'RSA-PSS'}).id
+    const rsaPssId = new ObjectID({ name: 'RSA-PSS' }).id
 
     if (certificate.signatureAlgorithm.algorithmId === rsaPssId) {
       return rsaPssId
@@ -77,15 +81,12 @@ export class AS2EnvelopedData {
   async encrypt (cert: string | Buffer, encryption: string) {
     const crypto = pkijs.getCrypto()
     const certificate = this._toCertificate(cert)
-    const publicCertOptions = crypto.getAlgorithmByOID(this._getCertAlgorithmId(certificate))
-    // let certAlgorithm = 'sha-256'
 
-    /* if ('hash' in publicCertOptions) {
-      certAlgorithm = publicCertOptions.hash.name
-    } */
-
-    this.enveloped.addRecipientByCertificate(certificate /* , { oaepHashAlgorithm: certAlgorithm } */)
-    await this.enveloped.encrypt(this._getEncryptionAlgorithm(encryption), this.data)
+    this.enveloped.addRecipientByCertificate(certificate)
+    await this.enveloped.encrypt(
+      this._getEncryptionAlgorithm(encryption),
+      this.data
+    )
 
     const envelopedDataContent = new pkijs.ContentInfo({
       contentType: new ObjectID({ name: 'envelopedData' }).id,
