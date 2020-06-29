@@ -384,7 +384,7 @@ should generate outgoing disposition from incoming message.
 
 # AS2MimeNode
 
-should be verified by openssl.
+signed should be verified by openssl.
 
 ```js
 ;async () => {
@@ -408,7 +408,37 @@ should be verified by openssl.
 }
 ```
 
-should be decrypted by openssl.
+encrypted should be decrypted by openssl.
+
+```js
+;async () => {
+  const smime = new core_1.AS2MimeNode({
+    filename: 'message.edi',
+    contentType: 'application/edi-x12',
+    encrypt: {
+      cert: Helpers_1.LIBAS2_CERT,
+      encryption: core_1.AS2Constants.ENCRYPTION.AES128
+    },
+    content: Helpers_1.LIBAS2_EDI
+  })
+  const encrypted = await smime.build()
+  const output = await Helpers_1.openssl({
+    command: 'cms',
+    input: encrypted,
+    arguments: {
+      decrypt: true,
+      recip: Helpers_1.LIBAS2_CERT_PATH,
+      inkey: Helpers_1.LIBAS2_KEY_PATH,
+      des3: true
+    }
+  })
+  const parsed = await core_1.AS2Parser.parse(output)
+  const opensslContent = parsed.content.toString('utf8')
+  assert.strictEqual(opensslContent, Helpers_1.LIBAS2_EDI)
+}
+```
+
+signed and encrypted should be decrypted by openssl.
 
 ```js
 ;async () => {
@@ -437,6 +467,19 @@ should be decrypted by openssl.
   const opensslContent = parsed.childNodes[0].content.toString('utf8')
   assert.strictEqual(opensslContent, Helpers_1.LIBAS2_EDI)
 }
+```
+
+should set message id.
+
+```js
+const mime = new core_1.AS2MimeNode({
+  filename: 'message.edi',
+  contentType: 'application/edi-x12',
+  contentDisposition: 'attachment',
+  content: Helpers_1.LIBAS2_EDI
+})
+const messageId = mime.messageId(true)
+assert.strictEqual(mime.messageId(), messageId)
 ```
 
 should pass helper tests.
