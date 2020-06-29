@@ -338,7 +338,184 @@
 
 <p>Class for describing and constructing a MIME document.</p>
 
-**Kind**: global class  
+**Kind**: global class
+
+- [AS2MimeNode](#AS2MimeNode)
+  - [new AS2MimeNode(options)](#new_AS2MimeNode_new)
+  - _instance_
+    - [.setSigning(options)](#AS2MimeNode+setSigning)
+    - [.setEncryption(options)](#AS2MimeNode+setEncryption)
+    - [.setHeader(keyOrHeaders, [value])](#AS2MimeNode+setHeader) ⇒ [<code>AS2MimeNode</code>](#AS2MimeNode)
+    - [.messageId([create])](#AS2MimeNode+messageId) ⇒ <code>string</code>
+    - [.dispositionOut([options])](#AS2MimeNode+dispositionOut) ⇒ [<code>Promise.&lt;AS2MimeNode&gt;</code>](#AS2MimeNode)
+    - [.dispositionIn([signed])](#AS2MimeNode+dispositionIn) ⇒ [<code>Promise.&lt;AS2Disposition&gt;</code>](#AS2Disposition)
+    - [.sign([options])](#AS2MimeNode+sign) ⇒ [<code>Promise.&lt;AS2MimeNode&gt;</code>](#AS2MimeNode)
+    - [.verify(options)](#AS2MimeNode+verify) ⇒ [<code>Promise.&lt;AS2MimeNode&gt;</code>](#AS2MimeNode)
+    - [.decrypt(options)](#AS2MimeNode+decrypt) ⇒ [<code>Promise.&lt;AS2MimeNode&gt;</code>](#AS2MimeNode)
+    - [.encrypt([options])](#AS2MimeNode+encrypt) ⇒ [<code>Promise.&lt;AS2MimeNode&gt;</code>](#AS2MimeNode)
+    - [.build()](#AS2MimeNode+build) ⇒ <code>Promise.&lt;Buffer&gt;</code>
+  - _static_
+    - [.generateMessageId([sender], [uniqueId])](#AS2MimeNode.generateMessageId) ⇒ <code>string</code>
+
+<a name="new_AS2MimeNode_new"></a>
+
+### new AS2MimeNode(options)
+
+| Param   | Type                            | Description                                     |
+| ------- | ------------------------------- | ----------------------------------------------- |
+| options | <code>AS2MimeNodeOptions</code> | <p>Options for constructing an AS2 message.</p> |
+
+<a name="AS2MimeNode+setSigning"></a>
+
+### aS2MimeNode.setSigning(options)
+
+<p>Set the signing options for this instance.</p>
+
+**Kind**: instance method of [<code>AS2MimeNode</code>](#AS2MimeNode)
+
+| Param   | Type                                           | Description                                  |
+| ------- | ---------------------------------------------- | -------------------------------------------- |
+| options | [<code>SigningOptions</code>](#SigningOptions) | <p>Options for signing this AS2 message.</p> |
+
+<a name="AS2MimeNode+setEncryption"></a>
+
+### aS2MimeNode.setEncryption(options)
+
+<p>Set the encryption options for this instance.</p>
+
+**Kind**: instance method of [<code>AS2MimeNode</code>](#AS2MimeNode)
+
+| Param   | Type                                                 | Description                                     |
+| ------- | ---------------------------------------------------- | ----------------------------------------------- |
+| options | [<code>EncryptionOptions</code>](#EncryptionOptions) | <p>Options for encrypting this AS2 message.</p> |
+
+<a name="AS2MimeNode+setHeader"></a>
+
+### aS2MimeNode.setHeader(keyOrHeaders, [value]) ⇒ [<code>AS2MimeNode</code>](#AS2MimeNode)
+
+<p>Set one or more headers on this instance.</p>
+
+**Kind**: instance method of [<code>AS2MimeNode</code>](#AS2MimeNode)  
+**Returns**: [<code>AS2MimeNode</code>](#AS2MimeNode) - <p>This AS2MimeNode instance.</p>
+
+| Param        | Type                                    | Description                                                                   |
+| ------------ | --------------------------------------- | ----------------------------------------------------------------------------- |
+| keyOrHeaders | <code>string</code> \| <code>any</code> | <p>The key name of the header to set or an array of headers.</p>              |
+| [value]      | <code>string</code>                     | <p>The value of the header key; required if providing a simple key/value.</p> |
+
+<a name="AS2MimeNode+messageId"></a>
+
+### aS2MimeNode.messageId([create]) ⇒ <code>string</code>
+
+<p>Sets and/or gets the message ID of the MIME message.</p>
+
+**Kind**: instance method of [<code>AS2MimeNode</code>](#AS2MimeNode)  
+**Returns**: <code>string</code> - <p>The message ID of the MIME.</p>
+
+| Param    | Type                 | Default            | Description                                          |
+| -------- | -------------------- | ------------------ | ---------------------------------------------------- |
+| [create] | <code>boolean</code> | <code>false</code> | <p>Set the the message ID if one does not exist.</p> |
+
+<a name="AS2MimeNode+dispositionOut"></a>
+
+### aS2MimeNode.dispositionOut([options]) ⇒ [<code>Promise.&lt;AS2MimeNode&gt;</code>](#AS2MimeNode)
+
+<p>Convenience method for generating an outgoing MDN for this message.</p>
+
+**Kind**: instance method of [<code>AS2MimeNode</code>](#AS2MimeNode)  
+**Returns**: [<code>Promise.&lt;AS2MimeNode&gt;</code>](#AS2MimeNode) - <p>An outgoing MDN as an AS2MimeNode.</p>
+
+| Param     | Type                               | Description                                    |
+| --------- | ---------------------------------- | ---------------------------------------------- |
+| [options] | <code>DispositionOutOptions</code> | <p>Optional options for generating an MDN.</p> |
+
+<a name="AS2MimeNode+dispositionIn"></a>
+
+### aS2MimeNode.dispositionIn([signed]) ⇒ [<code>Promise.&lt;AS2Disposition&gt;</code>](#AS2Disposition)
+
+<p>Convenience method for consuming this instance as an incoming MDN.</p>
+
+**Kind**: instance method of [<code>AS2MimeNode</code>](#AS2MimeNode)  
+**Returns**: [<code>Promise.&lt;AS2Disposition&gt;</code>](#AS2Disposition) - <p>This instance as an incoming AS2Disposition.</p>
+
+| Param    | Type                                                     | Description                                        |
+| -------- | -------------------------------------------------------- | -------------------------------------------------- |
+| [signed] | [<code>VerificationOptions</code>](#VerificationOptions) | <p>Pass verification options for a signed MDN.</p> |
+
+<a name="AS2MimeNode+sign"></a>
+
+### aS2MimeNode.sign([options]) ⇒ [<code>Promise.&lt;AS2MimeNode&gt;</code>](#AS2MimeNode)
+
+<p>Convenience method for signing this instance.</p>
+
+**Kind**: instance method of [<code>AS2MimeNode</code>](#AS2MimeNode)  
+**Returns**: [<code>Promise.&lt;AS2MimeNode&gt;</code>](#AS2MimeNode) - <p>This instance as a new signed multipart AS2MimeNode.</p>
+
+| Param     | Type                                           | Description                                                                                            |
+| --------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| [options] | [<code>SigningOptions</code>](#SigningOptions) | <p>Options for signing this AS2 message; not required if provided when constructing this instance.</p> |
+
+<a name="AS2MimeNode+verify"></a>
+
+### aS2MimeNode.verify(options) ⇒ [<code>Promise.&lt;AS2MimeNode&gt;</code>](#AS2MimeNode)
+
+<p>Convenience method for verifying this instance.</p>
+
+**Kind**: instance method of [<code>AS2MimeNode</code>](#AS2MimeNode)  
+**Returns**: [<code>Promise.&lt;AS2MimeNode&gt;</code>](#AS2MimeNode) - <p>The content part of this signed message as an AS2MimeNode.</p>
+
+| Param   | Type                                                     | Description                                           |
+| ------- | -------------------------------------------------------- | ----------------------------------------------------- |
+| options | [<code>VerificationOptions</code>](#VerificationOptions) | <p>Options for verifying this signed AS2 message.</p> |
+
+<a name="AS2MimeNode+decrypt"></a>
+
+### aS2MimeNode.decrypt(options) ⇒ [<code>Promise.&lt;AS2MimeNode&gt;</code>](#AS2MimeNode)
+
+<p>Convenience method for decrypting this instance.</p>
+
+**Kind**: instance method of [<code>AS2MimeNode</code>](#AS2MimeNode)  
+**Returns**: [<code>Promise.&lt;AS2MimeNode&gt;</code>](#AS2MimeNode) - <p>The contents of the encrypted message as an AS2MimeNode.</p>
+
+| Param   | Type                                                 | Description                                               |
+| ------- | ---------------------------------------------------- | --------------------------------------------------------- |
+| options | [<code>DecryptionOptions</code>](#DecryptionOptions) | <p>Options for decrypting this encrypted AS2 message.</p> |
+
+<a name="AS2MimeNode+encrypt"></a>
+
+### aS2MimeNode.encrypt([options]) ⇒ [<code>Promise.&lt;AS2MimeNode&gt;</code>](#AS2MimeNode)
+
+<p>Convenience method for encrypting this instance.</p>
+
+**Kind**: instance method of [<code>AS2MimeNode</code>](#AS2MimeNode)  
+**Returns**: [<code>Promise.&lt;AS2MimeNode&gt;</code>](#AS2MimeNode) - <p>This instance as a new encrypted AS2MimeNode.</p>
+
+| Param     | Type                                                 | Description                                                                                               |
+| --------- | ---------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| [options] | [<code>EncryptionOptions</code>](#EncryptionOptions) | <p>Options for encrypting this AS2 message; not required if provided when constructing this instance.</p> |
+
+<a name="AS2MimeNode+build"></a>
+
+### aS2MimeNode.build() ⇒ <code>Promise.&lt;Buffer&gt;</code>
+
+<p>Constructs a complete S/MIME or MIME buffer from this instance.</p>
+
+**Kind**: instance method of [<code>AS2MimeNode</code>](#AS2MimeNode)  
+**Returns**: <code>Promise.&lt;Buffer&gt;</code> - <p>This instance as raw, complete S/MIME or MIME buffer.</p>  
+<a name="AS2MimeNode.generateMessageId"></a>
+
+### AS2MimeNode.generateMessageId([sender], [uniqueId]) ⇒ <code>string</code>
+
+<p>Generates a valid, formatted, random message ID.</p>
+
+**Kind**: static method of [<code>AS2MimeNode</code>](#AS2MimeNode)  
+**Returns**: <code>string</code> - <p>A valid message ID for use with MIME.</p>
+
+| Param      | Type                | Default                                                | Description                                                    |
+| ---------- | ------------------- | ------------------------------------------------------ | -------------------------------------------------------------- |
+| [sender]   | <code>string</code> | <code>&quot;&#x27;&lt;HOST_NAME&gt;&#x27;&quot;</code> | <p>The sender of this ID.</p>                                  |
+| [uniqueId] | <code>string</code> |                                                        | <p>A unique ID may be provided if a real GUID is required.</p> |
+
 <a name="AS2Parser"></a>
 
 ## AS2Parser

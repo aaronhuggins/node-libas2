@@ -1,6 +1,6 @@
 import { Readable } from 'stream'
 import * as MimeNode from 'nodemailer/lib/mime-node'
-import { AS2MimeNodeOptions } from './Interfaces'
+import { AS2MimeNodeOptions, DispositionOutOptions } from './Interfaces'
 import {
   isNullOrUndefined,
   signingOptions,
@@ -17,7 +17,29 @@ import {
 import { AS2Disposition } from '../AS2Disposition'
 import { hostname } from 'os'
 
-/** Class for describing and constructing a MIME document. */
+/** Options for constructing an AS2 message.
+ * @typedef {object} AS2MimeNodeOptions
+ * @property {string} [filename]
+ * @property {string|Buffer | Readable} [content]
+ * @property {string} [boundary]
+ * @property {string} [baseBoundary]
+ * @property {false|string} [boundaryPrefix='--LibAs2_']
+ * @property {string} [contentType]
+ * @property {boolean|'inline'|'attachment'} [contentDisposition]
+ * @property {string} [messageId]
+ * @property {AS2Headers} [headers]
+ * @property {SigningOptions} [sign]
+ * @property {EncryptionOptions} [encrypt]
+ */
+
+/** Convenience options for generating an outgoing MDN.
+ * @typedef {object} DispositionOutOptions
+ * @property {boolean} [returnNode]
+ * @property {SigningOptions} [signDisposition]
+ * @property {VerificationOptions} [signed]
+ * @property {DecryptionOptions} [encrypted]
+ */
+
 export interface AS2MimeNode {
   keepBcc: boolean
   _headers: Array<{
@@ -41,7 +63,9 @@ export interface AS2MimeNode {
   _encodeHeaderValue(key: string, value: string): string
 }
 
-/** Class for describing and constructing a MIME document. */
+/** Class for describing and constructing a MIME document.
+ * @param {AS2MimeNodeOptions} options - Options for constructing an AS2 message.
+ */
 export class AS2MimeNode extends MimeNode {
   constructor (options: AS2MimeNodeOptions) {
     const {
@@ -140,19 +164,36 @@ export class AS2MimeNode extends MimeNode {
   compressed: boolean
   smimeType: string
 
+  /** Set the signing options for this instance.
+   * @param {SigningOptions} options - Options for signing this AS2 message.
+   */
   setSigning (options: SigningOptions): void {
     this._sign = signingOptions(options)
   }
 
+  /** Set the encryption options for this instance.
+   * @param {EncryptionOptions} options - Options for encrypting this AS2 message.
+   */
   setEncryption (options: EncryptionOptions): void {
     this._encrypt = encryptionOptions(options)
   }
 
+  /** Set one or more headers on this instance.
+   * @param {string|any} keyOrHeaders - The key name of the header to set or an array of headers.
+   * @param {string} [value] - The value of the header key; required if providing a simple key/value.
+   * @returns {AS2MimeNode} This AS2MimeNode instance.
+   */
   setHeader (keyOrHeaders: any, value?: any): this {
-    return super.setHeader(keyOrHeaders, value)
+    super.setHeader(keyOrHeaders, value)
+
+    return this
   }
 
-  messageId (create: boolean = false) {
+  /** Sets and/or gets the message ID of the MIME message.
+   * @param {boolean} [create=false] - Set the the message ID if one does not exist.
+   * @returns {string} The message ID of the MIME.
+   */
+  messageId (create: boolean = false): string {
     let messageId = this.getHeader('Message-ID')
 
     // You really should define your own Message-Id field!
@@ -165,43 +206,65 @@ export class AS2MimeNode extends MimeNode {
     return messageId
   }
 
-  async dispositionOut (options?: {
-    returnNode?: boolean
-    signDisposition?: SigningOptions
-    signed?: VerificationOptions
-    encrypted?: DecryptionOptions
-  }) {
+  /** Convenience method for generating an outgoing MDN for this message.
+   * @param {DispositionOutOptions} [options] - Optional options for generating an MDN.
+   * @returns {Promise<AS2MimeNode>} An outgoing MDN as an AS2MimeNode.
+   */
+  async dispositionOut (options?: DispositionOutOptions): Promise<AS2MimeNode> {
     options = isNullOrUndefined(options) ? {} : options
 
     return await AS2Disposition.outgoing({ ...options, node: this })
   }
 
-  async dispositionIn (signed?: VerificationOptions) {
+  /** Convenience method for consuming this instance as an incoming MDN.
+   * @param {VerificationOptions} [signed] - Pass verification options for a signed MDN.
+   * @returns {Promise<AS2Disposition>} This instance as an incoming AS2Disposition.
+   */
+  async dispositionIn (signed?: VerificationOptions): Promise<AS2Disposition> {
     return await AS2Disposition.incoming(this, signed)
   }
 
+  /** Convenience method for signing this instance.
+   * @param {SigningOptions} [options] - Options for signing this AS2 message; not required if provided when constructing this instance.
+   * @returns {Promise<AS2MimeNode>} This instance as a new signed multipart AS2MimeNode.
+   */
   async sign (options?: SigningOptions): Promise<AS2MimeNode> {
     options = isNullOrUndefined(options) ? this._sign : options
 
     return AS2Crypto.sign(this, options)
   }
 
+  /** Convenience method for verifying this instance.
+   * @param {VerificationOptions} options - Options for verifying this signed AS2 message.
+   * @returns {Promise<AS2MimeNode>} The content part of this signed message as an AS2MimeNode.
+   */
   async verify (options: VerificationOptions): Promise<AS2MimeNode> {
     return (await AS2Crypto.verify(this, options))
       ? this.childNodes[0]
       : undefined
   }
 
+  /** Convenience method for decrypting this instance.
+   * @param {DecryptionOptions} options - Options for decrypting this encrypted AS2 message.
+   * @returns {Promise<AS2MimeNode>} The contents of the encrypted message as an AS2MimeNode.
+   */
   async decrypt (options: DecryptionOptions): Promise<AS2MimeNode> {
     return AS2Crypto.decrypt(this, options)
   }
 
+  /** Convenience method for encrypting this instance.
+   * @param {EncryptionOptions} [options] - Options for encrypting this AS2 message; not required if provided when constructing this instance.
+   * @returns {Promise<AS2MimeNode>} This instance as a new encrypted AS2MimeNode.
+   */
   async encrypt (options?: EncryptionOptions): Promise<AS2MimeNode> {
     options = isNullOrUndefined(options) ? this._encrypt : options
 
     return AS2Crypto.encrypt(this, options)
   }
 
+  /** Constructs a complete S/MIME or MIME buffer from this instance.
+   * @returns {Promise<Buffer>} This instance as raw, complete S/MIME or MIME buffer.
+   */
   async build (): Promise<Buffer> {
     if (this.parsed && this.raw !== undefined) return Buffer.from(this.raw)
 
@@ -227,6 +290,11 @@ export class AS2MimeNode extends MimeNode {
     return await super.build()
   }
 
+  /** Generates a valid, formatted, random message ID.
+   * @param {string} [sender='<HOST_NAME>'] - The sender of this ID.
+   * @param {string} [uniqueId] - A unique ID may be provided if a real GUID is required.
+   * @returns {string} A valid message ID for use with MIME.
+   */
   static generateMessageId (sender?: string, uniqueId?: string): string {
     uniqueId = isNullOrUndefined(uniqueId)
       ? AS2Crypto.generateUniqueId()
