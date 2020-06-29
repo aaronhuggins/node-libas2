@@ -107,7 +107,8 @@ export class AS2Disposition {
           parseHeaderString(
             mdn.childNodes[1].content.toString('utf8'),
             toNotification
-          ) as any
+          ) as any,
+          'incoming'
         )
         // Get the optional thid part, if present; it is the returned message content.
         this.returned = mdn.childNodes[2]
@@ -162,6 +163,10 @@ export class AS2Disposition {
   static async outgoing (
     options: OutgoingDispositionOptions
   ): Promise<AS2MimeNode> {
+    if (isNullOrUndefined(options.node)) {
+      throw new Error(ERROR.DISPOSITION_NODE)
+    }
+
     const notification: AS2DispositionNotification = {
       finalRecipient: options.node.getHeader('As2-To'),
       disposition: {
@@ -173,8 +178,8 @@ export class AS2Disposition {
     let rootNode: AS2MimeNode = options.node
     let errored = false
 
-    if (isNullOrUndefined(options.node)) {
-      throw new Error(ERROR.DISPOSITION_NODE)
+    if (isNullOrUndefined(notification.finalRecipient)) {
+      throw new Error(ERROR.FINAL_RECIPIENT_MISSING)
     }
 
     if (typeof options.encrypted !== 'undefined') {

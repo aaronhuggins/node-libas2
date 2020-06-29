@@ -88,6 +88,8 @@ export const EXPLANATION = {
 }
 
 export const ERROR = {
+  FINAL_RECIPIENT_MISSING:
+    'AS2 message is missing the AS2-To header, so there is no final recipient which is required.',
   CONTENT_VERIFY: 'Could not verify signature against contents.',
   CERT_DECRYPT: 'Certificate provided was not used to encrypt message.',
   DISPOSITION_NODE:

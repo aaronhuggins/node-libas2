@@ -1,16 +1,24 @@
 import { AS2Signing } from '../AS2Crypto'
 import { LIBRAY_NAME_VERSION, CRLF } from '../Constants'
 import { hostname } from 'os'
+import { isNullOrUndefined } from '../Helpers'
 
 export class AS2DispositionNotification {
-  constructor (notification?: AS2DispositionNotification) {
+  constructor (
+    notification?: AS2DispositionNotification,
+    notificationType: 'incoming' | 'outgoing' = 'outgoing'
+  ) {
     Object.assign(this, notification, {
       headers: Array.isArray(notification.headers)
         ? Object.assign({}, ...notification.headers)
         : notification.headers
     })
 
-    if (!this.reportingUa) {
+    if (isNullOrUndefined(notificationType)) {
+      notificationType = 'outgoing'
+    }
+
+    if (!this.reportingUa && notificationType === 'outgoing') {
       this.reportingUa = hostname() + '; ' + LIBRAY_NAME_VERSION
     }
 

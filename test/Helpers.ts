@@ -109,6 +109,9 @@ export const ENCRYPTED_CONTENT = normalizeLineBreaks(
 export const SIGNED_CONTENT = normalizeLineBreaks(
   readFileSync('test/test-data/content.signed.txt', 'utf8')
 )
+export const MIME_CONTENT = normalizeLineBreaks(
+  readFileSync('test/test-data/content.mime.txt', 'utf8')
+)
 export const SIGNED_MDN = normalizeLineBreaks(
   readFileSync('test/test-data/mdn.signed.txt', 'utf8')
 )

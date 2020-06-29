@@ -130,8 +130,12 @@ describe('AS2Crypto', async () => {
     })
   })
 
-  it('should throw error on compression methods', () => {
-    assert.rejects(AS2Crypto.compress(new AS2MimeNode({}), {}))
-    assert.rejects(AS2Crypto.decompress(new AS2MimeNode({}), {}))
+  it('should throw error on compression methods', async () => {
+    await assert.rejects(async () => {
+      await AS2Crypto.compress(new AS2MimeNode({}), {})
+    })
+    await assert.rejects(async () => {
+      await AS2Crypto.decompress(new AS2MimeNode({}), {})
+    })
   })
 })

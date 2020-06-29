@@ -4,6 +4,7 @@ import { Crypto } from '@peculiar/webcrypto'
 import { PemFile } from './PemFile'
 import { ObjectID } from './LibOid'
 import { isNullOrUndefined } from '../Helpers'
+import { SIGNING } from '../Constants'
 
 const webcrypto = new Crypto()
 
@@ -111,6 +112,7 @@ export class AS2SignedData {
   }
 
   private async _addSigner ({ cert, key, algorithm }: SignMethodOptions) {
+    if (isNullOrUndefined(algorithm)) algorithm = SIGNING.SHA256
     const crypto = pkijs.getCrypto()
     const certificate = this._toCertificate(cert)
     const messageDigest = await crypto.digest({ name: algorithm }, this.data)
