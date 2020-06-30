@@ -181,13 +181,17 @@ export class AS2Disposition {
     return rootNode
   }
 
+  // TODO: Needs to output both the content node and the disposition node.
   /** Convenience method to decrypt and/or verify a mime node and construct an outgoing message disposition.
    * @param {OutgoingDispositionOptions} - The options for generating an outgoing MDN.
-   * @returns {Promise<AS2MimeNode>} - The generated outgoing MDN as an AS2MimeNode.
+   * @returns {Promise<object>} - The content node and the generated outgoing MDN as an AS2MimeNode.
    */
   static async outgoing (
     options: OutgoingDispositionOptions
-  ): Promise<AS2MimeNode> {
+  ): Promise<{
+    contentNode: AS2MimeNode
+    disposition: AS2MimeNode
+  }> {
     if (isNullOrUndefined(options.node)) {
       throw new Error(ERROR.DISPOSITION_NODE)
     }
@@ -251,10 +255,16 @@ export class AS2Disposition {
     })
 
     if (typeof options.signDisposition !== 'undefined') {
-      return await mdn.toMimeNode().sign(options.signDisposition)
+      return {
+        contentNode: rootNode,
+        disposition: await mdn.toMimeNode().sign(options.signDisposition)
+      }
     }
 
-    return mdn.toMimeNode()
+    return {
+      contentNode: rootNode,
+      disposition: mdn.toMimeNode()
+    }
   }
 
   /** Deconstruct a mime node into an incoming message disposition.

@@ -5,7 +5,8 @@ import {
   isNullOrUndefined,
   signingOptions,
   encryptionOptions,
-  isSMime
+  isSMime,
+  parseHeaderString
 } from '../Helpers'
 import {
   AS2Crypto,
@@ -208,9 +209,14 @@ export class AS2MimeNode extends MimeNode {
 
   /** Convenience method for generating an outgoing MDN for this message.
    * @param {DispositionOutOptions} [options] - Optional options for generating an MDN.
-   * @returns {Promise<AS2MimeNode>} An outgoing MDN as an AS2MimeNode.
+   * @returns {Promise<object>} The content node and the outgoing MDN as an AS2MimeNode.
    */
-  async dispositionOut (options?: DispositionOutOptions): Promise<AS2MimeNode> {
+  async dispositionOut (
+    options?: DispositionOutOptions
+  ): Promise<{
+    contentNode: AS2MimeNode
+    disposition: AS2MimeNode
+  }> {
     options = isNullOrUndefined(options) ? {} : options
 
     return await AS2Disposition.outgoing({ ...options, node: this })
@@ -288,6 +294,24 @@ export class AS2MimeNode extends MimeNode {
     }
 
     return await super.build()
+  }
+
+  /** Method for getting the headers and body of the MIME message as separate properties.
+   * @returns {Promise<object>} An object with headers and body properties.
+   */
+  async buildObject (): Promise<{
+    headers: { [key: string]: any }
+    body: string
+  }> {
+    const buffer = await this.build()
+    const [headers, ...body] = buffer
+      .toString('utf8')
+      .split(/(\r\n|\n\r|\n)(\r\n|\n\r|\n)/gu)
+
+    return {
+      headers: parseHeaderString(headers),
+      body: body.join('').trimLeft()
+    }
   }
 
   /** Generates a valid, formatted, random message ID.

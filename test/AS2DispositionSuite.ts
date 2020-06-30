@@ -127,7 +127,7 @@ describe('AS2Disposition', () => {
       signed: { cert: AS2_TESTING_CERT }
     })
 
-    assert.strictEqual(dispositionSignedMime instanceof AS2MimeNode, true)
+    assert.strictEqual(dispositionSignedMime.disposition instanceof AS2MimeNode, true)
     await assert.rejects(async () => {
       await AS2Disposition.outgoing({ node: null })
     })

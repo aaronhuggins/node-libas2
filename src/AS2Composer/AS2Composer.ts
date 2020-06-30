@@ -4,11 +4,7 @@ import {
   MessageDispositionOptions
 } from './Interfaces'
 import { AS2MimeNodeOptions, AS2MimeNode } from '../AS2MimeNode'
-import {
-  isNullOrUndefined,
-  agreementOptions,
-  parseHeaderString
-} from '../Helpers'
+import { isNullOrUndefined, agreementOptions } from '../Helpers'
 import { AS2Headers, RequestOptions } from '../Interfaces'
 import { AS2Constants } from '../Constants'
 
@@ -169,15 +165,12 @@ export class AS2Composer {
     if (this.message === undefined) {
       await this.compile()
     }
-    const buffer = await this.message.build()
-    const [headers, ...body] = buffer
-      .toString('utf8')
-      .split(/(\r\n|\n\r|\n)(\r\n|\n\r|\n)/gu)
+    const { headers, body } = await this.message.buildObject()
 
     return {
       url,
-      headers: parseHeaderString(headers),
-      body: body.join('').trimLeft(),
+      headers,
+      body,
       method: 'POST'
     }
   }

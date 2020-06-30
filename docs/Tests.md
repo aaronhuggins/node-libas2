@@ -390,7 +390,10 @@ should generate outgoing disposition from incoming message.
     ),
     signed: { cert: Helpers_1.AS2_TESTING_CERT }
   })
-  assert.strictEqual(dispositionSignedMime instanceof core_1.AS2MimeNode, true)
+  assert.strictEqual(
+    dispositionSignedMime.disposition instanceof core_1.AS2MimeNode,
+    true
+  )
   await assert.rejects(async () => {
     await core_1.AS2Disposition.outgoing({ node: null })
   })

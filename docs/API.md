@@ -259,7 +259,7 @@
   - _instance_
     - [.toMimeNode()](#AS2Disposition+toMimeNode) ⇒ [<code>AS2MimeNode</code>](#AS2MimeNode)
   - _static_
-    - [.outgoing(options)](#AS2Disposition.outgoing) ⇒ [<code>Promise.&lt;AS2MimeNode&gt;</code>](#AS2MimeNode)
+    - [.outgoing(options)](#AS2Disposition.outgoing) ⇒ <code>Promise.&lt;object&gt;</code>
     - [.incoming(node, [signed])](#AS2Disposition.incoming) ⇒ [<code>Promise.&lt;AS2Disposition&gt;</code>](#AS2Disposition)
 
 <a name="AS2Disposition+toMimeNode"></a>
@@ -275,14 +275,14 @@
 </ul>  
 <a name="AS2Disposition.outgoing"></a>
 
-### AS2Disposition.outgoing(options) ⇒ [<code>Promise.&lt;AS2MimeNode&gt;</code>](#AS2MimeNode)
+### AS2Disposition.outgoing(options) ⇒ <code>Promise.&lt;object&gt;</code>
 
 <p>Convenience method to decrypt and/or verify a mime node and construct an outgoing message disposition.</p>
 
 **Kind**: static method of [<code>AS2Disposition</code>](#AS2Disposition)  
-**Returns**: [<code>Promise.&lt;AS2MimeNode&gt;</code>](#AS2MimeNode) - <ul>
+**Returns**: <code>Promise.&lt;object&gt;</code> - <ul>
 
-<li>The generated outgoing MDN as an AS2MimeNode.</li>
+<li>The content node and the generated outgoing MDN as an AS2MimeNode.</li>
 </ul>
 
 | Param   | Type                                                                   | Description                                        |
@@ -356,13 +356,14 @@
     - [.setEncryption(options)](#AS2MimeNode+setEncryption)
     - [.setHeader(keyOrHeaders, [value])](#AS2MimeNode+setHeader) ⇒ [<code>AS2MimeNode</code>](#AS2MimeNode)
     - [.messageId([create])](#AS2MimeNode+messageId) ⇒ <code>string</code>
-    - [.dispositionOut([options])](#AS2MimeNode+dispositionOut) ⇒ [<code>Promise.&lt;AS2MimeNode&gt;</code>](#AS2MimeNode)
+    - [.dispositionOut([options])](#AS2MimeNode+dispositionOut) ⇒ <code>Promise.&lt;object&gt;</code>
     - [.dispositionIn([signed])](#AS2MimeNode+dispositionIn) ⇒ [<code>Promise.&lt;AS2Disposition&gt;</code>](#AS2Disposition)
     - [.sign([options])](#AS2MimeNode+sign) ⇒ [<code>Promise.&lt;AS2MimeNode&gt;</code>](#AS2MimeNode)
     - [.verify(options)](#AS2MimeNode+verify) ⇒ [<code>Promise.&lt;AS2MimeNode&gt;</code>](#AS2MimeNode)
     - [.decrypt(options)](#AS2MimeNode+decrypt) ⇒ [<code>Promise.&lt;AS2MimeNode&gt;</code>](#AS2MimeNode)
     - [.encrypt([options])](#AS2MimeNode+encrypt) ⇒ [<code>Promise.&lt;AS2MimeNode&gt;</code>](#AS2MimeNode)
     - [.build()](#AS2MimeNode+build) ⇒ <code>Promise.&lt;Buffer&gt;</code>
+    - [.buildObject()](#AS2MimeNode+buildObject) ⇒ <code>Promise.&lt;object&gt;</code>
   - _static_
     - [.generateMessageId([sender], [uniqueId])](#AS2MimeNode.generateMessageId) ⇒ <code>string</code>
 
@@ -427,12 +428,12 @@
 
 <a name="AS2MimeNode+dispositionOut"></a>
 
-### aS2MimeNode.dispositionOut([options]) ⇒ [<code>Promise.&lt;AS2MimeNode&gt;</code>](#AS2MimeNode)
+### aS2MimeNode.dispositionOut([options]) ⇒ <code>Promise.&lt;object&gt;</code>
 
 <p>Convenience method for generating an outgoing MDN for this message.</p>
 
 **Kind**: instance method of [<code>AS2MimeNode</code>](#AS2MimeNode)  
-**Returns**: [<code>Promise.&lt;AS2MimeNode&gt;</code>](#AS2MimeNode) - <p>An outgoing MDN as an AS2MimeNode.</p>
+**Returns**: <code>Promise.&lt;object&gt;</code> - <p>The content node and the outgoing MDN as an AS2MimeNode.</p>
 
 | Param     | Type                               | Description                                    |
 | --------- | ---------------------------------- | ---------------------------------------------- |
@@ -511,6 +512,14 @@
 
 **Kind**: instance method of [<code>AS2MimeNode</code>](#AS2MimeNode)  
 **Returns**: <code>Promise.&lt;Buffer&gt;</code> - <p>This instance as raw, complete S/MIME or MIME buffer.</p>  
+<a name="AS2MimeNode+buildObject"></a>
+
+### aS2MimeNode.buildObject() ⇒ <code>Promise.&lt;object&gt;</code>
+
+<p>Method for getting the headers and body of the MIME message as separate properties.</p>
+
+**Kind**: instance method of [<code>AS2MimeNode</code>](#AS2MimeNode)  
+**Returns**: <code>Promise.&lt;object&gt;</code> - <p>An object with headers and body properties.</p>  
 <a name="AS2MimeNode.generateMessageId"></a>
 
 ### AS2MimeNode.generateMessageId([sender], [uniqueId]) ⇒ <code>string</code>
