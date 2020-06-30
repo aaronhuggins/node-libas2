@@ -210,7 +210,7 @@ export async function request (
       options.method = options.method || 'POST'
       Object.entries(params || {}).forEach(val => {
         if (!isNullOrUndefined(val[1])) {
-          internalUrl.searchParams.append(...val as [string, any])
+          internalUrl.searchParams.append(...(val as [string, any]))
         }
       })
       const responseBufs: Buffer[] = []
