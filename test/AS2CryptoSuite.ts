@@ -5,7 +5,8 @@ import {
   AS2Parser,
   objectIds,
   ObjectID,
-  PemFile
+  PemFile,
+  AS2EnvelopedData
 } from '../core'
 import {
   LIBAS2_CERT,
@@ -127,6 +128,14 @@ describe('AS2Crypto', async () => {
     assert.strictEqual(typeof undefinedOrNullPem.type, 'undefined')
     assert.doesNotThrow(() => {
       PemFile.fromDer(certificateDerPem)
+    })
+  })
+
+  it('should throw error on unsupported encryption', async () => {
+    const encrypted = new AS2EnvelopedData(Buffer.from('a'))
+
+    await assert.rejects(async () => {
+      await encrypted.encrypt(LIBAS2_CERT, 'des3' as any)
     })
   })
 

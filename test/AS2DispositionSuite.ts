@@ -74,7 +74,18 @@ describe('AS2Disposition', () => {
     const mime = await AS2Parser.parse(SIGNED_MDN)
     const disposition = await mime.dispositionIn({ cert: AS2_TESTING_CERT })
 
+    mime.childNodes[0].childNodes[1].content =
+      'X-CUSTOM-DATA: Some MDNs might have custom headers.'
+    const customDisposition = new AS2Disposition(mime)
+
     assert.strictEqual(disposition instanceof AS2Disposition, true)
+    assert.strictEqual(
+      customDisposition.notification.headers['X-CUSTOM-DATA'],
+      'Some MDNs might have custom headers.'
+    )
+    assert.throws(() => {
+      new AS2Disposition({} as any)
+    })
     await assert.rejects(async () => {
       await AS2Disposition.incoming(mime, { cert: LIBAS2_CERT })
     })
@@ -125,5 +136,11 @@ describe('AS2Disposition', () => {
         node: await AS2Parser.parse(SIGNED_CONTENT)
       })
     })
+  })
+
+  it('should construct notification', () => {
+    const notification = new AS2DispositionNotification({} as any, null)
+
+    assert.strictEqual(typeof notification.headers, 'undefined')
   })
 })

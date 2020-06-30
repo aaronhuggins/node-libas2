@@ -73,7 +73,7 @@ describe('AS2MimeNode', async () => {
       sign: { cert: LIBAS2_CERT, key: LIBAS2_KEY },
       encrypt: {
         cert: LIBAS2_CERT,
-        encryption: AS2Constants.ENCRYPTION.AES128_CBC
+        encryption: AS2Constants.ENCRYPTION.AES192_CBC
       },
       content: LIBAS2_EDI
     })

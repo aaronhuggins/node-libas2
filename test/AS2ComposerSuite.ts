@@ -98,7 +98,7 @@ describe('AS2Composer', async () => {
         },
         encrypt: {
           cert: AS2_TESTING_CERT,
-          encryption: AS2Constants.ENCRYPTION.AES128_CBC
+          encryption: AS2Constants.ENCRYPTION.AES192_GCM
         },
         mdn: {
           to: 'mycompanyAS2@example-message.net',
