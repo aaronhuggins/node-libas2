@@ -1,9 +1,4 @@
-import {
-  CRLF,
-  ENCRYPTION_FILENAME,
-  SIGNATURE_FILENAME,
-  ERROR
-} from '../Constants'
+import { AS2Constants } from '../Constants'
 import { AS2MimeNode } from '../AS2MimeNode'
 import { encryptionOptions, canonicalTransform } from '../Helpers'
 import * as MimeNode from 'nodemailer/lib/mime-node'
@@ -17,6 +12,8 @@ import { AS2Parser } from '../AS2Parser'
 import { randomBytes } from 'crypto'
 import { AS2SignedData } from './AS2SignedData'
 import { AS2EnvelopedData } from './AS2EnvelopedData'
+
+const { CRLF, ENCRYPTION_FILENAME, SIGNATURE_FILENAME, ERROR } = AS2Constants
 
 /** List of supported signing algorithms.
  * @typedef {'sha-1'|'sha-256'|'sha-384'|'sha-512'} AS2Signing

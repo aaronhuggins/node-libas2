@@ -2,8 +2,10 @@ import { AS2MimeNode } from '../AS2MimeNode'
 import { AS2DispositionOptions, OutgoingDispositionOptions } from './Interfaces'
 import { parseHeaderString, getReportNode, isNullOrUndefined } from '../Helpers'
 import { AS2DispositionNotification } from './AS2DispositionNotification'
-import { EXPLANATION, ERROR } from '../Constants'
+import { AS2Constants } from '../Constants'
 import { VerificationOptions } from '../AS2Crypto'
+
+const { EXPLANATION, ERROR } = AS2Constants
 
 /** Options for composing a message disposition notification (MDN).
  * @typedef {object} AS2DispositionOptions

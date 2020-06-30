@@ -1,7 +1,9 @@
 import { AS2Signing } from '../AS2Crypto'
-import { LIBRAY_NAME_VERSION, CRLF } from '../Constants'
+import { AS2Constants } from '../Constants'
 import { hostname } from 'os'
 import { isNullOrUndefined } from '../Helpers'
+
+const { LIBRAY_NAME_VERSION, CRLF } = AS2Constants
 
 /** Class for dealing with disposition notification headers.
  * @param {AS2DispositionNotification} [notification] - A raw instance of AS2DispositionNotification.

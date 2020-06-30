@@ -1,6 +1,12 @@
 export type AS2Signing = 'sha-1' | 'sha-256' | 'sha-384' | 'sha-512'
 
-export type AS2Encryption = 'aes-128-CBC' | 'aes-192-CBC' | 'aes-256-CBC'
+export type AS2Encryption =
+  | 'aes128-CBC'
+  | 'aes192-CBC'
+  | 'aes256-CBC'
+  | 'aes128-GCM'
+  | 'aes192-GCM'
+  | 'aes256-GCM'
 
 export interface EncryptionOptions {
   /** PEM-based public certificate contents. */

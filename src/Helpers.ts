@@ -1,12 +1,14 @@
 import * as http from 'http'
 import * as https from 'https'
 import { AgreementOptions } from './AS2Composer'
-import { SIGNING, ENCRYPTION, CRLF } from './Constants'
+import { AS2Constants } from './Constants'
 import { AS2MimeNode } from './AS2MimeNode'
 import { SigningOptions, EncryptionOptions } from './AS2Crypto'
 import { RequestOptions, IncomingMessage } from './Interfaces'
 import { Socket } from 'net'
 import { AS2Parser } from './AS2Parser'
+
+const { SIGNING, ENCRYPTION, CRLF } = AS2Constants
 
 export function getReportNode (node: AS2MimeNode): AS2MimeNode {
   if (!node) return
@@ -130,7 +132,7 @@ export function signingOptions (sign: SigningOptions): SigningOptions {
 export function encryptionOptions (
   encrypt: EncryptionOptions
 ): EncryptionOptions {
-  return { cert: '', encryption: ENCRYPTION.AES256, ...encrypt }
+  return { cert: '', encryption: ENCRYPTION.AES256_CBC, ...encrypt }
 }
 
 /** Normalizes agreement options. */

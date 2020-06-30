@@ -15,11 +15,16 @@
 <dd><p>Class for parsing a MIME document to an AS2MimeNode tree.</p></dd>
 </dl>
 
+## Objects
+
+<dl>
+<dt><a href="#AS2Constants">AS2Constants</a> : <code>object</code></dt>
+<dd><p>Constants used in libas2.</p></dd>
+</dl>
+
 ## Functions
 
 <dl>
-<dt><a href="#getPackageJson">getPackageJson()</a></dt>
-<dd><p>Walk up the directory tree searching for this module's package.json.</p></dd>
 <dt><a href="#parseHeaderString">parseHeaderString()</a></dt>
 <dd><p>Method for converting a string of headers into key:value pairs.</p></dd>
 <dt><a href="#getProtocol">getProtocol()</a></dt>
@@ -538,13 +543,331 @@
 | ------- | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
 | content | <code>Buffer</code> \| <code>Stream</code> \| <code>string</code> \| [<code>ParseOptions</code>](#ParseOptions) | <p>A raw MIME message or ParseOptions object.</p> |
 
-<a name="getPackageJson"></a>
+<a name="AS2Constants"></a>
 
-## getPackageJson()
+## AS2Constants : <code>object</code>
 
-<p>Walk up the directory tree searching for this module's package.json.</p>
+<p>Constants used in libas2.</p>
 
-**Kind**: global function  
+**Kind**: global namespace
+
+- [AS2Constants](#AS2Constants) : <code>object</code>
+  - [.ENCRYPTION](#AS2Constants.ENCRYPTION) : <code>object</code>
+    - [.AES128_CBC](#AS2Constants.ENCRYPTION.AES128_CBC) : [<code>AS2Encryption</code>](#AS2Encryption)
+    - [.AES192_CBC](#AS2Constants.ENCRYPTION.AES192_CBC) : [<code>AS2Encryption</code>](#AS2Encryption)
+    - [.AES256_CBC](#AS2Constants.ENCRYPTION.AES256_CBC) : [<code>AS2Encryption</code>](#AS2Encryption)
+    - [.AES128_GCM](#AS2Constants.ENCRYPTION.AES128_GCM) : [<code>AS2Encryption</code>](#AS2Encryption)
+    - [.AES192_GCM](#AS2Constants.ENCRYPTION.AES192_GCM) : [<code>AS2Encryption</code>](#AS2Encryption)
+    - [.AES256_GCM](#AS2Constants.ENCRYPTION.AES256_GCM) : [<code>AS2Encryption</code>](#AS2Encryption)
+  - [.ERROR](#AS2Constants.ERROR) : <code>object</code>
+    - [.FINAL_RECIPIENT_MISSING](#AS2Constants.ERROR.FINAL_RECIPIENT_MISSING) : <code>string</code>
+    - [.CONTENT_VERIFY](#AS2Constants.ERROR.CONTENT_VERIFY) : <code>string</code>
+    - [.CERT_DECRYPT](#AS2Constants.ERROR.CERT_DECRYPT) : <code>string</code>
+    - [.DISPOSITION_NODE](#AS2Constants.ERROR.DISPOSITION_NODE) : <code>string</code>
+    - [.NOT_IMPLEMENTED](#AS2Constants.ERROR.NOT_IMPLEMENTED) : <code>string</code>
+  - [.EXPLANATION](#AS2Constants.EXPLANATION) : <code>object</code>
+    - [.SUCCESS](#AS2Constants.EXPLANATION.SUCCESS) : <code>string</code>
+    - [.FAILED_DECRYPTION](#AS2Constants.EXPLANATION.FAILED_DECRYPTION) : <code>string</code>
+    - [.FAILED_VERIFICATION](#AS2Constants.EXPLANATION.FAILED_VERIFICATION) : <code>string</code>
+    - [.FAILED_GENERALLY](#AS2Constants.EXPLANATION.FAILED_GENERALLY) : <code>string</code>
+  - [.SIGNING](#AS2Constants.SIGNING) : <code>object</code>
+    - [.SHA1](#AS2Constants.SIGNING.SHA1) : [<code>AS2Signing</code>](#AS2Signing)
+    - [.SHA256](#AS2Constants.SIGNING.SHA256) : [<code>AS2Signing</code>](#AS2Signing)
+    - [.SHA384](#AS2Constants.SIGNING.SHA384) : [<code>AS2Signing</code>](#AS2Signing)
+    - [.SHA512](#AS2Constants.SIGNING.SHA512) : [<code>AS2Signing</code>](#AS2Signing)
+  - [.STANDARD_HEADER](#AS2Constants.STANDARD_HEADER) : <code>object</code>
+    - [.VERSION](#AS2Constants.STANDARD_HEADER.VERSION) : <code>string</code>
+    - [.TO](#AS2Constants.STANDARD_HEADER.TO) : <code>string</code>
+    - [.FROM](#AS2Constants.STANDARD_HEADER.FROM) : <code>string</code>
+    - [.MDN_TO](#AS2Constants.STANDARD_HEADER.MDN_TO) : <code>string</code>
+    - [.MDN_OPTIONS](#AS2Constants.STANDARD_HEADER.MDN_OPTIONS) : <code>string</code>
+    - [.MDN_URL](#AS2Constants.STANDARD_HEADER.MDN_URL) : <code>string</code>
+  - [.CRLF](#AS2Constants.CRLF) : <code>string</code>
+  - [.MIME_VERSION](#AS2Constants.MIME_VERSION) : <code>string</code>
+  - [.AS2_VERSION](#AS2Constants.AS2_VERSION) : <code>string</code>
+  - [.SMIME_DESC](#AS2Constants.SMIME_DESC) : <code>string</code>
+  - [.SIGNATURE_FILENAME](#AS2Constants.SIGNATURE_FILENAME) : <code>string</code>
+  - [.ENCRYPTION_FILENAME](#AS2Constants.ENCRYPTION_FILENAME) : <code>string</code>
+  - [.LIBRARY_NAME](#AS2Constants.LIBRARY_NAME) : <code>string</code>
+  - [.LIBRARY_VERSION](#AS2Constants.LIBRARY_VERSION) : <code>string</code>
+  - [.LIBRAY_NAME_VERSION](#AS2Constants.LIBRAY_NAME_VERSION) : <code>string</code>
+
+<a name="AS2Constants.ENCRYPTION"></a>
+
+### AS2Constants.ENCRYPTION : <code>object</code>
+
+<p>Constants used for signing.</p>
+
+**Kind**: static namespace of [<code>AS2Constants</code>](#AS2Constants)
+
+- [.ENCRYPTION](#AS2Constants.ENCRYPTION) : <code>object</code>
+  - [.AES128_CBC](#AS2Constants.ENCRYPTION.AES128_CBC) : [<code>AS2Encryption</code>](#AS2Encryption)
+  - [.AES192_CBC](#AS2Constants.ENCRYPTION.AES192_CBC) : [<code>AS2Encryption</code>](#AS2Encryption)
+  - [.AES256_CBC](#AS2Constants.ENCRYPTION.AES256_CBC) : [<code>AS2Encryption</code>](#AS2Encryption)
+  - [.AES128_GCM](#AS2Constants.ENCRYPTION.AES128_GCM) : [<code>AS2Encryption</code>](#AS2Encryption)
+  - [.AES192_GCM](#AS2Constants.ENCRYPTION.AES192_GCM) : [<code>AS2Encryption</code>](#AS2Encryption)
+  - [.AES256_GCM](#AS2Constants.ENCRYPTION.AES256_GCM) : [<code>AS2Encryption</code>](#AS2Encryption)
+
+<a name="AS2Constants.ENCRYPTION.AES128_CBC"></a>
+
+#### ENCRYPTION.AES128_CBC : [<code>AS2Encryption</code>](#AS2Encryption)
+
+**Kind**: static constant of [<code>ENCRYPTION</code>](#AS2Constants.ENCRYPTION)  
+**Default**: <code>aes128-CBC</code>  
+<a name="AS2Constants.ENCRYPTION.AES192_CBC"></a>
+
+#### ENCRYPTION.AES192_CBC : [<code>AS2Encryption</code>](#AS2Encryption)
+
+**Kind**: static constant of [<code>ENCRYPTION</code>](#AS2Constants.ENCRYPTION)  
+**Default**: <code>aes192-CBC</code>  
+<a name="AS2Constants.ENCRYPTION.AES256_CBC"></a>
+
+#### ENCRYPTION.AES256_CBC : [<code>AS2Encryption</code>](#AS2Encryption)
+
+**Kind**: static constant of [<code>ENCRYPTION</code>](#AS2Constants.ENCRYPTION)  
+**Default**: <code>aes256-CBC</code>  
+<a name="AS2Constants.ENCRYPTION.AES128_GCM"></a>
+
+#### ENCRYPTION.AES128_GCM : [<code>AS2Encryption</code>](#AS2Encryption)
+
+**Kind**: static constant of [<code>ENCRYPTION</code>](#AS2Constants.ENCRYPTION)  
+**Default**: <code>aes128-GCM</code>  
+<a name="AS2Constants.ENCRYPTION.AES192_GCM"></a>
+
+#### ENCRYPTION.AES192_GCM : [<code>AS2Encryption</code>](#AS2Encryption)
+
+**Kind**: static constant of [<code>ENCRYPTION</code>](#AS2Constants.ENCRYPTION)  
+**Default**: <code>aes192-GCM</code>  
+<a name="AS2Constants.ENCRYPTION.AES256_GCM"></a>
+
+#### ENCRYPTION.AES256_GCM : [<code>AS2Encryption</code>](#AS2Encryption)
+
+**Kind**: static constant of [<code>ENCRYPTION</code>](#AS2Constants.ENCRYPTION)  
+**Default**: <code>aes256-GCM</code>  
+<a name="AS2Constants.ERROR"></a>
+
+### AS2Constants.ERROR : <code>object</code>
+
+<p>Constants used for signing.</p>
+
+**Kind**: static namespace of [<code>AS2Constants</code>](#AS2Constants)
+
+- [.ERROR](#AS2Constants.ERROR) : <code>object</code>
+  - [.FINAL_RECIPIENT_MISSING](#AS2Constants.ERROR.FINAL_RECIPIENT_MISSING) : <code>string</code>
+  - [.CONTENT_VERIFY](#AS2Constants.ERROR.CONTENT_VERIFY) : <code>string</code>
+  - [.CERT_DECRYPT](#AS2Constants.ERROR.CERT_DECRYPT) : <code>string</code>
+  - [.DISPOSITION_NODE](#AS2Constants.ERROR.DISPOSITION_NODE) : <code>string</code>
+  - [.NOT_IMPLEMENTED](#AS2Constants.ERROR.NOT_IMPLEMENTED) : <code>string</code>
+
+<a name="AS2Constants.ERROR.FINAL_RECIPIENT_MISSING"></a>
+
+#### ERROR.FINAL_RECIPIENT_MISSING : <code>string</code>
+
+**Kind**: static constant of [<code>ERROR</code>](#AS2Constants.ERROR)  
+**Default**: <code>&quot;AS2 message is missing the AS2-To header, so there is no final recipient which is required.&quot;</code>  
+<a name="AS2Constants.ERROR.CONTENT_VERIFY"></a>
+
+#### ERROR.CONTENT_VERIFY : <code>string</code>
+
+**Kind**: static constant of [<code>ERROR</code>](#AS2Constants.ERROR)  
+**Default**: <code>&quot;Could not verify signature against contents.&quot;</code>  
+<a name="AS2Constants.ERROR.CERT_DECRYPT"></a>
+
+#### ERROR.CERT_DECRYPT : <code>string</code>
+
+**Kind**: static constant of [<code>ERROR</code>](#AS2Constants.ERROR)  
+**Default**: <code>&quot;Certificate provided was not used to encrypt message.&quot;</code>  
+<a name="AS2Constants.ERROR.DISPOSITION_NODE"></a>
+
+#### ERROR.DISPOSITION_NODE : <code>string</code>
+
+**Kind**: static constant of [<code>ERROR</code>](#AS2Constants.ERROR)  
+**Default**: <code>&quot;Mime node must be provided in order to create outgoing disposition.&quot;</code>  
+<a name="AS2Constants.ERROR.NOT_IMPLEMENTED"></a>
+
+#### ERROR.NOT_IMPLEMENTED : <code>string</code>
+
+**Kind**: static constant of [<code>ERROR</code>](#AS2Constants.ERROR)  
+**Default**: <code>&quot;NOT YET IMPLEMENTED!&quot;</code>  
+<a name="AS2Constants.EXPLANATION"></a>
+
+### AS2Constants.EXPLANATION : <code>object</code>
+
+<p>Constants used for signing.</p>
+
+**Kind**: static namespace of [<code>AS2Constants</code>](#AS2Constants)
+
+- [.EXPLANATION](#AS2Constants.EXPLANATION) : <code>object</code>
+  - [.SUCCESS](#AS2Constants.EXPLANATION.SUCCESS) : <code>string</code>
+  - [.FAILED_DECRYPTION](#AS2Constants.EXPLANATION.FAILED_DECRYPTION) : <code>string</code>
+  - [.FAILED_VERIFICATION](#AS2Constants.EXPLANATION.FAILED_VERIFICATION) : <code>string</code>
+  - [.FAILED_GENERALLY](#AS2Constants.EXPLANATION.FAILED_GENERALLY) : <code>string</code>
+
+<a name="AS2Constants.EXPLANATION.SUCCESS"></a>
+
+#### EXPLANATION.SUCCESS : <code>string</code>
+
+**Kind**: static constant of [<code>EXPLANATION</code>](#AS2Constants.EXPLANATION)  
+**Default**: <code>&quot;The message was received successfully. This is no guarantee that the message contents have been processed.&quot;</code>  
+<a name="AS2Constants.EXPLANATION.FAILED_DECRYPTION"></a>
+
+#### EXPLANATION.FAILED_DECRYPTION : <code>string</code>
+
+**Kind**: static constant of [<code>EXPLANATION</code>](#AS2Constants.EXPLANATION)  
+**Default**: <code>&quot;The message was received, but could not be decrypted; the contents cannot be processed.&quot;</code>  
+<a name="AS2Constants.EXPLANATION.FAILED_VERIFICATION"></a>
+
+#### EXPLANATION.FAILED_VERIFICATION : <code>string</code>
+
+**Kind**: static constant of [<code>EXPLANATION</code>](#AS2Constants.EXPLANATION)  
+**Default**: <code>&quot;The message was received, but could not be verified; the contents cannot be trusted to be the same contents that were sent.&quot;</code>  
+<a name="AS2Constants.EXPLANATION.FAILED_GENERALLY"></a>
+
+#### EXPLANATION.FAILED_GENERALLY : <code>string</code>
+
+**Kind**: static constant of [<code>EXPLANATION</code>](#AS2Constants.EXPLANATION)  
+**Default**: <code>&quot;The message could not be received or processed.&quot;</code>  
+<a name="AS2Constants.SIGNING"></a>
+
+### AS2Constants.SIGNING : <code>object</code>
+
+<p>Constants used for signing.</p>
+
+**Kind**: static namespace of [<code>AS2Constants</code>](#AS2Constants)
+
+- [.SIGNING](#AS2Constants.SIGNING) : <code>object</code>
+  - [.SHA1](#AS2Constants.SIGNING.SHA1) : [<code>AS2Signing</code>](#AS2Signing)
+  - [.SHA256](#AS2Constants.SIGNING.SHA256) : [<code>AS2Signing</code>](#AS2Signing)
+  - [.SHA384](#AS2Constants.SIGNING.SHA384) : [<code>AS2Signing</code>](#AS2Signing)
+  - [.SHA512](#AS2Constants.SIGNING.SHA512) : [<code>AS2Signing</code>](#AS2Signing)
+
+<a name="AS2Constants.SIGNING.SHA1"></a>
+
+#### SIGNING.SHA1 : [<code>AS2Signing</code>](#AS2Signing)
+
+**Kind**: static constant of [<code>SIGNING</code>](#AS2Constants.SIGNING)  
+**Default**: <code>sha-1</code>  
+<a name="AS2Constants.SIGNING.SHA256"></a>
+
+#### SIGNING.SHA256 : [<code>AS2Signing</code>](#AS2Signing)
+
+**Kind**: static constant of [<code>SIGNING</code>](#AS2Constants.SIGNING)  
+**Default**: <code>sha-256</code>  
+<a name="AS2Constants.SIGNING.SHA384"></a>
+
+#### SIGNING.SHA384 : [<code>AS2Signing</code>](#AS2Signing)
+
+**Kind**: static constant of [<code>SIGNING</code>](#AS2Constants.SIGNING)  
+**Default**: <code>sha-384</code>  
+<a name="AS2Constants.SIGNING.SHA512"></a>
+
+#### SIGNING.SHA512 : [<code>AS2Signing</code>](#AS2Signing)
+
+**Kind**: static constant of [<code>SIGNING</code>](#AS2Constants.SIGNING)  
+**Default**: <code>sha-512</code>  
+<a name="AS2Constants.STANDARD_HEADER"></a>
+
+### AS2Constants.STANDARD_HEADER : <code>object</code>
+
+<p>Constants used for signing.</p>
+
+**Kind**: static namespace of [<code>AS2Constants</code>](#AS2Constants)
+
+- [.STANDARD_HEADER](#AS2Constants.STANDARD_HEADER) : <code>object</code>
+  - [.VERSION](#AS2Constants.STANDARD_HEADER.VERSION) : <code>string</code>
+  - [.TO](#AS2Constants.STANDARD_HEADER.TO) : <code>string</code>
+  - [.FROM](#AS2Constants.STANDARD_HEADER.FROM) : <code>string</code>
+  - [.MDN_TO](#AS2Constants.STANDARD_HEADER.MDN_TO) : <code>string</code>
+  - [.MDN_OPTIONS](#AS2Constants.STANDARD_HEADER.MDN_OPTIONS) : <code>string</code>
+  - [.MDN_URL](#AS2Constants.STANDARD_HEADER.MDN_URL) : <code>string</code>
+
+<a name="AS2Constants.STANDARD_HEADER.VERSION"></a>
+
+#### STANDARD_HEADER.VERSION : <code>string</code>
+
+**Kind**: static constant of [<code>STANDARD_HEADER</code>](#AS2Constants.STANDARD_HEADER)  
+**Default**: <code>&quot;AS2-Version&quot;</code>  
+<a name="AS2Constants.STANDARD_HEADER.TO"></a>
+
+#### STANDARD_HEADER.TO : <code>string</code>
+
+**Kind**: static constant of [<code>STANDARD_HEADER</code>](#AS2Constants.STANDARD_HEADER)  
+**Default**: <code>&quot;AS2-To&quot;</code>  
+<a name="AS2Constants.STANDARD_HEADER.FROM"></a>
+
+#### STANDARD_HEADER.FROM : <code>string</code>
+
+**Kind**: static constant of [<code>STANDARD_HEADER</code>](#AS2Constants.STANDARD_HEADER)  
+**Default**: <code>&quot;AS2-From&quot;</code>  
+<a name="AS2Constants.STANDARD_HEADER.MDN_TO"></a>
+
+#### STANDARD_HEADER.MDN_TO : <code>string</code>
+
+**Kind**: static constant of [<code>STANDARD_HEADER</code>](#AS2Constants.STANDARD_HEADER)  
+**Default**: <code>&quot;Disposition-Notification-To&quot;</code>  
+<a name="AS2Constants.STANDARD_HEADER.MDN_OPTIONS"></a>
+
+#### STANDARD_HEADER.MDN_OPTIONS : <code>string</code>
+
+**Kind**: static constant of [<code>STANDARD_HEADER</code>](#AS2Constants.STANDARD_HEADER)  
+**Default**: <code>&quot;Disposition-Notification-Options&quot;</code>  
+<a name="AS2Constants.STANDARD_HEADER.MDN_URL"></a>
+
+#### STANDARD_HEADER.MDN_URL : <code>string</code>
+
+**Kind**: static constant of [<code>STANDARD_HEADER</code>](#AS2Constants.STANDARD_HEADER)  
+**Default**: <code>&quot;Receipt-Delivery-Option&quot;</code>  
+<a name="AS2Constants.CRLF"></a>
+
+### AS2Constants.CRLF : <code>string</code>
+
+**Kind**: static constant of [<code>AS2Constants</code>](#AS2Constants)  
+**Default**: <code>&quot;\r\n&quot;</code>  
+<a name="AS2Constants.MIME_VERSION"></a>
+
+### AS2Constants.MIME_VERSION : <code>string</code>
+
+**Kind**: static constant of [<code>AS2Constants</code>](#AS2Constants)  
+**Default**: <code>&quot;1.0&quot;</code>  
+<a name="AS2Constants.AS2_VERSION"></a>
+
+### AS2Constants.AS2_VERSION : <code>string</code>
+
+**Kind**: static constant of [<code>AS2Constants</code>](#AS2Constants)  
+**Default**: <code>&quot;1.0&quot;</code>  
+<a name="AS2Constants.SMIME_DESC"></a>
+
+### AS2Constants.SMIME_DESC : <code>string</code>
+
+**Kind**: static constant of [<code>AS2Constants</code>](#AS2Constants)  
+**Default**: <code>&quot;This is an S/MIME signed message&quot;</code>  
+<a name="AS2Constants.SIGNATURE_FILENAME"></a>
+
+### AS2Constants.SIGNATURE_FILENAME : <code>string</code>
+
+**Kind**: static constant of [<code>AS2Constants</code>](#AS2Constants)  
+**Default**: <code>&quot;smime.p7s&quot;</code>  
+<a name="AS2Constants.ENCRYPTION_FILENAME"></a>
+
+### AS2Constants.ENCRYPTION_FILENAME : <code>string</code>
+
+**Kind**: static constant of [<code>AS2Constants</code>](#AS2Constants)  
+**Default**: <code>&quot;smime.p7m&quot;</code>  
+<a name="AS2Constants.LIBRARY_NAME"></a>
+
+### AS2Constants.LIBRARY_NAME : <code>string</code>
+
+**Kind**: static constant of [<code>AS2Constants</code>](#AS2Constants)  
+<a name="AS2Constants.LIBRARY_VERSION"></a>
+
+### AS2Constants.LIBRARY_VERSION : <code>string</code>
+
+**Kind**: static constant of [<code>AS2Constants</code>](#AS2Constants)  
+<a name="AS2Constants.LIBRAY_NAME_VERSION"></a>
+
+### AS2Constants.LIBRAY_NAME_VERSION : <code>string</code>
+
+**Kind**: static constant of [<code>AS2Constants</code>](#AS2Constants)  
 <a name="parseHeaderString"></a>
 
 ## parseHeaderString()

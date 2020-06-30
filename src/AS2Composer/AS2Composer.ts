@@ -10,7 +10,9 @@ import {
   parseHeaderString
 } from '../Helpers'
 import { AS2Headers, RequestOptions } from '../Interfaces'
-import { STANDARD_HEADER } from '../Constants'
+import { AS2Constants } from '../Constants'
+
+const { STANDARD_HEADER } = AS2Constants
 
 /** Options for composing an AS2 message.
  * @typedef {object} AS2ComposerOptions

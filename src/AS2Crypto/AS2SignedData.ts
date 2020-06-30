@@ -4,8 +4,9 @@ import { Crypto } from '@peculiar/webcrypto'
 import { PemFile } from './PemFile'
 import { ObjectID } from './LibOid'
 import { isNullOrUndefined } from '../Helpers'
-import { SIGNING } from '../Constants'
+import { AS2Constants } from '../Constants'
 
+const { SIGNING } = AS2Constants
 const webcrypto = new Crypto()
 
 export class AS2SignedData {
