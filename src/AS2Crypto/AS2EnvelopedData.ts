@@ -44,16 +44,6 @@ export class AS2EnvelopedData {
     return new pkijs.Certificate({ schema: certAsn1.result })
   }
 
-  private _getCertAlgorithmId (certificate: any) {
-    const rsaPssId = new ObjectID({ name: 'RSA-PSS' }).id
-
-    if (certificate.signatureAlgorithm.algorithmId === rsaPssId) {
-      return rsaPssId
-    }
-
-    return certificate.subjectPublicKeyInfo.algorithm.algorithmId
-  }
-
   private _getEncryptionAlgorithm (encryption: AS2Encryption) {
     const CBC = 'AES-CBC'
     const GCM = 'AES-GCM'

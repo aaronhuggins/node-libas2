@@ -11,7 +11,7 @@ export type AS2Headers =
 export interface RequestOptions extends http.RequestOptions {
   url: string | URL
   body?: string | Buffer
-  params?: { [key: string]: string }
+  params?: { [key: string]: string | boolean | number }
 }
 
 export interface IncomingMessage extends http.IncomingMessage {

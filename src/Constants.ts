@@ -2,7 +2,7 @@ import { AS2Encryption, AS2Signing } from './AS2Crypto'
 import { dirname, resolve } from 'path'
 import { readFileSync } from 'fs'
 
-const getPackageJson = function getPackageJson (
+export const getPackageJson = function getPackageJson (
   filename?: string,
   index: number = 0
 ): any {
@@ -29,26 +29,7 @@ const { alternateName, version } = getPackageJson()
 /** Constants used in libas2.
  * @namespace AS2Constants
  */
-export const AS2Constants: {
-  ENCRYPTION: {
-    AES128_CBC: AS2Encryption
-    AES192_CBC: AS2Encryption
-    AES256_CBC: AS2Encryption
-    AES128_GCM: AS2Encryption
-    AES192_GCM: AS2Encryption
-    AES256_GCM: AS2Encryption
-  }
-  ERROR: { [key: string]: string }
-  EXPLANATION: { [key: string]: string }
-  SIGNING: {
-    SHA1: AS2Signing
-    SHA256: AS2Signing
-    SHA384: AS2Signing
-    SHA512: AS2Signing
-  }
-  STANDARD_HEADER: { [key: string]: string }
-  [key: string]: string | any
-} = {
+export const AS2Constants = {
   /** Constants used for signing.
    * @namespace AS2Constants.ENCRYPTION
    */
@@ -89,6 +70,13 @@ export const AS2Constants: {
      * @default
      */
     AES256_GCM: 'aes256-GCM'
+  } as {
+    AES128_CBC: AS2Encryption
+    AES192_CBC: AS2Encryption
+    AES256_CBC: AS2Encryption
+    AES128_GCM: AS2Encryption
+    AES192_GCM: AS2Encryption
+    AES256_GCM: AS2Encryption
   },
   /** Constants used for signing.
    * @namespace AS2Constants.ERROR
@@ -187,6 +175,11 @@ export const AS2Constants: {
      * @default
      */
     SHA512: 'sha-512'
+  } as {
+    SHA1: AS2Signing
+    SHA256: AS2Signing
+    SHA384: AS2Signing
+    SHA512: AS2Signing
   },
   /** Constants used for signing.
    * @namespace AS2Constants.STANDARD_HEADER
