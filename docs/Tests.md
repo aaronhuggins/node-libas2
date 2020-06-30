@@ -3,6 +3,7 @@
 - [AS2Composer](#as2composer)
 - [AS2Crypto](#as2crypto)
 - [AS2Disposition](#as2disposition)
+- [Globals for libas2](#globals-for-libas2)
 - [AS2MimeNode](#as2mimenode)
 - [AS2Parser](#as2parser)
   <a name=""></a>
@@ -72,7 +73,7 @@ should make a valid AS2 exchange.
       },
       encrypt: {
         cert: Helpers_1.AS2_TESTING_CERT,
-        encryption: core_1.AS2Constants.ENCRYPTION.AES128
+        encryption: core_1.AS2Constants.ENCRYPTION.AES192_GCM
       },
       mdn: {
         to: 'mycompanyAS2@example-message.net',
@@ -231,6 +232,17 @@ assert.doesNotThrow(() => {
 })
 ```
 
+should throw error on unsupported encryption.
+
+```js
+;async () => {
+  const encrypted = new core_1.AS2EnvelopedData(Buffer.from('a'))
+  await assert.rejects(async () => {
+    await encrypted.encrypt(Helpers_1.LIBAS2_CERT, 'des3')
+  })
+}
+```
+
 should throw error on compression methods.
 
 ```js
@@ -312,7 +324,17 @@ should derive disposition from incoming disposition.
   const disposition = await mime.dispositionIn({
     cert: Helpers_1.AS2_TESTING_CERT
   })
+  mime.childNodes[0].childNodes[1].content =
+    'X-CUSTOM-DATA: Some MDNs might have custom headers.'
+  const customDisposition = new core_1.AS2Disposition(mime)
   assert.strictEqual(disposition instanceof core_1.AS2Disposition, true)
+  assert.strictEqual(
+    customDisposition.notification.headers['X-CUSTOM-DATA'],
+    'Some MDNs might have custom headers.'
+  )
+  assert.throws(() => {
+    new core_1.AS2Disposition({})
+  })
   await assert.rejects(async () => {
     await core_1.AS2Disposition.incoming(mime, { cert: Helpers_1.LIBAS2_CERT })
   })
@@ -380,6 +402,52 @@ should generate outgoing disposition from incoming message.
 }
 ```
 
+should construct notification.
+
+```js
+const notification = new core_1.AS2DispositionNotification({}, null)
+assert.strictEqual(typeof notification.headers, 'undefined')
+```
+
+<a name="globals-for-libas2"></a>
+
+# Globals for libas2
+
+should return empty package json.
+
+```js
+;async () => {
+  const mockManager = ts_mock_imports_1.ImportMock.mockFunction(
+    fs,
+    'readFileSync'
+  )
+  const pkg = core_1.getPackageJson()
+  mockManager.restore()
+  assert.deepStrictEqual(pkg, {})
+}
+```
+
+should make requests.
+
+```js
+;async () => {
+  const payload = { tested: null }
+  const scope = nock('http://local.host')
+  scope.post(uri => uri.startsWith('/fake')).reply(200, payload)
+  scope.post(uri => uri.startsWith('/fake')).reply(200, 'payload')
+  const response = await core_1.request({
+    url: 'http://local.host/fake',
+    params: {
+      test1: 1,
+      test2: null
+    }
+  })
+  const response2 = await core_1.request({ url: 'http://local.host/fake' })
+  assert.deepStrictEqual(response.json(), payload)
+  assert.strictEqual(response2.json() instanceof Error, true)
+}
+```
+
 <a name="as2mimenode"></a>
 
 # AS2MimeNode
@@ -417,7 +485,7 @@ encrypted should be decrypted by openssl.
     contentType: 'application/edi-x12',
     encrypt: {
       cert: Helpers_1.LIBAS2_CERT,
-      encryption: core_1.AS2Constants.ENCRYPTION.AES128
+      encryption: core_1.AS2Constants.ENCRYPTION.AES128_CBC
     },
     content: Helpers_1.LIBAS2_EDI
   })
@@ -448,7 +516,7 @@ signed and encrypted should be decrypted by openssl.
     sign: { cert: Helpers_1.LIBAS2_CERT, key: Helpers_1.LIBAS2_KEY },
     encrypt: {
       cert: Helpers_1.LIBAS2_CERT,
-      encryption: core_1.AS2Constants.ENCRYPTION.AES128
+      encryption: core_1.AS2Constants.ENCRYPTION.AES192_CBC
     },
     content: Helpers_1.LIBAS2_EDI
   })
