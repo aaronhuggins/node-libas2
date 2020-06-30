@@ -10,6 +10,10 @@ import { AS2Parser } from './AS2Parser'
 
 const { SIGNING, ENCRYPTION, CRLF } = AS2Constants
 
+/** Get the multipart/report disposition-notification, if any.
+ * @param {AS2MimeNode} node - The multipart MIME containing the report.
+ * @returns {AS2MimeNode} The multipart/report disposition-notification.
+ */
 export function getReportNode (node: AS2MimeNode): AS2MimeNode {
   if (!node) return
 
@@ -25,7 +29,12 @@ export function getReportNode (node: AS2MimeNode): AS2MimeNode {
   }
 }
 
-/** Method for converting a string of headers into key:value pairs. */
+/** Method for converting a string of headers into key:value pairs.
+ * @param {string} headers - A string of headers.
+ * @param {boolean|Function} [keyToLowerCase] - Set all header keys to lower-case; or provide a function to manipulate values.
+ * @param {Function} [callback] - A callback to manipulate values as they are parsed; only use if second argument is a boolean.
+ * @returns {object} The headers as an object of key/value pairs.
+ */
 export function parseHeaderString (
   headers: string
 ): { [key: string]: string | string[] }
@@ -86,6 +95,8 @@ export function parseHeaderString (
 }
 
 /** Method for retrieving the protocol of a URL, dynamically.
+ * @param {string|URL} url - The url to get the protocol.
+ * @returns {string} The protocol of the URL.
  * @throws URL is not one of either "string" or instance of "URL".
  */
 export function getProtocol (url: string | URL): string {
@@ -96,12 +107,18 @@ export function getProtocol (url: string | URL): string {
   throw new Error('URL is not one of either "string" or instance of "URL".')
 }
 
-/** Convenience method for null-checks */
+/** Convenience method for null-checks.
+ * @param {any} value - Any value to duck-check.
+ * @returns {boolean} True if null or undefined.
+ */
 export function isNullOrUndefined (value: any): boolean {
   return value === undefined || value === null
 }
 
-/** Determine if a given string is one of PKCS7 MIME types. */
+/** Determine if a given string is one of PKCS7 MIME types.
+ * @param {string} value - Checks if either pkcs7 or x-pkcs7.
+ * @returns {boolean} True if a valid pkcs7 value.
+ */
 export function isSMime (value: string) {
   return (
     value.toLowerCase().startsWith('application/pkcs7') ||
@@ -109,7 +126,9 @@ export function isSMime (value: string) {
   )
 }
 
-/** Transforms a payload into a canonical text format before signing */
+/** Transforms a payload into a canonical text format per RFC 5751 section 3.1.1.
+ * @param {AS2MimeNode} node - The AS2MimeNode to canonicalize.
+ */
 export function canonicalTransform (node: AS2MimeNode): void {
   const newline = /\r\n|\r|\n/gu
 
@@ -123,19 +142,28 @@ export function canonicalTransform (node: AS2MimeNode): void {
   node.childNodes.forEach(canonicalTransform)
 }
 
-/** Normalizes certificate signing options. */
+/** Normalizes certificate signing options.
+ * @param {SigningOptions} sign - Options for signing.
+ * @returns {SigningOptions} A normalized option object.
+ */
 export function signingOptions (sign: SigningOptions): SigningOptions {
   return { cert: '', key: '', algorithm: SIGNING.SHA256, ...sign }
 }
 
-/** Normalizes encryption options. */
+/** Normalizes encryption options.
+ * @param {EncryptionOptions} encrypt - Options for encryption.
+ * @returns {EncryptionOptions} A normalized option object.
+ */
 export function encryptionOptions (
   encrypt: EncryptionOptions
 ): EncryptionOptions {
   return { cert: '', encryption: ENCRYPTION.AES256_CBC, ...encrypt }
 }
 
-/** Normalizes agreement options. */
+/** Normalizes agreement options.
+ * @param {AgreementOptions} agreement - Options for partner agreement.
+ * @returns {AgreementOptions} A normalized option object.
+ */
 export function agreementOptions (
   agreement: AgreementOptions
 ): AgreementOptions {
@@ -160,17 +188,24 @@ export function agreementOptions (
   }
 }
 
-/** Convenience method for making AS2 HTTP/S requests. Makes a POST request by default. */
+/** Convenience method for making AS2 HTTP/S requests. Makes a POST request by default.
+ * @param {RequestOptions} options - Options for making a request; extends Node's RequestOptions interface.
+ * @param {Buffer|string|object|Array} options.body - Buffer, string, or JavaScript object.
+ * @param {object} options.params - JavaScript object of parameters to append to the url.
+ * @returns {IncomingMessage} The incoming message, including Buffer properties rawBody and rawResponse,
+ * and convenience methods for mime() and json().
+ */
 export async function request (
   options: RequestOptions
 ): Promise<IncomingMessage> {
   return new Promise((resolve, reject) => {
     try {
-      const { params, body, url } = options
+      const { body, params, url } = options
       const internalUrl = new URL(url as string)
       const internalBody = isNullOrUndefined(body) ? '' : body
       const protocol = getProtocol(internalUrl) === 'https' ? https : http
       delete options.body
+      delete options.params
       delete options.url
       options.method = options.method || 'POST'
       Object.entries(params || {}).forEach(val => {

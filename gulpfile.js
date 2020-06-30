@@ -21,14 +21,20 @@ gulp.task('compile', shell.task(['tsc']))
 gulp.task(
   'compile:docs',
   shell.task([
-    'jsdoc2md --no-cache --files ./src/**/*.ts --configure ./jsdoc2md.json > ./docs/API.md'
+    'jsdoc2md --no-cache --files ./src/**/*.ts --configure ./jsdoc2md.json > ./docs/API.md',
+    'prettier-standard docs/API.md'
   ])
 )
 
 gulp.task(
   'compile:tests',
-  shell.task(['mocha --reporter=markdown > ./docs/Tests.md'])
+  shell.task([
+    'mocha --reporter=markdown > ./docs/Tests.md',
+    'prettier-standard docs/Tests.md'
+  ])
 )
+
+gulp.task('docs', gulp.series('compile:docs', 'compile:tests'))
 
 gulp.task('mocha', shell.task(['mocha']))
 

@@ -25,23 +25,25 @@
 ## Functions
 
 <dl>
-<dt><a href="#parseHeaderString">parseHeaderString()</a></dt>
+<dt><a href="#getReportNode">getReportNode(node)</a> ⇒ <code><a href="#AS2MimeNode">AS2MimeNode</a></code></dt>
+<dd><p>Get the multipart/report disposition-notification, if any.</p></dd>
+<dt><a href="#parseHeaderString">parseHeaderString(headers, [keyToLowerCase], [callback])</a> ⇒ <code>object</code></dt>
 <dd><p>Method for converting a string of headers into key:value pairs.</p></dd>
-<dt><a href="#getProtocol">getProtocol()</a></dt>
+<dt><a href="#getProtocol">getProtocol(url)</a> ⇒ <code>string</code></dt>
 <dd><p>Method for retrieving the protocol of a URL, dynamically.</p></dd>
-<dt><a href="#isNullOrUndefined">isNullOrUndefined()</a></dt>
-<dd><p>Convenience method for null-checks</p></dd>
-<dt><a href="#isSMime">isSMime()</a></dt>
+<dt><a href="#isNullOrUndefined">isNullOrUndefined(value)</a> ⇒ <code>boolean</code></dt>
+<dd><p>Convenience method for null-checks.</p></dd>
+<dt><a href="#isSMime">isSMime(value)</a> ⇒ <code>boolean</code></dt>
 <dd><p>Determine if a given string is one of PKCS7 MIME types.</p></dd>
-<dt><a href="#canonicalTransform">canonicalTransform()</a></dt>
-<dd><p>Transforms a payload into a canonical text format before signing</p></dd>
-<dt><a href="#signingOptions">signingOptions()</a></dt>
+<dt><a href="#canonicalTransform">canonicalTransform(node)</a></dt>
+<dd><p>Transforms a payload into a canonical text format per RFC 5751 section 3.1.1.</p></dd>
+<dt><a href="#signingOptions">signingOptions(sign)</a> ⇒ <code><a href="#SigningOptions">SigningOptions</a></code></dt>
 <dd><p>Normalizes certificate signing options.</p></dd>
-<dt><a href="#encryptionOptions">encryptionOptions()</a></dt>
+<dt><a href="#encryptionOptions">encryptionOptions(encrypt)</a> ⇒ <code><a href="#EncryptionOptions">EncryptionOptions</a></code></dt>
 <dd><p>Normalizes encryption options.</p></dd>
-<dt><a href="#agreementOptions">agreementOptions()</a></dt>
+<dt><a href="#agreementOptions">agreementOptions(agreement)</a> ⇒ <code><a href="#AgreementOptions">AgreementOptions</a></code></dt>
 <dd><p>Normalizes agreement options.</p></dd>
-<dt><a href="#request">request()</a></dt>
+<dt><a href="#request">request(options)</a> ⇒ <code>IncomingMessage</code></dt>
 <dd><p>Convenience method for making AS2 HTTP/S requests. Makes a POST request by default.</p></dd>
 </dl>
 
@@ -56,7 +58,7 @@
 <dd><p>Options for composing an AS2 message.</p></dd>
 <dt><a href="#AS2Signing">AS2Signing</a> : <code>&#x27;sha-1&#x27;</code> | <code>&#x27;sha-256&#x27;</code> | <code>&#x27;sha-384&#x27;</code> | <code>&#x27;sha-512&#x27;</code></dt>
 <dd><p>List of supported signing algorithms.</p></dd>
-<dt><a href="#AS2Encryption">AS2Encryption</a> : <code>&#x27;aes-128-CBC&#x27;</code> | <code>&#x27;aes-192-CBC&#x27;</code> | <code>&#x27;aes-256-CBC&#x27;</code></dt>
+<dt><a href="#AS2Encryption">AS2Encryption</a> : <code>&#x27;aes128-CBC&#x27;</code> | <code>&#x27;aes192-CBC&#x27;</code> | <code>&#x27;aes256-CBC&#x27;</code> | <code>&#x27;aes128-GCM&#x27;</code> | <code>&#x27;aes192-GCM&#x27;</code> | <code>&#x27;aes256-GCM&#x27;</code></dt>
 <dd><p>List of supported encryption algorithms.</p></dd>
 <dt><a href="#EncryptionOptions">EncryptionOptions</a> : <code>object</code></dt>
 <dd><p>Options for encrypting payloads.</p></dd>
@@ -868,73 +870,143 @@
 ### AS2Constants.LIBRAY_NAME_VERSION : <code>string</code>
 
 **Kind**: static constant of [<code>AS2Constants</code>](#AS2Constants)  
+<a name="getReportNode"></a>
+
+## getReportNode(node) ⇒ [<code>AS2MimeNode</code>](#AS2MimeNode)
+
+<p>Get the multipart/report disposition-notification, if any.</p>
+
+**Kind**: global function  
+**Returns**: [<code>AS2MimeNode</code>](#AS2MimeNode) - <p>The multipart/report disposition-notification.</p>
+
+| Param | Type                                     | Description                                      |
+| ----- | ---------------------------------------- | ------------------------------------------------ |
+| node  | [<code>AS2MimeNode</code>](#AS2MimeNode) | <p>The multipart MIME containing the report.</p> |
+
 <a name="parseHeaderString"></a>
 
-## parseHeaderString()
+## parseHeaderString(headers, [keyToLowerCase], [callback]) ⇒ <code>object</code>
 
 <p>Method for converting a string of headers into key:value pairs.</p>
 
 **Kind**: global function  
+**Returns**: <code>object</code> - <p>The headers as an object of key/value pairs.</p>
+
+| Param            | Type                                          | Default            | Description                                                                                          |
+| ---------------- | --------------------------------------------- | ------------------ | ---------------------------------------------------------------------------------------------------- |
+| headers          | <code>string</code>                           |                    | <p>A string of headers.</p>                                                                          |
+| [keyToLowerCase] | <code>boolean</code> \| <code>function</code> | <code>false</code> | <p>Set all header keys to lower-case; or provide a function to manipulate values.</p>                |
+| [callback]       | <code>function</code>                         |                    | <p>A callback to manipulate values as they are parsed; only use if second argument is a boolean.</p> |
+
 <a name="getProtocol"></a>
 
-## getProtocol()
+## getProtocol(url) ⇒ <code>string</code>
 
 <p>Method for retrieving the protocol of a URL, dynamically.</p>
 
 **Kind**: global function  
+**Returns**: <code>string</code> - <p>The protocol of the URL.</p>  
 **Throws**:
 
 - <p>URL is not one of either &quot;string&quot; or instance of &quot;URL&quot;.</p>
 
+| Param | Type                                    | Description                         |
+| ----- | --------------------------------------- | ----------------------------------- |
+| url   | <code>string</code> \| <code>URL</code> | <p>The url to get the protocol.</p> |
+
 <a name="isNullOrUndefined"></a>
 
-## isNullOrUndefined()
+## isNullOrUndefined(value) ⇒ <code>boolean</code>
 
-<p>Convenience method for null-checks</p>
+<p>Convenience method for null-checks.</p>
 
 **Kind**: global function  
+**Returns**: <code>boolean</code> - <p>True if null or undefined.</p>
+
+| Param | Type             | Description                     |
+| ----- | ---------------- | ------------------------------- |
+| value | <code>any</code> | <p>Any value to duck-check.</p> |
+
 <a name="isSMime"></a>
 
-## isSMime()
+## isSMime(value) ⇒ <code>boolean</code>
 
 <p>Determine if a given string is one of PKCS7 MIME types.</p>
 
 **Kind**: global function  
+**Returns**: <code>boolean</code> - <p>True if a valid pkcs7 value.</p>
+
+| Param | Type                | Description                               |
+| ----- | ------------------- | ----------------------------------------- |
+| value | <code>string</code> | <p>Checks if either pkcs7 or x-pkcs7.</p> |
+
 <a name="canonicalTransform"></a>
 
-## canonicalTransform()
+## canonicalTransform(node)
 
-<p>Transforms a payload into a canonical text format before signing</p>
+<p>Transforms a payload into a canonical text format per RFC 5751 section 3.1.1.</p>
 
-**Kind**: global function  
+**Kind**: global function
+
+| Param | Type                                     | Description                             |
+| ----- | ---------------------------------------- | --------------------------------------- |
+| node  | [<code>AS2MimeNode</code>](#AS2MimeNode) | <p>The AS2MimeNode to canonicalize.</p> |
+
 <a name="signingOptions"></a>
 
-## signingOptions()
+## signingOptions(sign) ⇒ [<code>SigningOptions</code>](#SigningOptions)
 
 <p>Normalizes certificate signing options.</p>
 
 **Kind**: global function  
+**Returns**: [<code>SigningOptions</code>](#SigningOptions) - <p>A normalized option object.</p>
+
+| Param | Type                                           | Description                 |
+| ----- | ---------------------------------------------- | --------------------------- |
+| sign  | [<code>SigningOptions</code>](#SigningOptions) | <p>Options for signing.</p> |
+
 <a name="encryptionOptions"></a>
 
-## encryptionOptions()
+## encryptionOptions(encrypt) ⇒ [<code>EncryptionOptions</code>](#EncryptionOptions)
 
 <p>Normalizes encryption options.</p>
 
 **Kind**: global function  
+**Returns**: [<code>EncryptionOptions</code>](#EncryptionOptions) - <p>A normalized option object.</p>
+
+| Param   | Type                                                 | Description                    |
+| ------- | ---------------------------------------------------- | ------------------------------ |
+| encrypt | [<code>EncryptionOptions</code>](#EncryptionOptions) | <p>Options for encryption.</p> |
+
 <a name="agreementOptions"></a>
 
-## agreementOptions()
+## agreementOptions(agreement) ⇒ [<code>AgreementOptions</code>](#AgreementOptions)
 
 <p>Normalizes agreement options.</p>
 
 **Kind**: global function  
+**Returns**: [<code>AgreementOptions</code>](#AgreementOptions) - <p>A normalized option object.</p>
+
+| Param     | Type                                               | Description                           |
+| --------- | -------------------------------------------------- | ------------------------------------- |
+| agreement | [<code>AgreementOptions</code>](#AgreementOptions) | <p>Options for partner agreement.</p> |
+
 <a name="request"></a>
 
-## request()
+## request(options) ⇒ <code>IncomingMessage</code>
 
 <p>Convenience method for making AS2 HTTP/S requests. Makes a POST request by default.</p>
 
 **Kind**: global function  
+**Returns**: <code>IncomingMessage</code> - <p>The incoming message, including Buffer properties rawBody and rawResponse,
+and convenience methods for mime() and json().</p>
+
+| Param          | Type                                                                                    | Description                                                                   |
+| -------------- | --------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| options        | <code>RequestOptions</code>                                                             | <p>Options for making a request; extends Node's RequestOptions interface.</p> |
+| options.body   | <code>Buffer</code> \| <code>string</code> \| <code>object</code> \| <code>Array</code> | <p>Buffer, string, or JavaScript object.</p>                                  |
+| options.params | <code>object</code>                                                                     | <p>JavaScript object of parameters to append to the url.</p>                  |
+
 <a name="AS2ComposerOptions"></a>
 
 ## AS2ComposerOptions : <code>object</code>
@@ -995,7 +1067,7 @@
 **Kind**: global typedef  
 <a name="AS2Encryption"></a>
 
-## AS2Encryption : <code>&#x27;aes-128-CBC&#x27;</code> \| <code>&#x27;aes-192-CBC&#x27;</code> \| <code>&#x27;aes-256-CBC&#x27;</code>
+## AS2Encryption : <code>&#x27;aes128-CBC&#x27;</code> \| <code>&#x27;aes192-CBC&#x27;</code> \| <code>&#x27;aes256-CBC&#x27;</code> \| <code>&#x27;aes128-GCM&#x27;</code> \| <code>&#x27;aes192-GCM&#x27;</code> \| <code>&#x27;aes256-GCM&#x27;</code>
 
 <p>List of supported encryption algorithms.</p>
 

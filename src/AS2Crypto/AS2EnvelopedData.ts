@@ -3,6 +3,7 @@ import * as pkijs from 'pkijs/build/index'
 import { Crypto } from '@peculiar/webcrypto'
 import { PemFile } from './PemFile'
 import { ObjectID } from './LibOid'
+import { AS2Encryption } from './Interfaces'
 
 const webcrypto = new Crypto()
 
@@ -53,23 +54,39 @@ export class AS2EnvelopedData {
     return certificate.subjectPublicKeyInfo.algorithm.algorithmId
   }
 
-  private _getEncryptionAlgorithm (encryption: string) {
-    const aesCbc = 'AES-CBC'
+  private _getEncryptionAlgorithm (encryption: AS2Encryption) {
+    const CBC = 'AES-CBC'
+    const GCM = 'AES-GCM'
 
-    switch (encryption.toLowerCase()) {
-      case 'aes-128-cbc':
+    switch (encryption) {
+      case 'aes128-CBC':
         return {
-          name: aesCbc,
+          name: CBC,
           length: 128
         }
-      case 'aes-192-cbc':
+      case 'aes192-CBC':
         return {
-          name: aesCbc,
+          name: CBC,
           length: 192
         }
-      case 'aes-256-cbc':
+      case 'aes256-CBC':
         return {
-          name: aesCbc,
+          name: CBC,
+          length: 256
+        }
+      case 'aes128-GCM':
+        return {
+          name: GCM,
+          length: 128
+        }
+      case 'aes192-GCM':
+        return {
+          name: GCM,
+          length: 192
+        }
+      case 'aes256-GCM':
+        return {
+          name: GCM,
           length: 256
         }
       default:
@@ -77,7 +94,7 @@ export class AS2EnvelopedData {
     }
   }
 
-  async encrypt (cert: string | Buffer, encryption: string) {
+  async encrypt (cert: string | Buffer, encryption: AS2Encryption) {
     const certificate = this._toCertificate(cert)
 
     this.enveloped.addRecipientByCertificate(certificate)

@@ -20,7 +20,7 @@ const { CRLF, ENCRYPTION_FILENAME, SIGNATURE_FILENAME, ERROR } = AS2Constants
  */
 
 /** List of supported encryption algorithms.
- * @typedef {'aes-128-CBC' | 'aes-192-CBC' | 'aes-256-CBC'} AS2Encryption
+ * @typedef {'aes128-CBC'|'aes192-CBC'|'aes256-CBC'|'aes128-GCM'|'aes192-GCM'|'aes256-GCM'} AS2Encryption
  */
 
 /** Options for encrypting payloads.
