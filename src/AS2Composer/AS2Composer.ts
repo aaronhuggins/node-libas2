@@ -1,7 +1,7 @@
 import { AS2ComposerOptions, AgreementOptions } from './Interfaces'
 import { AS2Agreement } from './AS2Agreement'
 import { AS2MimeNodeOptions, AS2MimeNode } from '../AS2MimeNode'
-import { agreementOptions } from '../Helpers'
+import { getAgreementOptions } from '../Helpers'
 import { AS2Headers, RequestOptions } from '../Interfaces'
 import { AS2Constants } from '../Constants'
 
@@ -65,7 +65,7 @@ export class AS2Composer {
    * @param {AgreementOptions} agreement
    */
   setAgreement (agreement: AgreementOptions): void {
-    this._agreement = agreementOptions(agreement)
+    this._agreement = getAgreementOptions(agreement)
   }
 
   /** Compile the composed message into an instance of AS2MimeNode.

@@ -1,6 +1,6 @@
 import { AS2Constants } from '../Constants'
 import { AS2MimeNode } from '../AS2MimeNode'
-import { encryptionOptions, canonicalTransform } from '../Helpers'
+import { getEncryptionOptions, canonicalTransform } from '../Helpers'
 import * as MimeNode from 'nodemailer/lib/mime-node'
 import {
   EncryptionOptions,
@@ -107,7 +107,7 @@ export class AS2Crypto {
     node: AS2MimeNode,
     options: EncryptionOptions
   ): Promise<AS2MimeNode> {
-    options = encryptionOptions(options)
+    options = getEncryptionOptions(options)
     const rootNode = new AS2MimeNode({
       filename: ENCRYPTION_FILENAME,
       contentType: 'application/pkcs7-mime; smime-type=enveloped-data'

@@ -146,7 +146,7 @@ export function canonicalTransform (node: AS2MimeNode): void {
  * @param {SigningOptions} sign - Options for signing.
  * @returns {SigningOptions} A normalized option object.
  */
-export function signingOptions (sign: SigningOptions): SigningOptions {
+export function getSigningOptions (sign: SigningOptions): SigningOptions {
   return { cert: '', key: '', algorithm: SIGNING.SHA256, ...sign }
 }
 
@@ -154,7 +154,7 @@ export function signingOptions (sign: SigningOptions): SigningOptions {
  * @param {EncryptionOptions} encrypt - Options for encryption.
  * @returns {EncryptionOptions} A normalized option object.
  */
-export function encryptionOptions (
+export function getEncryptionOptions (
   encrypt: EncryptionOptions
 ): EncryptionOptions {
   return { cert: '', encryption: ENCRYPTION.AES256_CBC, ...encrypt }
@@ -164,7 +164,9 @@ export function encryptionOptions (
  * @param {AgreementOptions} agreement - Options for partner agreement.
  * @returns {AS2Agreement} A normalized option object.
  */
-export function agreementOptions (agreement: AgreementOptions): AS2Agreement {
+export function getAgreementOptions (
+  agreement: AgreementOptions
+): AS2Agreement {
   return new AS2Agreement(agreement as any)
 }
 

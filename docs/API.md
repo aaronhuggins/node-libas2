@@ -43,11 +43,11 @@
 <dd><p>Determine if a given string is one of PKCS7 MIME types.</p></dd>
 <dt><a href="#canonicalTransform">canonicalTransform(node)</a></dt>
 <dd><p>Transforms a payload into a canonical text format per RFC 5751 section 3.1.1.</p></dd>
-<dt><a href="#signingOptions">signingOptions(sign)</a> ⇒ <code><a href="#SigningOptions">SigningOptions</a></code></dt>
+<dt><a href="#getSigningOptions">getSigningOptions(sign)</a> ⇒ <code><a href="#SigningOptions">SigningOptions</a></code></dt>
 <dd><p>Normalizes certificate signing options.</p></dd>
-<dt><a href="#encryptionOptions">encryptionOptions(encrypt)</a> ⇒ <code><a href="#EncryptionOptions">EncryptionOptions</a></code></dt>
+<dt><a href="#getEncryptionOptions">getEncryptionOptions(encrypt)</a> ⇒ <code><a href="#EncryptionOptions">EncryptionOptions</a></code></dt>
 <dd><p>Normalizes encryption options.</p></dd>
-<dt><a href="#agreementOptions">agreementOptions(agreement)</a> ⇒ <code><a href="#AS2Agreement">AS2Agreement</a></code></dt>
+<dt><a href="#getAgreementOptions">getAgreementOptions(agreement)</a> ⇒ <code><a href="#AS2Agreement">AS2Agreement</a></code></dt>
 <dd><p>Normalizes agreement options.</p></dd>
 <dt><a href="#request">request(options)</a> ⇒ <code>IncomingMessage</code></dt>
 <dd><p>Convenience method for making AS2 HTTP/S requests. Makes a POST request by default.</p></dd>
@@ -1058,9 +1058,9 @@
 | ----- | ---------------------------------------- | --------------------------------------- |
 | node  | [<code>AS2MimeNode</code>](#AS2MimeNode) | <p>The AS2MimeNode to canonicalize.</p> |
 
-<a name="signingOptions"></a>
+<a name="getSigningOptions"></a>
 
-## signingOptions(sign) ⇒ [<code>SigningOptions</code>](#SigningOptions)
+## getSigningOptions(sign) ⇒ [<code>SigningOptions</code>](#SigningOptions)
 
 <p>Normalizes certificate signing options.</p>
 
@@ -1071,9 +1071,9 @@
 | ----- | ---------------------------------------------- | --------------------------- |
 | sign  | [<code>SigningOptions</code>](#SigningOptions) | <p>Options for signing.</p> |
 
-<a name="encryptionOptions"></a>
+<a name="getEncryptionOptions"></a>
 
-## encryptionOptions(encrypt) ⇒ [<code>EncryptionOptions</code>](#EncryptionOptions)
+## getEncryptionOptions(encrypt) ⇒ [<code>EncryptionOptions</code>](#EncryptionOptions)
 
 <p>Normalizes encryption options.</p>
 
@@ -1084,9 +1084,9 @@
 | ------- | ---------------------------------------------------- | ------------------------------ |
 | encrypt | [<code>EncryptionOptions</code>](#EncryptionOptions) | <p>Options for encryption.</p> |
 
-<a name="agreementOptions"></a>
+<a name="getAgreementOptions"></a>
 
-## agreementOptions(agreement) ⇒ [<code>AS2Agreement</code>](#AS2Agreement)
+## getAgreementOptions(agreement) ⇒ [<code>AS2Agreement</code>](#AS2Agreement)
 
 <p>Normalizes agreement options.</p>
 

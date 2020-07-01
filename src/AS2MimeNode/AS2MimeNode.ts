@@ -3,8 +3,8 @@ import * as MimeNode from 'nodemailer/lib/mime-node'
 import { AS2MimeNodeOptions, DispositionOutOptions } from './Interfaces'
 import {
   isNullOrUndefined,
-  signingOptions,
-  encryptionOptions,
+  getSigningOptions,
+  getEncryptionOptions,
   isSMime,
   parseHeaderString
 } from '../Helpers'
@@ -169,14 +169,14 @@ export class AS2MimeNode extends MimeNode {
    * @param {SigningOptions} options - Options for signing this AS2 message.
    */
   setSigning (options: SigningOptions): void {
-    this._sign = signingOptions(options)
+    this._sign = getSigningOptions(options)
   }
 
   /** Set the encryption options for this instance.
    * @param {EncryptionOptions} options - Options for encrypting this AS2 message.
    */
   setEncryption (options: EncryptionOptions): void {
-    this._encrypt = encryptionOptions(options)
+    this._encrypt = getEncryptionOptions(options)
   }
 
   /** Set one or more headers on this instance.
