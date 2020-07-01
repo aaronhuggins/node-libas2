@@ -1252,13 +1252,11 @@ and convenience methods for mime() and json().</p>
 **Kind**: global typedef  
 **Properties**
 
-| Name              | Type                                                     |
-| ----------------- | -------------------------------------------------------- |
-| node              | [<code>AS2MimeNode</code>](#AS2MimeNode)                 |
-| [returnNode]      | <code>boolean</code>                                     |
-| [signDisposition] | [<code>SigningOptions</code>](#SigningOptions)           |
-| [signed]          | [<code>VerificationOptions</code>](#VerificationOptions) |
-| [encrypted]       | [<code>DecryptionOptions</code>](#DecryptionOptions)     |
+| Name         | Type                                               | Description                                                                             |
+| ------------ | -------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| node         | [<code>AS2MimeNode</code>](#AS2MimeNode)           | <p>The mime node to verify and/or decrypt; used construct the outgoing disposition.</p> |
+| agreement    | [<code>AgreementOptions</code>](#AgreementOptions) | <p>The partner agreement to use when sending the outgoing disposition.</p>              |
+| [returnNode] | <code>boolean</code>                               | <p>Whether to attach the mime node to the disposition as the returned payload.</p>      |
 
 <a name="ParseOptions"></a>
 

@@ -397,12 +397,29 @@ should generate outgoing disposition from incoming message.
     fakeAs2Header + Helpers_1.SIGNED_CONTENT
   )
   const dispositionMime = await mime.dispositionOut({
+    agreement: {
+      host: { name: 'LibAS2 Community', id: 'libas2community' },
+      partner: { name: 'AS2 Testing', id: 'as2testing' }
+    },
     returnNode: true
   })
   const dispositionSignedMime = await mime.dispositionOut({
-    returnNode: true,
-    signDisposition: { cert: Helpers_1.LIBAS2_CERT, key: Helpers_1.LIBAS2_KEY },
-    signed: { cert: Helpers_1.LIBAS2_CERT }
+    agreement: {
+      host: {
+        name: 'LibAS2 Community',
+        id: 'libas2community',
+        certificate: Helpers_1.LIBAS2_CERT,
+        privateKey: Helpers_1.LIBAS2_KEY
+      },
+      partner: {
+        name: 'LibAS2 Community',
+        id: 'libas2community',
+        certificate: Helpers_1.LIBAS2_CERT,
+        verify: true,
+        mdn: { signing: 'sha-256' }
+      }
+    },
+    returnNode: true
   })
   assert.strictEqual(
     dispositionMime.contentNode instanceof core_1.AS2MimeNode &&
@@ -417,41 +434,89 @@ should generate outgoing disposition from incoming message.
   await core_1.AS2Disposition.outgoing({
     node: await AS2Parser_1.AS2Parser.parse(
       fakeAs2Header + Helpers_1.MIME_CONTENT
-    )
+    ),
+    agreement: {
+      host: { name: 'LibAS2 Community', id: 'libas2community' },
+      partner: { name: 'AS2 Testing', id: 'as2testing' }
+    }
   })
   await core_1.AS2Disposition.outgoing({
     node: await AS2Parser_1.AS2Parser.parse(
       fakeAs2Header + Helpers_1.ENCRYPTED_CONTENT
     ),
-    encrypted: { cert: Helpers_1.LIBAS2_CERT, key: Helpers_1.LIBAS2_KEY }
+    agreement: {
+      host: {
+        name: 'LibAS2 Community',
+        id: 'libas2community',
+        certificate: Helpers_1.LIBAS2_CERT,
+        privateKey: Helpers_1.LIBAS2_KEY,
+        decrypt: true
+      },
+      partner: { name: 'AS2 Testing', id: 'as2testing' }
+    }
   })
   // Force a disposition decryption failure message
   await core_1.AS2Disposition.outgoing({
     node: await AS2Parser_1.AS2Parser.parse(
       fakeAs2Header + Helpers_1.ENCRYPTED_CONTENT
     ),
-    encrypted: { cert: Helpers_1.AS2_TESTING_CERT, key: Helpers_1.LIBAS2_CERT }
+    agreement: {
+      host: {
+        name: 'LibAS2 Community',
+        id: 'libas2community',
+        certificate: Helpers_1.AS2_TESTING_CERT,
+        privateKey: Helpers_1.LIBAS2_CERT,
+        decrypt: true
+      },
+      partner: { name: 'AS2 Testing', id: 'as2testing' }
+    }
   })
   // Force a disposition verification failure message
   await core_1.AS2Disposition.outgoing({
     node: await AS2Parser_1.AS2Parser.parse(
       fakeAs2Header + Helpers_1.SIGNED_CONTENT
     ),
-    signed: { cert: Helpers_1.AS2_TESTING_CERT }
+    agreement: {
+      host: { name: 'LibAS2 Community', id: 'libas2community' },
+      partner: {
+        name: 'LibAS2 Community',
+        id: 'libas2community',
+        certificate: Helpers_1.AS2_TESTING_CERT,
+        verify: true
+      }
+    }
   })
   // Force a disposition generic failure message
   await core_1.AS2Disposition.outgoing({
     node: await AS2Parser_1.AS2Parser.parse(
       fakeAs2Header + Helpers_1.MIME_CONTENT
     ),
-    signed: { cert: Helpers_1.AS2_TESTING_CERT }
-  })
-  await assert.rejects(async () => {
-    await core_1.AS2Disposition.outgoing({ node: null })
+    agreement: {
+      host: { name: 'LibAS2 Community', id: 'libas2community' },
+      partner: {
+        name: 'LibAS2 Community',
+        id: 'libas2community',
+        certificate: Helpers_1.AS2_TESTING_CERT,
+        verify: true
+      }
+    }
   })
   await assert.rejects(async () => {
     await core_1.AS2Disposition.outgoing({
-      node: await AS2Parser_1.AS2Parser.parse(Helpers_1.SIGNED_CONTENT)
+      node: null,
+      agreement: {
+        host: { name: 'LibAS2 Community', id: 'libas2community' },
+        partner: { name: 'AS2 Testing', id: 'as2testing' }
+      }
+    })
+  })
+  await assert.rejects(async () => {
+    await core_1.AS2Disposition.outgoing({
+      node: await AS2Parser_1.AS2Parser.parse(Helpers_1.SIGNED_CONTENT),
+      agreement: {
+        host: { name: 'LibAS2 Community', id: 'libas2community' },
+        partner: { name: 'AS2 Testing', id: 'as2testing' }
+      }
     })
   })
 }
