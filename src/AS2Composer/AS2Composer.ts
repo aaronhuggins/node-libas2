@@ -1,14 +1,11 @@
-import {
-  AS2ComposerOptions,
-  AgreementOptions,
-  MessageDispositionOptions
-} from './Interfaces'
+import { AS2ComposerOptions, AgreementOptions } from './Interfaces'
+import { AS2Agreement } from './AS2Agreement'
 import { AS2MimeNodeOptions, AS2MimeNode } from '../AS2MimeNode'
-import { isNullOrUndefined, agreementOptions } from '../Helpers'
+import { agreementOptions } from '../Helpers'
 import { AS2Headers, RequestOptions } from '../Interfaces'
 import { AS2Constants } from '../Constants'
 
-const { STANDARD_HEADER } = AS2Constants
+const { STANDARD_HEADER, AS2_VERSION } = AS2Constants
 
 /** Options for composing an AS2 message.
  * @typedef {object} AS2ComposerOptions
@@ -18,23 +15,25 @@ const { STANDARD_HEADER } = AS2Constants
 
 /** Options for composing an AS2 message.
  * @typedef {object} AgreementOptions
- * @property {string} sender
- * @property {string} recipient
- * @property {SigningOptions} sign
- * @property {EncryptionOptions} encrypt
- * @property {MessageDispositionOptions} mdn
- * @property {string} version
- * @property {AS2Headers} headers
- */
-
-/** Options for composing an AS2 message.
- * @typedef {object} MessageDispositionOptions
- * @property {string} to
- * @property {string} [deliveryUrl]
- * @property {object} [sign]
- * @property {'required'|'optional'} sign.importance
- * @property {'pkcs7-signature'} sign.protocol
- * @property {AS2Signing} sign.micalg
+ * @property {object} host - Options for the AS2 host.
+ * @property {string} host.name - The name of the host.
+ * @property {string} host.id - The id of the host; usually a company's DUNS id.
+ * @property {string|Buffer|PemFile} host.certificate - The certificate of the host in PEM format. Required for signing or decrypting.
+ * @property {string|Buffer|PemFile} host.privateKey - The private key of the host in PEM format. Required for signing or decrypting.
+ * @property {boolean} host.decrypt - Host requires partner to encrypt messages sent to the host.
+ * @property {AS2Signing|boolean} host.sign - Host requires partner to verify messages sent from the host.
+ * @property {object} host.mdn - Host requests a message disposition notification (MDN).
+ * @property {URL} host.mdn.async - Host requires MDN to be sent to a separate URL.
+ * @property {AS2Signing|false} host.mdn.signing - Host requires MDN to be signed with algorithm if possible.
+ * @property {object} partner - Options for the AS2 partner.
+ * @property {string} partner.name - The name of the partner.
+ * @property {string} partner.id - The id of the partner; usually a company's DUNS id.
+ * @property {string|Buffer|PemFile} partner.certificate - The certificate of the partner in PEM format. Required for signing or decrypting.
+ * @property {AS2Encryption|boolean} partner.encrypt - Partner requires host to encrypt messages sent to the partner.
+ * @property {boolean} partner.verify - Partner requires host to verify messages sent from the partner.
+ * @property {object} partner.mdn - Partner may request a message disposition notification (MDN).{
+ * @property {URL} partner.mdn.async - Partner requires MDN to be sent to a separate URL.
+ * @property {AS2Signing|false} partner.mdn.signing - Partner requires MDN to be signed with algorithm if possible.
  */
 
 /** Class for composing AS2 messages.
@@ -45,87 +44,26 @@ export class AS2Composer {
     this._message = { ...options.message }
     this._headers = []
     this.setAgreement(options.agreement)
-    this.setHeaders(this._agreement)
+
+    if (Array.isArray(options.additionalHeaders)) {
+      this._headers.push(...options.additionalHeaders)
+    } else {
+      for (const [key, value] of Object.entries(options.additionalHeaders || {})) {
+        this._headers.push({ key, value })
+      }
+    }
   }
 
-  _agreement: AgreementOptions
+  _agreement: AS2Agreement
   _message: AS2MimeNodeOptions
-  _headers: Array<{
-    key: string
-    value: string
-  }>
+  _headers: AS2Headers
   message: AS2MimeNode
 
   /** Set the agreement for this composer instance.
-   * @param {AgreementOptions} agreement
+   * @param {AS2Agreement} agreement
    */
   setAgreement (agreement: AgreementOptions): void {
     this._agreement = agreementOptions(agreement)
-  }
-
-  /** Set headers for this composer instance.
-   * @param {AS2Headers|AgreementOptions} headers
-   */
-  setHeaders (headers: AS2Headers | AgreementOptions): void {
-    if (
-      !isNullOrUndefined((headers as AgreementOptions).sender) &&
-      !isNullOrUndefined((headers as AgreementOptions).recipient)
-    ) {
-      const result: Array<{
-        key: string
-        value: string
-      }> = []
-
-      for (let entry of Object.entries(headers)) {
-        const [key, value] = entry
-
-        switch (key) {
-          case 'sender':
-            result.push({ key: STANDARD_HEADER.FROM, value })
-            break
-          case 'recipient':
-            result.push({ key: STANDARD_HEADER.TO, value })
-            break
-          case 'version':
-            result.push({ key: STANDARD_HEADER.VERSION, value })
-            break
-          case 'mdn':
-            const mdn = (value as unknown) as MessageDispositionOptions
-
-            result.push({ key: STANDARD_HEADER.MDN_TO, value: mdn.to })
-
-            if (!isNullOrUndefined(mdn.sign)) {
-              const sign = mdn.sign
-              result.push({
-                key: STANDARD_HEADER.MDN_OPTIONS,
-                value: `signed-receipt-protocol=${sign.importance},${sign.protocol}; signed-receipt-micalg=${sign.importance},${sign.micalg}`
-              })
-            }
-            if (!isNullOrUndefined(mdn.deliveryUrl)) {
-              result.push({
-                key: STANDARD_HEADER.MDN_URL,
-                value: mdn.deliveryUrl
-              })
-            }
-            break
-          case 'headers':
-            this.setHeaders((value as unknown) as AS2Headers)
-            break
-        }
-      }
-
-      this._headers = this._headers.concat(result)
-    } else {
-      if (Array.isArray(headers)) {
-        this._headers = this._headers.concat(headers as any)
-      } else {
-        for (let entry of Object.entries(headers)) {
-          for (let [key, value] of entry) {
-            this._headers.push({ key, value })
-          }
-        }
-      }
-    }
   }
 
   /** Compile the composed message into an instance of AS2MimeNode.
@@ -133,23 +71,50 @@ export class AS2Composer {
    */
   async compile (): Promise<AS2MimeNode> {
     this.message = new AS2MimeNode({ ...this._message })
-    if (!isNullOrUndefined(this._agreement.sign)) {
-      this.message.setSigning(this._agreement.sign)
-    }
-    if (!isNullOrUndefined(this._agreement.encrypt)) {
-      this.message.setEncryption(this._agreement.encrypt)
-    }
-    if (
-      !isNullOrUndefined(this._agreement.sign) ||
-      !isNullOrUndefined(this._message.sign)
-    ) {
+
+    if (this._agreement.host.sign) {
+      this.message.setSigning({
+        cert: this._agreement.host.certificate,
+        key: this._agreement.host.privateKey,
+        algorithm: this._agreement.host.sign
+      })
+
       this.message = await this.message.sign()
     }
-    if (
-      !isNullOrUndefined(this._agreement.encrypt) ||
-      !isNullOrUndefined(this._message.encrypt)
-    ) {
+
+    if (this._agreement.partner.encrypt) {
+      this.message.setEncryption({
+        cert: this._agreement.partner.certificate,
+        encryption: this._agreement.partner.encrypt
+      })
+
       this.message = await this.message.encrypt()
+    }
+
+    // Set AS2 headers.
+    this.message.setHeader([
+      { key: STANDARD_HEADER.FROM, value: this._agreement.host.id },
+      { key: STANDARD_HEADER.TO, value: this._agreement.partner.id },
+      { key: STANDARD_HEADER.VERSION, value: AS2_VERSION }
+    ])
+
+    // Set MDN headers.
+    if (this._agreement.host.mdn) {
+      const mdn = this._agreement.host.mdn
+      let options = 'signed-receipt-protocol=optional,pkcs7-signature; signed-receipt-micalg=optional,sha-256'
+
+      if (mdn.signing) {
+        options = `signed-receipt-protocol=required,pkcs7-signature; signed-receipt-micalg=required,${
+          mdn.signing.toLowerCase()
+        }`
+      }
+
+      this.message.setHeader(STANDARD_HEADER.MDN_TO, this._agreement.host.id)
+      this.message.setHeader(STANDARD_HEADER.MDN_OPTIONS,options)
+
+      if (mdn.async) {
+        this.message.setHeader(STANDARD_HEADER.MDN_URL, mdn.async)
+      }
     }
 
     this.message.setHeader(this._headers)

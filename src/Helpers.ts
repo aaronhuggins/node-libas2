@@ -1,6 +1,6 @@
 import * as http from 'http'
 import * as https from 'https'
-import { AgreementOptions } from './AS2Composer'
+import { AgreementOptions, AS2Agreement } from './AS2Composer'
 import { AS2Constants } from './Constants'
 import { AS2MimeNode } from './AS2MimeNode'
 import { SigningOptions, EncryptionOptions } from './AS2Crypto'
@@ -166,26 +166,8 @@ export function encryptionOptions (
  */
 export function agreementOptions (
   agreement: AgreementOptions
-): AgreementOptions {
-  const { mdn } = agreement
-  const { sign } = mdn
-
-  return {
-    version: '1.0',
-    ...agreement,
-    mdn: isNullOrUndefined(mdn)
-      ? mdn
-      : {
-          ...mdn,
-          sign: isNullOrUndefined(sign)
-            ? sign
-            : {
-                importance: 'required',
-                protocol: 'pkcs7-signature',
-                ...sign
-              }
-        }
-  }
+): AS2Agreement {
+  return new AS2Agreement(agreement as any)
 }
 
 /** Convenience method for making AS2 HTTP/S requests. Makes a POST request by default.

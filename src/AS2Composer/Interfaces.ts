@@ -1,11 +1,14 @@
 import { AS2MimeNodeOptions } from '../AS2MimeNode'
 import { AS2Encryption, AS2Signing, PemFile } from '../AS2Crypto'
+import { AS2Headers } from '../Interfaces'
 
 export interface AS2ComposerOptions {
   /** Message options */
   message: AS2MimeNodeOptions
   /** Agreement options */
   agreement: AgreementOptions
+  /** Additional headers */
+  additionalHeaders?: AS2Headers
 }
 
 export interface AgreementOptions {
@@ -50,18 +53,5 @@ export interface AgreementOptions {
       /** Partner requires MDN to be signed with algorithm if possible. */
       signing: AS2Signing|false
     }
-  }
-}
-
-export interface MessageDispositionOptions {
-  /** Email address to receive a Message Disposition Notification. */
-  to: string
-  /** Url to receive an asynchronous Message Disposition Notification. */
-  deliveryUrl?: string
-  /** Request a signed Message Disposition Notification. */
-  sign?: {
-    importance: 'required' | 'optional'
-    protocol: 'pkcs7-signature'
-    micalg: AS2Signing
   }
 }
