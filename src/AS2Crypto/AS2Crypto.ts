@@ -130,12 +130,32 @@ export class AS2Crypto {
   /** Method to verify data has not been modified from a signature.
    * @param {AS2MimeNode} node - The AS2MimeNode to verify.
    * @param {VerificationOptions} options - Options to verify the MIME message.
-   * @returns {Promise<boolean>} A boolean indicating if the message was verified.
+   * @param {boolean} [getDigest] - Optional argument to return a message digest if verified instead of a boolean.
+   * @returns {Promise<boolean|object>} A boolean or digest object indicating if the message was verified.
    */
   static async verify (
     node: AS2MimeNode,
     options: VerificationOptions
-  ): Promise<boolean> {
+  ): Promise<boolean>
+  static async verify (
+    node: AS2MimeNode,
+    options: VerificationOptions,
+    getDigest: true
+  ): Promise<{
+    digest: Buffer
+    algorithm: string
+  }>
+  static async verify (
+    node: AS2MimeNode,
+    options: VerificationOptions,
+    getDigest?: boolean
+  ): Promise<
+    | boolean
+    | {
+        digest: Buffer
+        algorithm: string
+      }
+  > {
     const contentPart = await AS2Crypto.buildNode(node.childNodes[0])
     const contentPartNoCrLf = AS2Crypto.removeTrailingCrLf(contentPart)
     const signaturePart = Buffer.isBuffer(node.childNodes[1].content)
@@ -145,12 +165,13 @@ export class AS2Crypto {
 
     // Deal with Nodemailer trailing CRLF bug by trying with and without CRLF
     if (await signedData.verify(options.cert)) {
-      return true
+      return getDigest ? signedData.getMessageDigest() : true
     }
 
     const signedDataNoCrLf = new AS2SignedData(contentPartNoCrLf, signaturePart)
+    const result = await signedDataNoCrLf.verify(options.cert)
 
-    return await signedDataNoCrLf.verify(options.cert)
+    return getDigest && result ? signedDataNoCrLf.getMessageDigest() : result
   }
 
   /** Method to sign data against a certificate and key pair.

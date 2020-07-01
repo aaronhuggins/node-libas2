@@ -3,7 +3,7 @@ import { AS2DispositionOptions, OutgoingDispositionOptions } from './Interfaces'
 import { parseHeaderString, getReportNode, isNullOrUndefined } from '../Helpers'
 import { AS2DispositionNotification } from './AS2DispositionNotification'
 import { AS2Constants } from '../Constants'
-import { VerificationOptions } from '../AS2Crypto'
+import { VerificationOptions, AS2Crypto, AS2Signing } from '../AS2Crypto'
 
 const { EXPLANATION, ERROR } = AS2Constants
 
@@ -227,7 +227,17 @@ export class AS2Disposition {
 
     if (typeof options.signed !== 'undefined' && !errored) {
       try {
-        rootNode = await rootNode.verify(options.signed)
+        const verified = await AS2Crypto.verify(rootNode, options.signed, true) // rootNode.verify(options.signed)
+
+        if (verified) {
+          rootNode = rootNode.childNodes[0]
+          notification.receivedContentMic = {
+            mic: verified.digest.toString('base64'),
+            algorithm: verified.algorithm as AS2Signing
+          }
+        } else {
+          rootNode = undefined
+        }
       } catch (error) {
         errored = true
         notification.disposition.processed = false

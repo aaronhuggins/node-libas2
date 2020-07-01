@@ -28,7 +28,8 @@ describe('AS2Disposition', () => {
           processed: true
         },
         finalRecipient: 'some-recipient'
-      }
+      },
+      returned: false
     }
 
     const disposition = new AS2Disposition(opts)
@@ -72,12 +73,14 @@ describe('AS2Disposition', () => {
 
   it('should derive disposition from incoming disposition', async () => {
     const mime = await AS2Parser.parse(SIGNED_MDN)
-    const disposition = await mime.dispositionIn({ cert: AS2_TESTING_CERT })
+    const dispositionSigned = await mime.dispositionIn({ cert: AS2_TESTING_CERT })
+    const disposition = await mime.dispositionIn()
 
     mime.childNodes[0].childNodes[1].content =
       'X-CUSTOM-DATA: Some MDNs might have custom headers.'
     const customDisposition = new AS2Disposition(mime)
 
+    assert.strictEqual(dispositionSigned instanceof AS2Disposition, true)
     assert.strictEqual(disposition instanceof AS2Disposition, true)
     assert.strictEqual(
       customDisposition.notification.headers['X-CUSTOM-DATA'],
@@ -96,13 +99,27 @@ describe('AS2Disposition', () => {
 
   it('should generate outgoing disposition from incoming message', async () => {
     // Fake header is only for testing purposes; real AS2 messages should already posess this header.
-    const fakeAs2Header = 'AS2-To: fake@recipient.unreal\r\n'
+    const fakeAs2Header = 'AS2-To: fake.recipient.unreal\r\n'
     const mime = await AS2Parser.parse(fakeAs2Header + SIGNED_CONTENT)
+    const dispositionMime = await mime.dispositionOut({
+      returnNode: true
+    })
     const dispositionSignedMime = await mime.dispositionOut({
       returnNode: true,
       signDisposition: { cert: LIBAS2_CERT, key: LIBAS2_KEY },
       signed: { cert: LIBAS2_CERT }
     })
+
+    assert.strictEqual(
+      dispositionMime.contentNode instanceof AS2MimeNode &&
+      dispositionMime.disposition instanceof AS2MimeNode,
+      true
+    )
+    assert.strictEqual(
+      dispositionSignedMime.contentNode instanceof AS2MimeNode &&
+      dispositionSignedMime.disposition instanceof AS2MimeNode,
+      true
+    )
 
     await AS2Disposition.outgoing({
       node: await AS2Parser.parse(fakeAs2Header + MIME_CONTENT)
@@ -127,7 +144,6 @@ describe('AS2Disposition', () => {
       signed: { cert: AS2_TESTING_CERT }
     })
 
-    assert.strictEqual(dispositionSignedMime.disposition instanceof AS2MimeNode, true)
     await assert.rejects(async () => {
       await AS2Disposition.outgoing({ node: null })
     })

@@ -43,13 +43,24 @@ export class AS2SignedData {
   }
 
   data: ArrayBuffer
+  digestInfo?: {
+    digest: ArrayBuffer
+    algorithm: string
+  }
   signed: {
     version: number
     encapContentInfo: any
     signerInfos: any[]
     certificates: any[]
     sign: (...args: any) => Promise<void>
-    verify: (...args: any) => Promise<boolean>
+    verify: (
+      ...args: any
+    ) => Promise<
+      | boolean
+      | {
+          signatureVerified: boolean
+        }
+    >
     toSchema: (...args: any) => any
   }
 
@@ -135,6 +146,11 @@ export class AS2SignedData {
     )
     const index = this._addSignerInfo(certificate, messageDigest)
 
+    this.digestInfo = {
+      digest: messageDigest,
+      algorithm: algorithm
+    }
+
     await this.signed.sign(privateKey, index, algorithm, this.data)
   }
 
@@ -155,6 +171,36 @@ export class AS2SignedData {
     }
 
     return -1
+  }
+
+  private async _calculateMessageDigest (index: number) {
+    const crypto = pkijs.getCrypto()
+    const algorithmId = this.signed.signerInfos[index].digestAlgorithm
+      .algorithmId
+    const hashAlgorithm = crypto.getAlgorithmByOID(algorithmId)
+
+    this.digestInfo = {
+      digest: await crypto.digest(
+        hashAlgorithm.name,
+        new Uint8Array(this.data)
+      ),
+      algorithm: hashAlgorithm.name
+    }
+
+  }
+
+  getMessageDigest (): {
+    digest: Buffer
+    algorithm: string
+  } {
+    if (typeof this.digestInfo !== 'undefined') {
+      return {
+        digest: Buffer.from(this.digestInfo.digest),
+        algorithm: this.digestInfo.algorithm
+      }
+    }
+
+    throw new Error('Message digest not yet calculated.')
   }
 
   async sign ({
@@ -188,11 +234,17 @@ export class AS2SignedData {
       return false
     }
 
-    return await this.signed.verify({
+    const result: any = await this.signed.verify({
       signer: index === -1 ? 0 : index,
       data: this.data,
-      extendedMode: debugMode
+      extendedMode: true
     })
+
+    if (result.signatureVerified) {
+      await this._calculateMessageDigest(index)
+    }
+
+    return debugMode ? result : result.signatureVerified
   }
 }
 
