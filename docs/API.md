@@ -33,6 +33,8 @@
 <dl>
 <dt><a href="#getReportNode">getReportNode(node)</a> ⇒ <code><a href="#AS2MimeNode">AS2MimeNode</a></code></dt>
 <dd><p>Get the multipart/report disposition-notification, if any.</p></dd>
+<dt><a href="#isMdn">isMdn(node)</a> ⇒ <code>boolean</code></dt>
+<dd><p>Answers if the AS2MimeNode is a Message Disposition Notification.</p></dd>
 <dt><a href="#parseHeaderString">parseHeaderString(headers, [keyToLowerCase], [callback])</a> ⇒ <code>object</code></dt>
 <dd><p>Method for converting a string of headers into key:value pairs.</p></dd>
 <dt><a href="#getProtocol">getProtocol(url)</a> ⇒ <code>string</code></dt>
@@ -988,6 +990,19 @@
 | Param | Type                                     | Description                                      |
 | ----- | ---------------------------------------- | ------------------------------------------------ |
 | node  | [<code>AS2MimeNode</code>](#AS2MimeNode) | <p>The multipart MIME containing the report.</p> |
+
+<a name="isMdn"></a>
+
+## isMdn(node) ⇒ <code>boolean</code>
+
+<p>Answers if the AS2MimeNode is a Message Disposition Notification.</p>
+
+**Kind**: global function  
+**Returns**: <code>boolean</code> - <p>True for a Message Disposition Notification.</p>
+
+| Param | Type                                     | Description                                           |
+| ----- | ---------------------------------------- | ----------------------------------------------------- |
+| node  | [<code>AS2MimeNode</code>](#AS2MimeNode) | <p>The multipart MIME which may contain a report.</p> |
 
 <a name="parseHeaderString"></a>
 

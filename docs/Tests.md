@@ -568,6 +568,13 @@ should make requests.
 }
 ```
 
+should check if AS2MimeNode is a MDN.
+
+```js
+const mime = new core_1.AS2MimeNode({})
+assert.strictEqual(core_1.isMdn(mime), false)
+```
+
 <a name="as2mimenode"></a>
 
 # AS2MimeNode

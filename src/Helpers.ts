@@ -18,15 +18,24 @@ export function getReportNode (node: AS2MimeNode): AS2MimeNode {
   if (!node) return
 
   if (
+    node.contentType &&
     node.contentType.includes('multipart/report') &&
     node.contentType.includes('disposition-notification')
   ) {
     return node
-  } else {
-    for (const childNode of node.childNodes || []) {
-      return getReportNode(childNode)
-    }
   }
+
+  for (const childNode of node.childNodes || []) {
+    return getReportNode(childNode)
+  }
+}
+
+/** Answers if the AS2MimeNode is a Message Disposition Notification.
+ * @param {AS2MimeNode} node - The multipart MIME which may contain a report.
+ * @returns {boolean} True for a Message Disposition Notification.
+ */
+export function isMdn (node: AS2MimeNode): boolean {
+  return typeof getReportNode(node) !== 'undefined'
 }
 
 /** Method for converting a string of headers into key:value pairs.

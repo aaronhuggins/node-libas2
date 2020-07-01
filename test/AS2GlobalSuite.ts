@@ -1,5 +1,5 @@
 import { ImportMock } from 'ts-mock-imports'
-import { getPackageJson, request } from '../core'
+import { AS2MimeNode, getPackageJson, isMdn, request } from '../core'
 import * as fs from 'fs'
 import * as assert from 'assert'
 import * as nock from 'nock'
@@ -33,5 +33,11 @@ describe('Globals for libas2', () => {
 
     assert.deepStrictEqual(response.json(), payload)
     assert.strictEqual(response2.json() instanceof Error, true)
+  })
+
+  it('should check if AS2MimeNode is a MDN', () => {
+    const mime = new AS2MimeNode({})
+
+    assert.strictEqual(isMdn(mime), false)
   })
 })
