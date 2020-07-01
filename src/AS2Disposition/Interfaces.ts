@@ -1,11 +1,6 @@
 import { AgreementOptions } from '../AS2Composer'
 import { AS2MimeNode } from '../AS2MimeNode'
 import { AS2DispositionNotification } from './AS2DispositionNotification'
-import {
-  VerificationOptions,
-  DecryptionOptions,
-  SigningOptions
-} from '../AS2Crypto'
 
 export interface AS2DispositionOptions {
   explanation: string
