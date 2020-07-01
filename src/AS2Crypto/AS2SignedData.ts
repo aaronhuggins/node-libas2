@@ -64,7 +64,7 @@ export class AS2SignedData {
     toSchema: (...args: any) => any
   }
 
-  private _toCertificate (cert: string | Buffer) {
+  private _toCertificate (cert: string | Buffer | PemFile) {
     const certPemFile = new PemFile(cert)
     const certAsn1 = asn1js.fromBER(certPemFile.data)
 
@@ -154,7 +154,7 @@ export class AS2SignedData {
     await this.signed.sign(privateKey, index, algorithm, this.data)
   }
 
-  private _findSigner (cert?: string | Buffer): number {
+  private _findSigner (cert?: string | Buffer | PemFile): number {
     if (!isNullOrUndefined(cert)) {
       const certificate = this._toCertificate(cert)
 
@@ -227,7 +227,7 @@ export class AS2SignedData {
     return Buffer.from(signedDataBuffer)
   }
 
-  async verify (cert?: string | Buffer, debugMode?: boolean): Promise<boolean> {
+  async verify (cert?: string | Buffer | PemFile, debugMode?: boolean): Promise<boolean> {
     const index = this._findSigner(cert)
 
     if (!isNullOrUndefined(cert) && index === -1) {
@@ -249,12 +249,12 @@ export class AS2SignedData {
 }
 
 export interface SignMethodOptions {
-  cert: string | Buffer
-  key: string | Buffer
+  cert: string | Buffer | PemFile
+  key: string | Buffer | PemFile
   algorithm: string
   addSigners?: Array<{
-    cert: string | Buffer
-    key: string | Buffer
+    cert: string | Buffer | PemFile
+    key: string | Buffer | PemFile
     algorithm: string
   }>
 }

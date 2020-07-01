@@ -37,7 +37,7 @@ export class AS2EnvelopedData {
   data: ArrayBuffer
   enveloped: any
 
-  private _toCertificate (cert: string | Buffer) {
+  private _toCertificate (cert: string | Buffer | PemFile) {
     const certPemFile = new PemFile(cert)
     const certAsn1 = asn1js.fromBER(certPemFile.data)
 
@@ -84,7 +84,7 @@ export class AS2EnvelopedData {
     }
   }
 
-  async encrypt (cert: string | Buffer, encryption: AS2Encryption) {
+  async encrypt (cert: string | Buffer | PemFile, encryption: AS2Encryption) {
     const certificate = this._toCertificate(cert)
 
     this.enveloped.addRecipientByCertificate(certificate)
@@ -103,7 +103,7 @@ export class AS2EnvelopedData {
     return Buffer.from(envelopedDataBuffer)
   }
 
-  async decrypt (cert: string | Buffer, key: string | Buffer) {
+  async decrypt (cert: string | Buffer | PemFile, key: string | Buffer | PemFile) {
     const certificate = this._toCertificate(cert)
     const privateKey = new PemFile(key).data
     this.data = await this.enveloped.decrypt(0, {

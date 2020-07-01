@@ -1,10 +1,18 @@
 import { isNullOrUndefined } from '../Helpers'
 
+/** Types of PEM files.
+ * @typedef {'UNKNOWN'|'PRIVATE_KEY'|'PUBLIC_KEY'|'CERTIFICATE'} PemFileType
+ */
+
 type PemFileType = 'UNKNOWN' | 'PRIVATE_KEY' | 'PUBLIC_KEY' | 'CERTIFICATE'
 
+/** Method for constructing an object from PEM data.
+ * @param {string|Buffer|PemFile} data - Data for constructing a PemFile object.
+ */
 export class PemFile {
-  constructor (data: Buffer | string) {
+  constructor (data: string | Buffer | PemFile) {
     if (isNullOrUndefined(data) || data === '') return
+    if (data instanceof PemFile) return data
     this.type = 'UNKNOWN'
 
     if (Buffer.isBuffer(data)) {
@@ -41,6 +49,11 @@ export class PemFile {
   type: PemFileType
   data: ArrayBuffer
 
+  /** Convenience method for creating a PemFile from a DER/BER Buffer.
+   * @param {Buffer} data - DER or BER data in a Buffer.
+   * @param {PemFileType} [type='UNKNOWN'] - The type of PEM file.
+   * @returns {PemFile} The data as a PemFile object.
+   */
   static fromDer (data: Buffer, type: PemFileType = 'UNKNOWN'): PemFile {
     const pemFile = new PemFile('')
 
@@ -54,8 +67,30 @@ export class PemFile {
   }
 }
 
-export const PEM_FILETYPE: { [key: string]: PemFileType } = {
+/** Constants used in libas2.
+ * @namespace PEM_FILETYPE
+ */
+export const PEM_FILETYPE: {
+  CERTIFICATE: PemFileType
+  PRIVATE_KEY: PemFileType
+  PUBLIC_KEY: PemFileType
+} = {
+  /**
+   * @constant
+   * @type {PemFileType}
+   * @default
+   */
   CERTIFICATE: 'CERTIFICATE',
+  /**
+   * @constant
+   * @type {PemFileType}
+   * @default
+   */
   PRIVATE_KEY: 'PRIVATE_KEY',
+  /**
+   * @constant
+   * @type {PemFileType}
+   * @default
+   */
   PUBLIC_KEY: 'PUBLIC_KEY'
 }
