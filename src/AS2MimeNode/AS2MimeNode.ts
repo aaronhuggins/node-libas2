@@ -321,7 +321,7 @@ export class AS2MimeNode extends MimeNode {
     uniqueId = isNullOrUndefined(uniqueId)
       ? AS2Crypto.generateUniqueId()
       : uniqueId
-    sender = isNullOrUndefined(uniqueId) ? hostname() || 'localhost' : sender
+    sender = isNullOrUndefined(sender) ? hostname() || 'localhost' : sender
 
     return '<' + uniqueId + '@' + sender + '>'
   }
