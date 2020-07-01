@@ -1,6 +1,8 @@
 ## Classes
 
 <dl>
+<dt><a href="#AS2Agreement">AS2Agreement</a></dt>
+<dd><p>Class for describing and handling partner agreements.</p></dd>
 <dt><a href="#AS2Composer">AS2Composer</a></dt>
 <dd><p>Class for composing AS2 messages.</p></dd>
 <dt><a href="#AS2Crypto">AS2Crypto</a></dt>
@@ -15,13 +17,6 @@
 <dd><p>Class for describing and constructing a MIME document.</p></dd>
 <dt><a href="#AS2Parser">AS2Parser</a></dt>
 <dd><p>Class for parsing a MIME document to an AS2MimeNode tree.</p></dd>
-</dl>
-
-## Members
-
-<dl>
-<dt><a href="#AS2Partner">AS2Partner</a></dt>
-<dd><p>Class for describing and handling partner agreements.</p></dd>
 </dl>
 
 ## Objects
@@ -52,7 +47,7 @@
 <dd><p>Normalizes certificate signing options.</p></dd>
 <dt><a href="#encryptionOptions">encryptionOptions(encrypt)</a> ⇒ <code><a href="#EncryptionOptions">EncryptionOptions</a></code></dt>
 <dd><p>Normalizes encryption options.</p></dd>
-<dt><a href="#agreementOptions">agreementOptions(agreement)</a> ⇒ <code><a href="#AgreementOptions">AgreementOptions</a></code></dt>
+<dt><a href="#agreementOptions">agreementOptions(agreement)</a> ⇒ <code><a href="#AS2Agreement">AS2Agreement</a></code></dt>
 <dd><p>Normalizes agreement options.</p></dd>
 <dt><a href="#request">request(options)</a> ⇒ <code>IncomingMessage</code></dt>
 <dd><p>Convenience method for making AS2 HTTP/S requests. Makes a POST request by default.</p></dd>
@@ -85,6 +80,22 @@
 <dd><p>Options for parsing a MIME document; useful if there is no access to the underlying raw response.</p></dd>
 </dl>
 
+<a name="AS2Agreement"></a>
+
+## AS2Agreement
+
+<p>Class for describing and handling partner agreements.</p>
+
+**Kind**: global class  
+**Implements**: [<code>AgreementOptions</code>](#AgreementOptions)  
+<a name="new_AS2Agreement_new"></a>
+
+### new AS2Agreement(agreement)
+
+| Param     | Type                                               | Description                                                      |
+| --------- | -------------------------------------------------- | ---------------------------------------------------------------- |
+| agreement | [<code>AgreementOptions</code>](#AgreementOptions) | <p>The partner agreement for sending and receiving over AS2.</p> |
+
 <a name="AS2Composer"></a>
 
 ## AS2Composer
@@ -115,9 +126,9 @@
 
 **Kind**: instance method of [<code>AS2Composer</code>](#AS2Composer)
 
-| Param     | Type                      |
-| --------- | ------------------------- |
-| agreement | <code>AS2Agreement</code> |
+| Param     | Type                                               |
+| --------- | -------------------------------------------------- |
+| agreement | [<code>AgreementOptions</code>](#AgreementOptions) |
 
 <a name="AS2Composer+compile"></a>
 
@@ -584,18 +595,6 @@
 | Param   | Type                                                                                                            | Description                                       |
 | ------- | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
 | content | <code>Buffer</code> \| <code>Stream</code> \| <code>string</code> \| [<code>ParseOptions</code>](#ParseOptions) | <p>A raw MIME message or ParseOptions object.</p> |
-
-<a name="AS2Partner"></a>
-
-## AS2Partner
-
-<p>Class for describing and handling partner agreements.</p>
-
-**Kind**: global variable
-
-| Param     | Type                                               | Description                                                      |
-| --------- | -------------------------------------------------- | ---------------------------------------------------------------- |
-| agreement | [<code>AgreementOptions</code>](#AgreementOptions) | <p>The partner agreement for sending and receiving over AS2.</p> |
 
 <a name="PEM_FILETYPE"></a>
 
@@ -1087,12 +1086,12 @@
 
 <a name="agreementOptions"></a>
 
-## agreementOptions(agreement) ⇒ [<code>AgreementOptions</code>](#AgreementOptions)
+## agreementOptions(agreement) ⇒ [<code>AS2Agreement</code>](#AS2Agreement)
 
 <p>Normalizes agreement options.</p>
 
 **Kind**: global function  
-**Returns**: [<code>AgreementOptions</code>](#AgreementOptions) - <p>A normalized option object.</p>
+**Returns**: [<code>AS2Agreement</code>](#AS2Agreement) - <p>A normalized option object.</p>
 
 | Param     | Type                                               | Description                           |
 | --------- | -------------------------------------------------- | ------------------------------------- |

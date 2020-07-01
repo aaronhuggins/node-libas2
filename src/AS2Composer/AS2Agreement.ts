@@ -5,6 +5,34 @@ import { isNullOrUndefined } from '../Helpers'
 
 const { ENCRYPTION, ERROR, SIGNING } = AS2Constants
 
+/** Class for describing and handling partner agreements.
+ * @implements {AgreementOptions}
+ * @param {AgreementOptions} agreement - The partner agreement for sending and receiving over AS2.
+ */
+export class AS2Agreement implements AgreementOptions {
+  constructor (
+    agreement:
+      | AgreementOptions
+      | (AS2Agreement & {
+          host: AS2Host & {
+            certificate?: string | Buffer | PemFile
+            privateKey?: string | Buffer | PemFile
+            sign: AS2Signing | boolean
+          }
+          partner: AS2Partner & {
+            certificate?: string | Buffer | PemFile
+            encrypt: AS2Encryption | boolean
+          }
+        })
+  ) {
+    this.host = new AS2Host(agreement.host as any)
+    this.partner = new AS2Partner(agreement.partner as any)
+  }
+
+  host: AS2Host
+  partner: AS2Partner
+}
+
 export class AS2Trading {
   constructor (trading: AS2Trading & { mdn?: { async?: URL | string } }) {
     this.role = trading.role
@@ -129,31 +157,4 @@ export class AS2Partner extends AS2Trading {
   certificate?: PemFile
   encrypt?: AS2Encryption | false
   verify?: boolean
-}
-
-/** Class for describing and handling partner agreements.
- * @param {AgreementOptions} agreement - The partner agreement for sending and receiving over AS2.
- */
-export class AS2Agreement implements AgreementOptions {
-  constructor (
-    agreement:
-      | AgreementOptions
-      | (AS2Agreement & {
-          host: AS2Host & {
-            certificate?: string | Buffer | PemFile
-            privateKey?: string | Buffer | PemFile
-            sign: AS2Signing | boolean
-          }
-          partner: AS2Partner & {
-            certificate?: string | Buffer | PemFile
-            encrypt: AS2Encryption | boolean
-          }
-        })
-  ) {
-    this.host = new AS2Host(agreement.host as any)
-    this.partner = new AS2Partner(agreement.partner as any)
-  }
-
-  host: AS2Host
-  partner: AS2Partner
 }

@@ -62,7 +62,7 @@ export class AS2Composer {
   message: AS2MimeNode
 
   /** Set the agreement for this composer instance.
-   * @param {AS2Agreement} agreement
+   * @param {AgreementOptions} agreement
    */
   setAgreement (agreement: AgreementOptions): void {
     this._agreement = agreementOptions(agreement)

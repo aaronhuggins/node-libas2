@@ -162,7 +162,7 @@ export function encryptionOptions (
 
 /** Normalizes agreement options.
  * @param {AgreementOptions} agreement - Options for partner agreement.
- * @returns {AgreementOptions} A normalized option object.
+ * @returns {AS2Agreement} A normalized option object.
  */
 export function agreementOptions (agreement: AgreementOptions): AS2Agreement {
   return new AS2Agreement(agreement as any)
