@@ -99,6 +99,7 @@ export class AS2Composer {
       { key: STANDARD_HEADER.TO, value: this._agreement.partner.id },
       { key: STANDARD_HEADER.VERSION, value: AS2_VERSION }
     ])
+    this.message.messageId(true)
 
     // Set MDN headers.
     if (this._agreement.host.mdn) {

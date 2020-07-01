@@ -5,7 +5,7 @@ import { AS2DispositionNotification } from './AS2DispositionNotification'
 import { AS2Constants } from '../Constants'
 import { VerificationOptions, AS2Crypto, AS2Signing } from '../AS2Crypto'
 
-const { EXPLANATION, ERROR } = AS2Constants
+const { AS2_VERSION, EXPLANATION, ERROR, STANDARD_HEADER } = AS2Constants
 
 /** Options for composing a message disposition notification (MDN).
  * @typedef {object} AS2DispositionOptions
@@ -265,23 +265,29 @@ export class AS2Disposition {
       notification,
       returned: options.returnNode ? options.node : undefined
     })
+    let mdnMime = mdn.toMimeNode()
 
     if (
       options.agreement.partner.mdn &&
       options.agreement.partner.mdn.signing
     ) {
-      return {
-        contentNode: rootNode,
-        disposition: await mdn.toMimeNode().sign({
-          cert: options.agreement.host.certificate,
-          key: options.agreement.host.privateKey
-        })
-      }
+      mdnMime = await mdnMime.sign({
+        cert: options.agreement.host.certificate,
+        key: options.agreement.host.privateKey
+      })
     }
+
+    // Set AS2 headers.
+    mdnMime.setHeader([
+      { key: STANDARD_HEADER.FROM, value: options.agreement.host.id },
+      { key: STANDARD_HEADER.TO, value: options.agreement.partner.id },
+      { key: STANDARD_HEADER.VERSION, value: AS2_VERSION }
+    ])
+    mdnMime.messageId(true)
 
     return {
       contentNode: rootNode,
-      disposition: mdn.toMimeNode()
+      disposition: mdnMime
     }
   }
 
