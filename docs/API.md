@@ -5,6 +5,8 @@
 <dd><p>Class for composing AS2 messages.</p></dd>
 <dt><a href="#AS2Crypto">AS2Crypto</a></dt>
 <dd><p>Class for cryptography methods supported by AS2.</p></dd>
+<dt><a href="#PemFile">PemFile</a></dt>
+<dd><p>Method for constructing an object from PEM data.</p></dd>
 <dt><a href="#AS2Disposition">AS2Disposition</a></dt>
 <dd><p>Class for describing and constructing a Message Disposition Notification.</p></dd>
 <dt><a href="#AS2DispositionNotification">AS2DispositionNotification</a></dt>
@@ -15,9 +17,18 @@
 <dd><p>Class for parsing a MIME document to an AS2MimeNode tree.</p></dd>
 </dl>
 
+## Members
+
+<dl>
+<dt><a href="#AS2Partner">AS2Partner</a></dt>
+<dd><p>Class for describing and handling partner agreements.</p></dd>
+</dl>
+
 ## Objects
 
 <dl>
+<dt><a href="#PEM_FILETYPE">PEM_FILETYPE</a> : <code>object</code></dt>
+<dd><p>Constants used in libas2.</p></dd>
 <dt><a href="#AS2Constants">AS2Constants</a> : <code>object</code></dt>
 <dd><p>Constants used in libas2.</p></dd>
 </dl>
@@ -54,8 +65,6 @@
 <dd><p>Options for composing an AS2 message.</p></dd>
 <dt><a href="#AgreementOptions">AgreementOptions</a> : <code>object</code></dt>
 <dd><p>Options for composing an AS2 message.</p></dd>
-<dt><a href="#MessageDispositionOptions">MessageDispositionOptions</a> : <code>object</code></dt>
-<dd><p>Options for composing an AS2 message.</p></dd>
 <dt><a href="#AS2Signing">AS2Signing</a> : <code>&#x27;sha-1&#x27;</code> | <code>&#x27;sha-256&#x27;</code> | <code>&#x27;sha-384&#x27;</code> | <code>&#x27;sha-512&#x27;</code></dt>
 <dd><p>List of supported signing algorithms.</p></dd>
 <dt><a href="#AS2Encryption">AS2Encryption</a> : <code>&#x27;aes128-CBC&#x27;</code> | <code>&#x27;aes192-CBC&#x27;</code> | <code>&#x27;aes256-CBC&#x27;</code> | <code>&#x27;aes128-GCM&#x27;</code> | <code>&#x27;aes192-GCM&#x27;</code> | <code>&#x27;aes256-GCM&#x27;</code></dt>
@@ -87,7 +96,6 @@
 - [AS2Composer](#AS2Composer)
   - [new AS2Composer(options)](#new_AS2Composer_new)
   - [.setAgreement(agreement)](#AS2Composer+setAgreement)
-  - [.setHeaders(headers)](#AS2Composer+setHeaders)
   - [.compile()](#AS2Composer+compile) ⇒ [<code>Promise.&lt;AS2MimeNode&gt;</code>](#AS2MimeNode)
   - [.toRequestOptions(url)](#AS2Composer+toRequestOptions) ⇒ <code>Promise.&lt;RequestOptions&gt;</code>
 
@@ -107,21 +115,9 @@
 
 **Kind**: instance method of [<code>AS2Composer</code>](#AS2Composer)
 
-| Param     | Type                                               |
-| --------- | -------------------------------------------------- |
-| agreement | [<code>AgreementOptions</code>](#AgreementOptions) |
-
-<a name="AS2Composer+setHeaders"></a>
-
-### aS2Composer.setHeaders(headers)
-
-<p>Set headers for this composer instance.</p>
-
-**Kind**: instance method of [<code>AS2Composer</code>](#AS2Composer)
-
-| Param   | Type                                                                          |
-| ------- | ----------------------------------------------------------------------------- |
-| headers | <code>AS2Headers</code> \| [<code>AgreementOptions</code>](#AgreementOptions) |
+| Param     | Type                      |
+| --------- | ------------------------- |
+| agreement | <code>AS2Agreement</code> |
 
 <a name="AS2Composer+compile"></a>
 
@@ -156,7 +152,7 @@
   - [.generateUniqueId()](#AS2Crypto.generateUniqueId) ⇒ <code>string</code>
   - [.decrypt(node, options)](#AS2Crypto.decrypt) ⇒ [<code>Promise.&lt;AS2MimeNode&gt;</code>](#AS2MimeNode)
   - [.encrypt(node, options)](#AS2Crypto.encrypt) ⇒ [<code>Promise.&lt;AS2MimeNode&gt;</code>](#AS2MimeNode)
-  - [.verify(node, options)](#AS2Crypto.verify) ⇒ <code>Promise.&lt;boolean&gt;</code>
+  - [.verify(node, options, [getDigest])](#AS2Crypto.verify) ⇒ <code>Promise.&lt;(boolean\|object)&gt;</code>
   - [.sign(node, options)](#AS2Crypto.sign) ⇒ [<code>Promise.&lt;AS2MimeNode&gt;</code>](#AS2MimeNode)
   - [.compress()](#AS2Crypto.compress)
   - [.decompress()](#AS2Crypto.decompress)
@@ -199,17 +195,18 @@
 
 <a name="AS2Crypto.verify"></a>
 
-### AS2Crypto.verify(node, options) ⇒ <code>Promise.&lt;boolean&gt;</code>
+### AS2Crypto.verify(node, options, [getDigest]) ⇒ <code>Promise.&lt;(boolean\|object)&gt;</code>
 
 <p>Method to verify data has not been modified from a signature.</p>
 
 **Kind**: static method of [<code>AS2Crypto</code>](#AS2Crypto)  
-**Returns**: <code>Promise.&lt;boolean&gt;</code> - <p>A boolean indicating if the message was verified.</p>
+**Returns**: <code>Promise.&lt;(boolean\|object)&gt;</code> - <p>A boolean or digest object indicating if the message was verified.</p>
 
-| Param   | Type                                                     | Description                                |
-| ------- | -------------------------------------------------------- | ------------------------------------------ |
-| node    | [<code>AS2MimeNode</code>](#AS2MimeNode)                 | <p>The AS2MimeNode to verify.</p>          |
-| options | [<code>VerificationOptions</code>](#VerificationOptions) | <p>Options to verify the MIME message.</p> |
+| Param       | Type                                                     | Description                                                                           |
+| ----------- | -------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| node        | [<code>AS2MimeNode</code>](#AS2MimeNode)                 | <p>The AS2MimeNode to verify.</p>                                                     |
+| options     | [<code>VerificationOptions</code>](#VerificationOptions) | <p>Options to verify the MIME message.</p>                                            |
+| [getDigest] | <code>boolean</code>                                     | <p>Optional argument to return a message digest if verified instead of a boolean.</p> |
 
 <a name="AS2Crypto.sign"></a>
 
@@ -246,6 +243,40 @@
 **Throws**:
 
 - <p>ERROR.NOT_IMPLEMENTED</p>
+
+<a name="PemFile"></a>
+
+## PemFile
+
+<p>Method for constructing an object from PEM data.</p>
+
+**Kind**: global class
+
+- [PemFile](#PemFile)
+  - [new PemFile(data)](#new_PemFile_new)
+  - [.fromDer(data, [type])](#PemFile.fromDer) ⇒ [<code>PemFile</code>](#PemFile)
+
+<a name="new_PemFile_new"></a>
+
+### new PemFile(data)
+
+| Param | Type                                                                           | Description                                    |
+| ----- | ------------------------------------------------------------------------------ | ---------------------------------------------- |
+| data  | <code>string</code> \| <code>Buffer</code> \| [<code>PemFile</code>](#PemFile) | <p>Data for constructing a PemFile object.</p> |
+
+<a name="PemFile.fromDer"></a>
+
+### PemFile.fromDer(data, [type]) ⇒ [<code>PemFile</code>](#PemFile)
+
+<p>Convenience method for creating a PemFile from a DER/BER Buffer.</p>
+
+**Kind**: static method of [<code>PemFile</code>](#PemFile)  
+**Returns**: [<code>PemFile</code>](#PemFile) - <p>The data as a PemFile object.</p>
+
+| Param  | Type                     | Default                          | Description                         |
+| ------ | ------------------------ | -------------------------------- | ----------------------------------- |
+| data   | <code>Buffer</code>      |                                  | <p>DER or BER data in a Buffer.</p> |
+| [type] | <code>PemFileType</code> | <code>&#x27;UNKNOWN&#x27;</code> | <p>The type of PEM file.</p>        |
 
 <a name="AS2Disposition"></a>
 
@@ -554,6 +585,49 @@
 | ------- | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
 | content | <code>Buffer</code> \| <code>Stream</code> \| <code>string</code> \| [<code>ParseOptions</code>](#ParseOptions) | <p>A raw MIME message or ParseOptions object.</p> |
 
+<a name="AS2Partner"></a>
+
+## AS2Partner
+
+<p>Class for describing and handling partner agreements.</p>
+
+**Kind**: global variable
+
+| Param     | Type                                               | Description                                                      |
+| --------- | -------------------------------------------------- | ---------------------------------------------------------------- |
+| agreement | [<code>AgreementOptions</code>](#AgreementOptions) | <p>The partner agreement for sending and receiving over AS2.</p> |
+
+<a name="PEM_FILETYPE"></a>
+
+## PEM_FILETYPE : <code>object</code>
+
+<p>Constants used in libas2.</p>
+
+**Kind**: global namespace
+
+- [PEM_FILETYPE](#PEM_FILETYPE) : <code>object</code>
+  - [.CERTIFICATE](#PEM_FILETYPE.CERTIFICATE) : <code>PemFileType</code>
+  - [.PRIVATE_KEY](#PEM_FILETYPE.PRIVATE_KEY) : <code>PemFileType</code>
+  - [.PUBLIC_KEY](#PEM_FILETYPE.PUBLIC_KEY) : <code>PemFileType</code>
+
+<a name="PEM_FILETYPE.CERTIFICATE"></a>
+
+### PEM_FILETYPE.CERTIFICATE : <code>PemFileType</code>
+
+**Kind**: static constant of [<code>PEM_FILETYPE</code>](#PEM_FILETYPE)  
+**Default**: <code>CERTIFICATE</code>  
+<a name="PEM_FILETYPE.PRIVATE_KEY"></a>
+
+### PEM_FILETYPE.PRIVATE_KEY : <code>PemFileType</code>
+
+**Kind**: static constant of [<code>PEM_FILETYPE</code>](#PEM_FILETYPE)  
+**Default**: <code>PRIVATE_KEY</code>  
+<a name="PEM_FILETYPE.PUBLIC_KEY"></a>
+
+### PEM_FILETYPE.PUBLIC_KEY : <code>PemFileType</code>
+
+**Kind**: static constant of [<code>PEM_FILETYPE</code>](#PEM_FILETYPE)  
+**Default**: <code>PUBLIC_KEY</code>  
 <a name="AS2Constants"></a>
 
 ## AS2Constants : <code>object</code>
@@ -571,6 +645,9 @@
     - [.AES192_GCM](#AS2Constants.ENCRYPTION.AES192_GCM) : [<code>AS2Encryption</code>](#AS2Encryption)
     - [.AES256_GCM](#AS2Constants.ENCRYPTION.AES256_GCM) : [<code>AS2Encryption</code>](#AS2Encryption)
   - [.ERROR](#AS2Constants.ERROR) : <code>object</code>
+    - [.MISSING_PARTNER_CERT](#AS2Constants.ERROR.MISSING_PARTNER_CERT) : <code>string</code>
+    - [.MISSING_PARTNER_KEY](#AS2Constants.ERROR.MISSING_PARTNER_KEY) : <code>string</code>
+    - [.WRONG_PEM_FILE](#AS2Constants.ERROR.WRONG_PEM_FILE) : <code>string</code>
     - [.FINAL_RECIPIENT_MISSING](#AS2Constants.ERROR.FINAL_RECIPIENT_MISSING) : <code>string</code>
     - [.CONTENT_VERIFY](#AS2Constants.ERROR.CONTENT_VERIFY) : <code>string</code>
     - [.CERT_DECRYPT](#AS2Constants.ERROR.CERT_DECRYPT) : <code>string</code>
@@ -664,12 +741,33 @@
 **Kind**: static namespace of [<code>AS2Constants</code>](#AS2Constants)
 
 - [.ERROR](#AS2Constants.ERROR) : <code>object</code>
+  - [.MISSING_PARTNER_CERT](#AS2Constants.ERROR.MISSING_PARTNER_CERT) : <code>string</code>
+  - [.MISSING_PARTNER_KEY](#AS2Constants.ERROR.MISSING_PARTNER_KEY) : <code>string</code>
+  - [.WRONG_PEM_FILE](#AS2Constants.ERROR.WRONG_PEM_FILE) : <code>string</code>
   - [.FINAL_RECIPIENT_MISSING](#AS2Constants.ERROR.FINAL_RECIPIENT_MISSING) : <code>string</code>
   - [.CONTENT_VERIFY](#AS2Constants.ERROR.CONTENT_VERIFY) : <code>string</code>
   - [.CERT_DECRYPT](#AS2Constants.ERROR.CERT_DECRYPT) : <code>string</code>
   - [.DISPOSITION_NODE](#AS2Constants.ERROR.DISPOSITION_NODE) : <code>string</code>
   - [.NOT_IMPLEMENTED](#AS2Constants.ERROR.NOT_IMPLEMENTED) : <code>string</code>
 
+<a name="AS2Constants.ERROR.MISSING_PARTNER_CERT"></a>
+
+#### ERROR.MISSING_PARTNER_CERT : <code>string</code>
+
+**Kind**: static constant of [<code>ERROR</code>](#AS2Constants.ERROR)  
+**Default**: <code>&quot;Certificate is required for this partner agreement.&quot;</code>  
+<a name="AS2Constants.ERROR.MISSING_PARTNER_KEY"></a>
+
+#### ERROR.MISSING_PARTNER_KEY : <code>string</code>
+
+**Kind**: static constant of [<code>ERROR</code>](#AS2Constants.ERROR)  
+**Default**: <code>&quot;Private key is required for this partner agreement.&quot;</code>  
+<a name="AS2Constants.ERROR.WRONG_PEM_FILE"></a>
+
+#### ERROR.WRONG_PEM_FILE : <code>string</code>
+
+**Kind**: static constant of [<code>ERROR</code>](#AS2Constants.ERROR)  
+**Default**: <code>&quot;The type of pem file provided was not correct;&quot;</code>  
 <a name="AS2Constants.ERROR.FINAL_RECIPIENT_MISSING"></a>
 
 #### ERROR.FINAL_RECIPIENT_MISSING : <code>string</code>
@@ -1039,33 +1137,27 @@ and convenience methods for mime() and json().</p>
 **Kind**: global typedef  
 **Properties**
 
-| Name      | Type                                                                 |
-| --------- | -------------------------------------------------------------------- |
-| sender    | <code>string</code>                                                  |
-| recipient | <code>string</code>                                                  |
-| sign      | [<code>SigningOptions</code>](#SigningOptions)                       |
-| encrypt   | [<code>EncryptionOptions</code>](#EncryptionOptions)                 |
-| mdn       | [<code>MessageDispositionOptions</code>](#MessageDispositionOptions) |
-| version   | <code>string</code>                                                  |
-| headers   | <code>AS2Headers</code>                                              |
-
-<a name="MessageDispositionOptions"></a>
-
-## MessageDispositionOptions : <code>object</code>
-
-<p>Options for composing an AS2 message.</p>
-
-**Kind**: global typedef  
-**Properties**
-
-| Name            | Type                                                                   |
-| --------------- | ---------------------------------------------------------------------- |
-| to              | <code>string</code>                                                    |
-| [deliveryUrl]   | <code>string</code>                                                    |
-| [sign]          | <code>object</code>                                                    |
-| sign.importance | <code>&#x27;required&#x27;</code> \| <code>&#x27;optional&#x27;</code> |
-| sign.protocol   | <code>&#x27;pkcs7-signature&#x27;</code>                               |
-| sign.micalg     | [<code>AS2Signing</code>](#AS2Signing)                                 |
+| Name                | Type                                                                           | Description                                                                              |
+| ------------------- | ------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------- |
+| host                | <code>object</code>                                                            | <p>Options for the AS2 host.</p>                                                         |
+| host.name           | <code>string</code>                                                            | <p>The name of the host.</p>                                                             |
+| host.id             | <code>string</code>                                                            | <p>The id of the host; usually a company's DUNS id.</p>                                  |
+| host.certificate    | <code>string</code> \| <code>Buffer</code> \| [<code>PemFile</code>](#PemFile) | <p>The certificate of the host in PEM format. Required for signing or decrypting.</p>    |
+| host.privateKey     | <code>string</code> \| <code>Buffer</code> \| [<code>PemFile</code>](#PemFile) | <p>The private key of the host in PEM format. Required for signing or decrypting.</p>    |
+| host.decrypt        | <code>boolean</code>                                                           | <p>Host requires partner to encrypt messages sent to the host.</p>                       |
+| host.sign           | [<code>AS2Signing</code>](#AS2Signing) \| <code>boolean</code>                 | <p>Host requires partner to verify messages sent from the host.</p>                      |
+| host.mdn            | <code>object</code>                                                            | <p>Host requests a message disposition notification (MDN).</p>                           |
+| host.mdn.async      | <code>URL</code>                                                               | <p>Host requires MDN to be sent to a separate URL.</p>                                   |
+| host.mdn.signing    | [<code>AS2Signing</code>](#AS2Signing) \| <code>false</code>                   | <p>Host requires MDN to be signed with algorithm if possible.</p>                        |
+| partner             | <code>object</code>                                                            | <p>Options for the AS2 partner.</p>                                                      |
+| partner.name        | <code>string</code>                                                            | <p>The name of the partner.</p>                                                          |
+| partner.id          | <code>string</code>                                                            | <p>The id of the partner; usually a company's DUNS id.</p>                               |
+| partner.certificate | <code>string</code> \| <code>Buffer</code> \| [<code>PemFile</code>](#PemFile) | <p>The certificate of the partner in PEM format. Required for signing or decrypting.</p> |
+| partner.encrypt     | [<code>AS2Encryption</code>](#AS2Encryption) \| <code>boolean</code>           | <p>Partner requires host to encrypt messages sent to the partner.</p>                    |
+| partner.verify      | <code>boolean</code>                                                           | <p>Partner requires host to verify messages sent from the partner.</p>                   |
+| partner.mdn         | <code>object</code>                                                            | <p>Partner may request a message disposition notification (MDN).{</p>                    |
+| partner.mdn.async   | <code>URL</code>                                                               | <p>Partner requires MDN to be sent to a separate URL.</p>                                |
+| partner.mdn.signing | [<code>AS2Signing</code>](#AS2Signing) \| <code>false</code>                   | <p>Partner requires MDN to be signed with algorithm if possible.</p>                     |
 
 <a name="AS2Signing"></a>
 

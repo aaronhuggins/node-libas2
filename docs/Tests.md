@@ -12,14 +12,61 @@
 
 # AS2Composer
 
-should set headers on AS2 message without error.
+should create an AS2Agreement.
 
 ```js
-;async () => {
-  const composer = new core_1.AS2Composer(options)
-  composer.setHeaders({ 'fake-header': 'not-a-real-header' })
-  composer.setHeaders([{ key: 'fake-header', value: 'not-a-real-header' }])
-}
+const agreement = new core_1.AS2Agreement(options.agreement)
+assert.strictEqual(agreement instanceof core_1.AS2Agreement, true)
+assert.throws(() => {
+  new core_1.AS2Agreement({
+    host: { sign: true },
+    partner: options.agreement.partner
+  })
+})
+assert.throws(() => {
+  new core_1.AS2Agreement({
+    host: options.agreement.host,
+    partner: { verify: true }
+  })
+})
+assert.throws(() => {
+  const partial = {
+    host: {
+      certificate: Helpers_1.LIBAS2_KEY,
+      sign: true
+    }
+  }
+  new core_1.AS2Agreement(partial)
+})
+assert.throws(() => {
+  const partial = {
+    host: {
+      certificate: Helpers_1.LIBAS2_CERT,
+      sign: true
+    }
+  }
+  new core_1.AS2Agreement(partial)
+})
+assert.throws(() => {
+  const partial = {
+    host: {
+      certificate: Helpers_1.LIBAS2_CERT,
+      privateKey: Helpers_1.LIBAS2_CERT,
+      sign: true
+    }
+  }
+  new core_1.AS2Agreement(partial)
+})
+assert.throws(() => {
+  const partial = {
+    host: options.agreement.host,
+    partner: {
+      certificate: Helpers_1.LIBAS2_KEY,
+      verify: true
+    }
+  }
+  new core_1.AS2Agreement(partial)
+})
 ```
 
 should produce a valid AS2 message.
@@ -54,34 +101,27 @@ should make a valid AS2 exchange.
     )
     nock('https://as2testing.centralus.cloudapp.azure.com')
       .post('/pub/Receive.rsb')
-      .reply(
-        200,
-        body.join('').trimLeft(),
-        Helpers_2.parseHeaderString(headers)
-      )
+      .reply(200, body.join('').trimLeft(), core_1.parseHeaderString(headers))
   }
   // Test using ArcESB; this is a Drummond certified product.
   const composer = new core_1.AS2Composer({
     message: options.message,
     agreement: {
-      sender: 'libas2community',
-      recipient: 'as2testing',
-      sign: {
-        cert: Helpers_1.LIBAS2_CERT,
-        key: Helpers_1.LIBAS2_KEY,
-        algorithm: core_1.AS2Constants.SIGNING.SHA256
+      host: {
+        name: 'LibAS2 Community',
+        id: 'libas2community',
+        certificate: Helpers_1.LIBAS2_CERT,
+        privateKey: Helpers_1.LIBAS2_KEY,
+        decrypt: false,
+        sign: true,
+        mdn: { signing: core_1.AS2Constants.SIGNING.SHA256 }
       },
-      encrypt: {
-        cert: Helpers_1.AS2_TESTING_CERT,
-        encryption: core_1.AS2Constants.ENCRYPTION.AES192_GCM
-      },
-      mdn: {
-        to: 'mycompanyAS2@example-message.net',
-        sign: {
-          importance: 'required',
-          protocol: 'pkcs7-signature',
-          micalg: core_1.AS2Constants.SIGNING.SHA256
-        }
+      partner: {
+        name: 'AS2 Testing',
+        id: 'as2testing',
+        certificate: Helpers_1.AS2_TESTING_CERT,
+        encrypt: core_1.AS2Constants.ENCRYPTION.AES192_GCM,
+        verify: true
       }
     }
   })
@@ -92,7 +132,7 @@ should make a valid AS2 exchange.
   )
   const mdn = inServiceHours
     ? await result.mime()
-    : await AS2Parser_1.AS2Parser.parse({
+    : await core_1.AS2Parser.parse({
         headers: result.rawHeaders,
         content: result.rawBody
       })
@@ -273,7 +313,8 @@ should construct disposition from plain object options..
         processed: true
       },
       finalRecipient: 'some-recipient'
-    }
+    },
+    returned: false
   }
   const disposition = new core_1.AS2Disposition(opts)
   const mime = disposition.toMimeNode()
@@ -321,12 +362,14 @@ should derive disposition from incoming disposition.
 ```js
 ;async () => {
   const mime = await AS2Parser_1.AS2Parser.parse(Helpers_1.SIGNED_MDN)
-  const disposition = await mime.dispositionIn({
+  const dispositionSigned = await mime.dispositionIn({
     cert: Helpers_1.AS2_TESTING_CERT
   })
+  const disposition = await mime.dispositionIn()
   mime.childNodes[0].childNodes[1].content =
     'X-CUSTOM-DATA: Some MDNs might have custom headers.'
   const customDisposition = new core_1.AS2Disposition(mime)
+  assert.strictEqual(dispositionSigned instanceof core_1.AS2Disposition, true)
   assert.strictEqual(disposition instanceof core_1.AS2Disposition, true)
   assert.strictEqual(
     customDisposition.notification.headers['X-CUSTOM-DATA'],
@@ -349,15 +392,28 @@ should generate outgoing disposition from incoming message.
 ```js
 ;async () => {
   // Fake header is only for testing purposes; real AS2 messages should already posess this header.
-  const fakeAs2Header = 'AS2-To: fake@recipient.unreal\r\n'
+  const fakeAs2Header = 'AS2-To: fake.recipient.unreal\r\n'
   const mime = await AS2Parser_1.AS2Parser.parse(
     fakeAs2Header + Helpers_1.SIGNED_CONTENT
   )
+  const dispositionMime = await mime.dispositionOut({
+    returnNode: true
+  })
   const dispositionSignedMime = await mime.dispositionOut({
     returnNode: true,
     signDisposition: { cert: Helpers_1.LIBAS2_CERT, key: Helpers_1.LIBAS2_KEY },
     signed: { cert: Helpers_1.LIBAS2_CERT }
   })
+  assert.strictEqual(
+    dispositionMime.contentNode instanceof core_1.AS2MimeNode &&
+      dispositionMime.disposition instanceof core_1.AS2MimeNode,
+    true
+  )
+  assert.strictEqual(
+    dispositionSignedMime.contentNode instanceof core_1.AS2MimeNode &&
+      dispositionSignedMime.disposition instanceof core_1.AS2MimeNode,
+    true
+  )
   await core_1.AS2Disposition.outgoing({
     node: await AS2Parser_1.AS2Parser.parse(
       fakeAs2Header + Helpers_1.MIME_CONTENT
@@ -390,10 +446,6 @@ should generate outgoing disposition from incoming message.
     ),
     signed: { cert: Helpers_1.AS2_TESTING_CERT }
   })
-  assert.strictEqual(
-    dispositionSignedMime.disposition instanceof core_1.AS2MimeNode,
-    true
-  )
   await assert.rejects(async () => {
     await core_1.AS2Disposition.outgoing({ node: null })
   })
