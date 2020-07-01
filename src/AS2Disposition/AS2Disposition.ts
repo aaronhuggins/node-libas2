@@ -16,11 +16,9 @@ const { EXPLANATION, ERROR } = AS2Constants
 
 /** Options for generating an outgoing MDN.
  * @typedef {object} OutgoingDispositionOptions
- * @property {AS2MimeNode} node
- * @property {boolean} [returnNode]
- * @property {SigningOptions} [signDisposition]
- * @property {VerificationOptions} [signed]
- * @property {DecryptionOptions} [encrypted]
+ * @property {AS2MimeNode} node - The mime node to verify and/or decrypt; used construct the outgoing disposition.
+ * @property {AgreementOptions} agreement - The partner agreement to use when sending the outgoing disposition.
+ * @property {boolean} [returnNode] - Whether to attach the mime node to the disposition as the returned payload.
  */
 
 const toNotification = function toNotification (
@@ -211,9 +209,12 @@ export class AS2Disposition {
       throw new Error(ERROR.FINAL_RECIPIENT_MISSING)
     }
 
-    if (typeof options.encrypted !== 'undefined') {
+    if (options.agreement.host.decrypt) {
       try {
-        rootNode = await rootNode.decrypt(options.encrypted)
+        rootNode = await rootNode.decrypt({
+          cert: options.agreement.host.certificate,
+          key: options.agreement.host.privateKey
+        })
       } catch (error) {
         errored = true
         notification.disposition.processed = false
@@ -225,9 +226,10 @@ export class AS2Disposition {
       }
     }
 
-    if (typeof options.signed !== 'undefined' && !errored) {
+    if (options.agreement.partner.verify && !errored) {
       try {
-        const verified = await AS2Crypto.verify(rootNode, options.signed, true) // rootNode.verify(options.signed)
+        const cert = options.agreement.partner.certificate
+        const verified = await AS2Crypto.verify(rootNode, { cert }, true)
 
         if (verified) {
           rootNode = rootNode.childNodes[0]
@@ -264,10 +266,16 @@ export class AS2Disposition {
       returned: options.returnNode ? options.node : undefined
     })
 
-    if (typeof options.signDisposition !== 'undefined') {
+    if (
+      options.agreement.partner.mdn &&
+      options.agreement.partner.mdn.signing
+    ) {
       return {
         contentNode: rootNode,
-        disposition: await mdn.toMimeNode().sign(options.signDisposition)
+        disposition: await mdn.toMimeNode().sign({
+          cert: options.agreement.host.certificate,
+          key: options.agreement.host.privateKey
+        })
       }
     }
 

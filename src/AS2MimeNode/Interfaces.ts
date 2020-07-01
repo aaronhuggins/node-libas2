@@ -1,11 +1,7 @@
 import { Readable } from 'stream'
 import { AS2Headers } from '../Interfaces'
-import {
-  SigningOptions,
-  EncryptionOptions,
-  DecryptionOptions,
-  VerificationOptions
-} from '../AS2Crypto'
+import { SigningOptions, EncryptionOptions } from '../AS2Crypto'
+import { AgreementOptions } from '../AS2Composer'
 
 export interface AS2MimeNodeOptions {
   /** Filename for the node. */
@@ -33,8 +29,6 @@ export interface AS2MimeNodeOptions {
 }
 
 export interface DispositionOutOptions {
+  agreement: AgreementOptions
   returnNode?: boolean
-  signDisposition?: SigningOptions
-  signed?: VerificationOptions
-  encrypted?: DecryptionOptions
 }

@@ -35,10 +35,8 @@ import { hostname } from 'os'
 
 /** Convenience options for generating an outgoing MDN.
  * @typedef {object} DispositionOutOptions
+ * @property {AgreementOptions} agreement
  * @property {boolean} [returnNode]
- * @property {SigningOptions} [signDisposition]
- * @property {VerificationOptions} [signed]
- * @property {DecryptionOptions} [encrypted]
  */
 
 export interface AS2MimeNode {
@@ -217,7 +215,7 @@ export class AS2MimeNode extends MimeNode {
     contentNode: AS2MimeNode
     disposition: AS2MimeNode
   }> {
-    options = isNullOrUndefined(options) ? {} : options
+    options = isNullOrUndefined(options) ? ({} as any) : options
 
     return await AS2Disposition.outgoing({ ...options, node: this })
   }
