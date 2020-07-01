@@ -73,7 +73,9 @@ describe('AS2Disposition', () => {
 
   it('should derive disposition from incoming disposition', async () => {
     const mime = await AS2Parser.parse(SIGNED_MDN)
-    const dispositionSigned = await mime.dispositionIn({ cert: AS2_TESTING_CERT })
+    const dispositionSigned = await mime.dispositionIn({
+      cert: AS2_TESTING_CERT
+    })
     const disposition = await mime.dispositionIn()
 
     mime.childNodes[0].childNodes[1].content =
@@ -112,12 +114,12 @@ describe('AS2Disposition', () => {
 
     assert.strictEqual(
       dispositionMime.contentNode instanceof AS2MimeNode &&
-      dispositionMime.disposition instanceof AS2MimeNode,
+        dispositionMime.disposition instanceof AS2MimeNode,
       true
     )
     assert.strictEqual(
       dispositionSignedMime.contentNode instanceof AS2MimeNode &&
-      dispositionSignedMime.disposition instanceof AS2MimeNode,
+        dispositionSignedMime.disposition instanceof AS2MimeNode,
       true
     )
 

@@ -1,4 +1,4 @@
-import { PemFile } from "./PemFile"
+import { PemFile } from './PemFile'
 
 export type AS2Signing = 'sha-1' | 'sha-256' | 'sha-384' | 'sha-512'
 

@@ -103,7 +103,10 @@ export class AS2EnvelopedData {
     return Buffer.from(envelopedDataBuffer)
   }
 
-  async decrypt (cert: string | Buffer | PemFile, key: string | Buffer | PemFile) {
+  async decrypt (
+    cert: string | Buffer | PemFile,
+    key: string | Buffer | PemFile
+  ) {
     const certificate = this._toCertificate(cert)
     const privateKey = new PemFile(key).data
     this.data = await this.enveloped.decrypt(0, {

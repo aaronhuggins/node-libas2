@@ -87,22 +87,19 @@ export const AS2Constants = {
      * @type {string}
      * @default
      */
-    MISSING_PARTNER_CERT:
-      'Certificate is required for this partner agreement.',
+    MISSING_PARTNER_CERT: 'Certificate is required for this partner agreement.',
     /**
      * @constant
      * @type {string}
      * @default
      */
-    MISSING_PARTNER_KEY:
-      'Private key is required for this partner agreement.',
+    MISSING_PARTNER_KEY: 'Private key is required for this partner agreement.',
     /**
      * @constant
      * @type {string}
      * @default
      */
-    WRONG_PEM_FILE:
-      'The type of pem file provided was not correct;',
+    WRONG_PEM_FILE: 'The type of pem file provided was not correct;',
     /**
      * @constant
      * @type {string}

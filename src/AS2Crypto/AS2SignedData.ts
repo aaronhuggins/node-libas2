@@ -186,7 +186,6 @@ export class AS2SignedData {
       ),
       algorithm: hashAlgorithm.name
     }
-
   }
 
   getMessageDigest (): {
@@ -227,7 +226,10 @@ export class AS2SignedData {
     return Buffer.from(signedDataBuffer)
   }
 
-  async verify (cert?: string | Buffer | PemFile, debugMode?: boolean): Promise<boolean> {
+  async verify (
+    cert?: string | Buffer | PemFile,
+    debugMode?: boolean
+  ): Promise<boolean> {
     const index = this._findSigner(cert)
 
     if (!isNullOrUndefined(cert) && index === -1) {

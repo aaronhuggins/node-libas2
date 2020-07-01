@@ -58,10 +58,16 @@ describe('AS2Composer', async () => {
 
     assert.strictEqual(agreement instanceof AS2Agreement, true)
     assert.throws(() => {
-      new AS2Agreement({ host: { sign: true }, partner: options.agreement.partner } as any)
+      new AS2Agreement({
+        host: { sign: true },
+        partner: options.agreement.partner
+      } as any)
     })
     assert.throws(() => {
-      new AS2Agreement({ host: options.agreement.host, partner: { verify: true } } as any)
+      new AS2Agreement({
+        host: options.agreement.host,
+        partner: { verify: true }
+      } as any)
     })
     assert.throws(() => {
       const partial: any = {
