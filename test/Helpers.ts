@@ -1,6 +1,7 @@
 import { AS2Constants } from '../core'
 import * as cp from 'child_process'
 import { readFileSync } from 'fs'
+import { format } from 'util'
 
 export const normalizeLineBreaks = function normalizeLineBreaks (
   input: string
@@ -82,7 +83,7 @@ export async function openssl (options: {
   try {
     return normalizeLineBreaks(await run('openssl', args, options.input))
   } catch (error) {
-    if (options.printError) console.log(error)
+    if (options.printError) process.stdout.write(format(error) + '\n')
     if (options.arguments.verify === true) {
       return error.message.toLowerCase() === 'verification successful'
     } else if (options.command === 'req') {
