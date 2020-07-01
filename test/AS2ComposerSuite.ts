@@ -1,10 +1,13 @@
 import 'mocha'
 import {
+  AS2Agreement,
   AS2Constants,
   AS2Composer,
   AS2ComposerOptions,
   AS2Crypto,
   AS2MimeNode,
+  AS2Parser,
+  parseHeaderString,
   request
 } from '../core'
 import {
@@ -17,8 +20,7 @@ import {
 import * as assert from 'assert'
 import { DateTime } from 'luxon'
 import * as nock from 'nock'
-import { parseHeaderString } from '../src/Helpers'
-import { AS2Parser } from '../src/AS2Parser'
+import { sign } from 'crypto'
 
 const options: AS2ComposerOptions = {
   message: {
@@ -51,6 +53,59 @@ const options: AS2ComposerOptions = {
 }
 
 describe('AS2Composer', async () => {
+  it('should create an AS2Agreement', () => {
+    const agreement = new AS2Agreement(options.agreement)
+
+    assert.strictEqual(agreement instanceof AS2Agreement, true)
+    assert.throws(() => {
+      new AS2Agreement({ host: { sign: true }, partner: options.agreement.partner } as any)
+    })
+    assert.throws(() => {
+      new AS2Agreement({ host: options.agreement.host, partner: { verify: true } } as any)
+    })
+    assert.throws(() => {
+      const partial: any = {
+        host: {
+          certificate: LIBAS2_KEY,
+          sign: true
+        }
+      }
+
+      new AS2Agreement(partial)
+    })
+    assert.throws(() => {
+      const partial: any = {
+        host: {
+          certificate: LIBAS2_CERT,
+          sign: true
+        }
+      }
+
+      new AS2Agreement(partial)
+    })
+    assert.throws(() => {
+      const partial: any = {
+        host: {
+          certificate: LIBAS2_CERT,
+          privateKey: LIBAS2_CERT,
+          sign: true
+        }
+      }
+
+      new AS2Agreement(partial)
+    })
+    assert.throws(() => {
+      const partial: any = {
+        host: options.agreement.host,
+        partner: {
+          certificate: LIBAS2_KEY,
+          verify: true
+        }
+      }
+
+      new AS2Agreement(partial)
+    })
+  })
   it('should produce a valid AS2 message', async () => {
     const composer = new AS2Composer(options)
     const compiled = await composer.compile()

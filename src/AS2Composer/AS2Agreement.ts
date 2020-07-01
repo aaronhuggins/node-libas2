@@ -123,7 +123,7 @@ export class AS2Partner extends AS2Trading {
  * @param {AgreementOptions} agreement - The partner agreement for sending and receiving over AS2.
  */
 export class AS2Agreement implements AgreementOptions {
-  constructor (agreement: AS2Agreement & {
+  constructor (agreement: AgreementOptions | AS2Agreement & {
     host: AS2Host & {
       certificate?: string | Buffer | PemFile
       privateKey?: string | Buffer | PemFile
@@ -134,8 +134,8 @@ export class AS2Agreement implements AgreementOptions {
       encrypt: AS2Encryption|boolean
     }
   }) {
-    this.host = new AS2Host(agreement.host)
-    this.partner = new AS2Partner(agreement.partner)
+    this.host = new AS2Host(agreement.host as any)
+    this.partner = new AS2Partner(agreement.partner as any)
   }
 
   host: AS2Host
