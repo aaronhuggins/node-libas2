@@ -104,12 +104,29 @@ describe('AS2Disposition', () => {
     const fakeAs2Header = 'AS2-To: fake.recipient.unreal\r\n'
     const mime = await AS2Parser.parse(fakeAs2Header + SIGNED_CONTENT)
     const dispositionMime = await mime.dispositionOut({
+      agreement: {
+        host: { name: 'LibAS2 Community', id: 'libas2community' },
+        partner: { name: 'AS2 Testing', id: 'as2testing' }
+      },
       returnNode: true
     })
     const dispositionSignedMime = await mime.dispositionOut({
-      returnNode: true,
-      signDisposition: { cert: LIBAS2_CERT, key: LIBAS2_KEY },
-      signed: { cert: LIBAS2_CERT }
+      agreement: {
+        host: {
+          name: 'LibAS2 Community',
+          id: 'libas2community',
+          certificate: LIBAS2_CERT,
+          privateKey: LIBAS2_KEY
+        },
+        partner: {
+          name: 'LibAS2 Community',
+          id: 'libas2community',
+          certificate: LIBAS2_CERT,
+          verify: true,
+          mdn: { signing: 'sha-256' }
+        }
+      },
+      returnNode: true
     })
 
     assert.strictEqual(
@@ -124,34 +141,82 @@ describe('AS2Disposition', () => {
     )
 
     await AS2Disposition.outgoing({
-      node: await AS2Parser.parse(fakeAs2Header + MIME_CONTENT)
+      node: await AS2Parser.parse(fakeAs2Header + MIME_CONTENT),
+      agreement: {
+        host: { name: 'LibAS2 Community', id: 'libas2community' },
+        partner: { name: 'AS2 Testing', id: 'as2testing' }
+      }
     })
     await AS2Disposition.outgoing({
       node: await AS2Parser.parse(fakeAs2Header + ENCRYPTED_CONTENT),
-      encrypted: { cert: LIBAS2_CERT, key: LIBAS2_KEY }
+      agreement: {
+        host: {
+          name: 'LibAS2 Community',
+          id: 'libas2community',
+          certificate: LIBAS2_CERT,
+          privateKey: LIBAS2_KEY,
+          decrypt: true
+        },
+        partner: { name: 'AS2 Testing', id: 'as2testing' }
+      }
     })
     // Force a disposition decryption failure message
     await AS2Disposition.outgoing({
       node: await AS2Parser.parse(fakeAs2Header + ENCRYPTED_CONTENT),
-      encrypted: { cert: AS2_TESTING_CERT, key: LIBAS2_CERT }
+      agreement: {
+        host: {
+          name: 'LibAS2 Community',
+          id: 'libas2community',
+          certificate: AS2_TESTING_CERT,
+          privateKey: LIBAS2_CERT,
+          decrypt: true
+        },
+        partner: { name: 'AS2 Testing', id: 'as2testing' }
+      }
     })
     // Force a disposition verification failure message
     await AS2Disposition.outgoing({
       node: await AS2Parser.parse(fakeAs2Header + SIGNED_CONTENT),
-      signed: { cert: AS2_TESTING_CERT }
+      agreement: {
+        host: { name: 'LibAS2 Community', id: 'libas2community' },
+        partner: {
+          name: 'LibAS2 Community',
+          id: 'libas2community',
+          certificate: AS2_TESTING_CERT,
+          verify: true
+        }
+      }
     })
     // Force a disposition generic failure message
     await AS2Disposition.outgoing({
       node: await AS2Parser.parse(fakeAs2Header + MIME_CONTENT),
-      signed: { cert: AS2_TESTING_CERT }
+      agreement: {
+        host: { name: 'LibAS2 Community', id: 'libas2community' },
+        partner: {
+          name: 'LibAS2 Community',
+          id: 'libas2community',
+          certificate: AS2_TESTING_CERT,
+          verify: true
+        }
+      }
     })
 
     await assert.rejects(async () => {
-      await AS2Disposition.outgoing({ node: null })
+      await AS2Disposition.outgoing({
+        node: null,
+        agreement: {
+          host: { name: 'LibAS2 Community', id: 'libas2community' },
+          partner: { name: 'AS2 Testing', id: 'as2testing' }
+        }
+      })
     })
     await assert.rejects(async () => {
       await AS2Disposition.outgoing({
-        node: await AS2Parser.parse(SIGNED_CONTENT)
+        node: await AS2Parser.parse(SIGNED_CONTENT),
+        agreement: {
+          host: { name: 'LibAS2 Community', id: 'libas2community' },
+          partner: { name: 'AS2 Testing', id: 'as2testing' }
+        }
       })
     })
   })

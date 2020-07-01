@@ -20,7 +20,6 @@ import {
 import * as assert from 'assert'
 import { DateTime } from 'luxon'
 import * as nock from 'nock'
-import { sign } from 'crypto'
 
 const options: AS2ComposerOptions = {
   message: {
