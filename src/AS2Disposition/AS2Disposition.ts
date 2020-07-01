@@ -195,6 +195,7 @@ export class AS2Disposition {
     }
 
     const notification: AS2DispositionNotification = {
+      originalMessageId: options.node.messageId(),
       finalRecipient: options.node.getHeader('As2-To'),
       disposition: {
         processed: true,
