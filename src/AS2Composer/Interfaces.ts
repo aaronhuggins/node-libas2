@@ -13,7 +13,7 @@ export interface AS2ComposerOptions {
 
 export interface AgreementOptions {
   host: {
-    role: 'host'
+    role?: 'host'
     /** The name of the host. */
     name: string
     /** The id of the host; usually a company's DUNS id. */
@@ -25,17 +25,17 @@ export interface AgreementOptions {
     /** Host requires partner to encrypt messages sent to the host. */
     decrypt?: boolean
     /** Host requires partner to verify messages sent from the host. */
-    sign?: AS2Signing|boolean
+    sign?: AS2Signing | boolean
     /** Host requests a message disposition notification (MDN). */
     mdn?: {
       /** Host requires MDN to be sent to a separate URL. */
-      async?: URL
+      async?: string | URL
       /** Host requires MDN to be signed with algorithm if possible. */
-      signing: AS2Signing|false
+      signing: AS2Signing | false
     }
   }
   partner: {
-    role: 'partner'
+    role?: 'partner'
     /** The name of the partner. */
     name: string
     /** The id of the partner; usually a company's DUNS id. */
@@ -43,15 +43,15 @@ export interface AgreementOptions {
     /** The certificate of the partner in PEM format. Required for signing or decrypting. */
     certificate?: string | Buffer | PemFile
     /** Partner requires host to encrypt messages sent to the partner. */
-    encrypt?: AS2Encryption|boolean
+    encrypt?: AS2Encryption | boolean
     /** Partner requires host to verify messages sent from the partner. */
     verify?: boolean
     /** Partner may request a message disposition notification (MDN). */
     mdn?: {
       /** Partner requires MDN to be sent to a separate URL. */
-      async?: URL
+      async?: string | URL
       /** Partner requires MDN to be signed with algorithm if possible. */
-      signing: AS2Signing|false
+      signing: AS2Signing | false
     }
   }
 }

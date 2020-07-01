@@ -27,33 +27,30 @@ const options: AS2ComposerOptions = {
     content: LIBAS2_EDI
   },
   agreement: {
-    recipient: 'libas2community',
-    sender: 'as2testing',
-    sign: { cert: LIBAS2_CERT, key: LIBAS2_KEY },
-    encrypt: {
-      cert: LIBAS2_CERT,
-      encryption: AS2Constants.ENCRYPTION.AES128_GCM
-    },
-    mdn: {
-      to: 'WHATEVER@WHATWHAT.EXAMPLE',
-      deliveryUrl: 'http://whatwhat.example/as2',
-      sign: {
-        importance: 'required',
-        protocol: 'pkcs7-signature',
-        micalg: 'sha-256'
+    host: {
+      name: 'LibAS2 Community',
+      id: 'libas2community',
+      certificate: LIBAS2_CERT,
+      privateKey: LIBAS2_KEY,
+      decrypt: false,
+      sign: true,
+      mdn: {
+        async: 'http://whatwhat.example/as2',
+        signing: AS2Constants.SIGNING.SHA256
       }
     },
-    headers: { not: ['real'] }
-  }
+    partner: {
+      name: 'AS2 Testing',
+      id: 'as2testing',
+      certificate: LIBAS2_CERT,
+      encrypt: AS2Constants.ENCRYPTION.AES128_GCM,
+      verify: true
+    }
+  },
+  additionalHeaders: { not: ['real'] }
 }
 
 describe('AS2Composer', async () => {
-  it('should set headers on AS2 message without error', async () => {
-    const composer = new AS2Composer(options)
-    composer.setHeaders({ 'fake-header': 'not-a-real-header' })
-    composer.setHeaders([{ key: 'fake-header', value: 'not-a-real-header' }])
-  })
-
   it('should produce a valid AS2 message', async () => {
     const composer = new AS2Composer(options)
     const compiled = await composer.compile()
@@ -89,24 +86,21 @@ describe('AS2Composer', async () => {
     const composer = new AS2Composer({
       message: options.message,
       agreement: {
-        sender: 'libas2community',
-        recipient: 'as2testing',
-        sign: {
-          cert: LIBAS2_CERT,
-          key: LIBAS2_KEY,
-          algorithm: AS2Constants.SIGNING.SHA256
+        host: {
+          name: 'LibAS2 Community',
+          id: 'libas2community',
+          certificate: LIBAS2_CERT,
+          privateKey: LIBAS2_KEY,
+          decrypt: false,
+          sign: true,
+          mdn: { signing: AS2Constants.SIGNING.SHA256 }
         },
-        encrypt: {
-          cert: AS2_TESTING_CERT,
-          encryption: AS2Constants.ENCRYPTION.AES192_GCM
-        },
-        mdn: {
-          to: 'mycompanyAS2@example-message.net',
-          sign: {
-            importance: 'required',
-            protocol: 'pkcs7-signature',
-            micalg: AS2Constants.SIGNING.SHA256
-          }
+        partner: {
+          name: 'AS2 Testing',
+          id: 'as2testing',
+          certificate: AS2_TESTING_CERT,
+          encrypt: AS2Constants.ENCRYPTION.AES192_GCM,
+          verify: true
         }
       }
     })
