@@ -1,6 +1,5 @@
 import { AS2MimeNodeOptions } from '../AS2MimeNode'
-import { AS2Headers } from '../Interfaces'
-import { SigningOptions, EncryptionOptions, AS2Signing } from '../AS2Crypto'
+import { AS2Encryption, AS2Signing, PemFile } from '../AS2Crypto'
 
 export interface AS2ComposerOptions {
   /** Message options */
@@ -10,20 +9,48 @@ export interface AS2ComposerOptions {
 }
 
 export interface AgreementOptions {
-  /** The sender of the AS2 message; usually a company's DUNS id. */
-  sender: string
-  /** the recipient of the AS2 message; usually a company's DUNS id. */
-  recipient: string
-  /** Options for signing the message; will override "sign" option in message. */
-  sign?: SigningOptions
-  /** Options for encrypting the message; will override "encrypt" option in message. */
-  encrypt?: EncryptionOptions
-  /** Settings for the request of a Message Disposition Notification; default is none. */
-  mdn?: MessageDispositionOptions
-  /** The version of AS2 agreed upon; default value is "1.0". */
-  version?: string
-  /** Additional headers for the agreement. */
-  headers?: AS2Headers
+  host: {
+    role: 'host'
+    /** The name of the host. */
+    name: string
+    /** The id of the host; usually a company's DUNS id. */
+    id: string
+    /** The certificate of the host in PEM format. Required for signing or decrypting. */
+    certificate?: string | Buffer | PemFile
+    /** The private key of the host in PEM format. Required for signing or decrypting. */
+    privateKey?: string | Buffer | PemFile
+    /** Host requires partner to encrypt messages sent to the host. */
+    decrypt?: boolean
+    /** Host requires partner to verify messages sent from the host. */
+    sign?: AS2Signing|boolean
+    /** Host requests a message disposition notification (MDN). */
+    mdn?: {
+      /** Host requires MDN to be sent to a separate URL. */
+      async?: URL
+      /** Host requires MDN to be signed with algorithm if possible. */
+      signing: AS2Signing|false
+    }
+  }
+  partner: {
+    role: 'partner'
+    /** The name of the partner. */
+    name: string
+    /** The id of the partner; usually a company's DUNS id. */
+    id: string
+    /** The certificate of the partner in PEM format. Required for signing or decrypting. */
+    certificate?: string | Buffer | PemFile
+    /** Partner requires host to encrypt messages sent to the partner. */
+    encrypt?: AS2Encryption|boolean
+    /** Partner requires host to verify messages sent from the partner. */
+    verify?: boolean
+    /** Partner may request a message disposition notification (MDN). */
+    mdn?: {
+      /** Partner requires MDN to be sent to a separate URL. */
+      async?: URL
+      /** Partner requires MDN to be signed with algorithm if possible. */
+      signing: AS2Signing|false
+    }
+  }
 }
 
 export interface MessageDispositionOptions {

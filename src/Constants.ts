@@ -87,6 +87,27 @@ export const AS2Constants = {
      * @type {string}
      * @default
      */
+    MISSING_PARTNER_CERT:
+      'Certificate is required for this partner agreement.',
+    /**
+     * @constant
+     * @type {string}
+     * @default
+     */
+    MISSING_PARTNER_KEY:
+      'Private key is required for this partner agreement.',
+    /**
+     * @constant
+     * @type {string}
+     * @default
+     */
+    WRONG_PEM_FILE:
+      'The type of pem file provided was not correct;',
+    /**
+     * @constant
+     * @type {string}
+     * @default
+     */
     FINAL_RECIPIENT_MISSING:
       'AS2 message is missing the AS2-To header, so there is no final recipient which is required.',
     /**
