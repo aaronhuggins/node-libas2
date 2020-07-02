@@ -188,8 +188,8 @@ export class AS2Disposition {
     options: OutgoingDispositionOptions
   ): Promise<{
     contentNode: AS2MimeNode
-    disposition: AS2MimeNode
-    dispositionObject: AS2Disposition
+    dispositionNode: AS2MimeNode
+    disposition: AS2Disposition
   }> {
     if (isNullOrUndefined(options.node)) {
       throw new Error(ERROR.DISPOSITION_NODE)
@@ -289,8 +289,8 @@ export class AS2Disposition {
 
     return {
       contentNode: rootNode,
-      disposition: mdnMime,
-      dispositionObject: mdn
+      dispositionNode: mdnMime,
+      disposition: mdn
     }
   }
 

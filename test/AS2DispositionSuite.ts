@@ -131,12 +131,14 @@ describe('AS2Disposition', () => {
 
     assert.strictEqual(
       dispositionMime.contentNode instanceof AS2MimeNode &&
-        dispositionMime.disposition instanceof AS2MimeNode,
+      dispositionMime.dispositionNode instanceof AS2MimeNode &&
+      dispositionMime.disposition instanceof AS2Disposition,
       true
     )
     assert.strictEqual(
       dispositionSignedMime.contentNode instanceof AS2MimeNode &&
-        dispositionSignedMime.disposition instanceof AS2MimeNode,
+      dispositionSignedMime.dispositionNode instanceof AS2MimeNode &&
+      dispositionSignedMime.disposition instanceof AS2Disposition,
       true
     )
 

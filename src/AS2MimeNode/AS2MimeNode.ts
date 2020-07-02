@@ -213,7 +213,8 @@ export class AS2MimeNode extends MimeNode {
     options?: DispositionOutOptions
   ): Promise<{
     contentNode: AS2MimeNode
-    disposition: AS2MimeNode
+    dispositionNode: AS2MimeNode
+    disposition: AS2Disposition
   }> {
     options = isNullOrUndefined(options) ? ({} as any) : options
 
