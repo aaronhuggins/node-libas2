@@ -326,7 +326,7 @@
 **Kind**: static method of [<code>AS2Disposition</code>](#AS2Disposition)  
 **Returns**: <code>Promise.&lt;object&gt;</code> - <ul>
 
-<li>The content node and the generated outgoing MDN as an AS2MimeNode.</li>
+<li>The content node, disposition object, and the generated outgoing MDN as an AS2MimeNode.</li>
 </ul>
 
 | Param   | Type                                                                   | Description                                        |
