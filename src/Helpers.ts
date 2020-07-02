@@ -218,7 +218,16 @@ export async function request (
             const rawBody = Buffer.concat(bodyBufs)
             response.rawBody = rawBody
             response.rawResponse = rawResponse
-            response.mime = () => AS2Parser.parse(rawResponse)
+            response.mime = async () => {
+              return await AS2Parser.parse(
+                rawResponse.length > 0
+                  ? rawResponse
+                  : {
+                    headers: response.rawHeaders,
+                    content: rawBody
+                  }
+              )
+            }
             response.json = function json () {
               try {
                 return JSON.parse(rawBody.toString('utf8'))

@@ -169,12 +169,7 @@ describe('AS2Composer', async () => {
         'https://as2testing.centralus.cloudapp.azure.com/pub/Receive.rsb'
       )
     )
-    const mdn = inServiceHours
-      ? await result.mime()
-      : await AS2Parser.parse({
-          headers: result.rawHeaders,
-          content: result.rawBody
-        })
+    const mdn = await result.mime()
     const message = await mdn.verify({ cert: AS2_TESTING_CERT })
 
     assert.strictEqual(
