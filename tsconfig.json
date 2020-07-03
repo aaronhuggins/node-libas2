@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "newLine": "lf",
     "module": "commonjs",
     "moduleResolution": "node",
     "noImplicitAny": true,
