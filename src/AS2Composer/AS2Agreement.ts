@@ -34,15 +34,14 @@ export class AS2Agreement implements AgreementOptions {
 }
 
 export class AS2Trading {
-  constructor (trading: AS2Trading & { mdn?: { async?: URL | string } }) {
+  constructor (trading: AS2Trading & { url: string | URL }) {
     this.role = trading.role
     this.name = trading.name
     this.id = trading.id
+    this.url = trading.url ? new URL(trading.url as string) : trading.url
     if (trading.mdn) {
       this.mdn = {
-        async: trading.mdn.async
-          ? new URL(trading.mdn.async as string)
-          : undefined,
+        async: trading.mdn.async,
         signing: trading.mdn.signing
       }
     }
@@ -51,8 +50,9 @@ export class AS2Trading {
   role: 'host' | 'partner'
   name: string
   id: string
+  url: URL
   mdn?: {
-    async?: URL
+    async?: boolean
     signing: AS2Signing | false
   }
 }
@@ -124,6 +124,7 @@ export class AS2Partner extends AS2Trading {
   ) {
     super(partner)
     this.role = 'partner'
+    this.file = partner.file
     this.encrypt =
       typeof partner.encrypt === 'boolean' && partner.encrypt
         ? ENCRYPTION.AES128_CBC
@@ -154,6 +155,7 @@ export class AS2Partner extends AS2Trading {
   }
 
   role: 'partner'
+  file: 'EDIX12' | 'EDIFACT' | 'XML' | string
   certificate?: PemFile
   encrypt?: AS2Encryption | false
   verify?: boolean

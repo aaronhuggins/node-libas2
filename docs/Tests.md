@@ -110,6 +110,7 @@ should make a valid AS2 exchange.
       host: {
         name: 'LibAS2 Community',
         id: 'libas2community',
+        url: 'http://whatwhat.example/as2',
         certificate: Helpers_1.LIBAS2_CERT,
         privateKey: Helpers_1.LIBAS2_KEY,
         decrypt: false,
@@ -119,23 +120,16 @@ should make a valid AS2 exchange.
       partner: {
         name: 'AS2 Testing',
         id: 'as2testing',
+        url: 'https://as2testing.centralus.cloudapp.azure.com/pub/Receive.rsb',
+        file: 'EDIX12',
         certificate: Helpers_1.AS2_TESTING_CERT,
         encrypt: core_1.AS2Constants.ENCRYPTION.AES192_GCM,
         verify: true
       }
     }
   })
-  const result = await core_1.request(
-    await composer.toRequestOptions(
-      'https://as2testing.centralus.cloudapp.azure.com/pub/Receive.rsb'
-    )
-  )
-  const mdn = inServiceHours
-    ? await result.mime()
-    : await core_1.AS2Parser.parse({
-        headers: result.rawHeaders,
-        content: result.rawBody
-      })
+  const result = await core_1.request(await composer.toRequestOptions())
+  const mdn = await result.mime()
   const message = await mdn.verify({ cert: Helpers_1.AS2_TESTING_CERT })
   assert.strictEqual(
     message instanceof core_1.AS2MimeNode,
@@ -398,8 +392,16 @@ should generate outgoing disposition from incoming message.
   )
   const dispositionMime = await mime.dispositionOut({
     agreement: {
-      host: { name: 'LibAS2 Community', id: 'libas2community' },
-      partner: { name: 'AS2 Testing', id: 'as2testing' }
+      host: {
+        name: 'LibAS2 Community',
+        id: 'libas2community',
+        url: 'http://whatwhat.example/as2'
+      },
+      partner: {
+        name: 'AS2 Testing',
+        id: 'as2testing',
+        url: 'http://whatwhat.example/as2'
+      }
     },
     returnNode: true
   })
@@ -408,12 +410,14 @@ should generate outgoing disposition from incoming message.
       host: {
         name: 'LibAS2 Community',
         id: 'libas2community',
+        url: 'http://whatwhat.example/as2',
         certificate: Helpers_1.LIBAS2_CERT,
         privateKey: Helpers_1.LIBAS2_KEY
       },
       partner: {
         name: 'LibAS2 Community',
         id: 'libas2community',
+        url: 'http://whatwhat.example/as2',
         certificate: Helpers_1.LIBAS2_CERT,
         verify: true,
         mdn: { signing: 'sha-256' }
@@ -423,12 +427,14 @@ should generate outgoing disposition from incoming message.
   })
   assert.strictEqual(
     dispositionMime.contentNode instanceof core_1.AS2MimeNode &&
-      dispositionMime.disposition instanceof core_1.AS2MimeNode,
+      dispositionMime.dispositionNode instanceof core_1.AS2MimeNode &&
+      dispositionMime.disposition instanceof core_1.AS2Disposition,
     true
   )
   assert.strictEqual(
     dispositionSignedMime.contentNode instanceof core_1.AS2MimeNode &&
-      dispositionSignedMime.disposition instanceof core_1.AS2MimeNode,
+      dispositionSignedMime.dispositionNode instanceof core_1.AS2MimeNode &&
+      dispositionSignedMime.disposition instanceof core_1.AS2Disposition,
     true
   )
   await core_1.AS2Disposition.outgoing({
@@ -436,8 +442,16 @@ should generate outgoing disposition from incoming message.
       fakeAs2Header + Helpers_1.MIME_CONTENT
     ),
     agreement: {
-      host: { name: 'LibAS2 Community', id: 'libas2community' },
-      partner: { name: 'AS2 Testing', id: 'as2testing' }
+      host: {
+        name: 'LibAS2 Community',
+        id: 'libas2community',
+        url: 'http://whatwhat.example/as2'
+      },
+      partner: {
+        name: 'AS2 Testing',
+        id: 'as2testing',
+        url: 'http://whatwhat.example/as2'
+      }
     }
   })
   await core_1.AS2Disposition.outgoing({
@@ -448,11 +462,16 @@ should generate outgoing disposition from incoming message.
       host: {
         name: 'LibAS2 Community',
         id: 'libas2community',
+        url: 'http://whatwhat.example/as2',
         certificate: Helpers_1.LIBAS2_CERT,
         privateKey: Helpers_1.LIBAS2_KEY,
         decrypt: true
       },
-      partner: { name: 'AS2 Testing', id: 'as2testing' }
+      partner: {
+        name: 'AS2 Testing',
+        id: 'as2testing',
+        url: 'http://whatwhat.example/as2'
+      }
     }
   })
   // Force a disposition decryption failure message
@@ -464,11 +483,16 @@ should generate outgoing disposition from incoming message.
       host: {
         name: 'LibAS2 Community',
         id: 'libas2community',
+        url: 'http://whatwhat.example/as2',
         certificate: Helpers_1.AS2_TESTING_CERT,
         privateKey: Helpers_1.LIBAS2_CERT,
         decrypt: true
       },
-      partner: { name: 'AS2 Testing', id: 'as2testing' }
+      partner: {
+        name: 'AS2 Testing',
+        id: 'as2testing',
+        url: 'http://whatwhat.example/as2'
+      }
     }
   })
   // Force a disposition verification failure message
@@ -477,10 +501,15 @@ should generate outgoing disposition from incoming message.
       fakeAs2Header + Helpers_1.SIGNED_CONTENT
     ),
     agreement: {
-      host: { name: 'LibAS2 Community', id: 'libas2community' },
+      host: {
+        name: 'LibAS2 Community',
+        id: 'libas2community',
+        url: 'http://whatwhat.example/as2'
+      },
       partner: {
         name: 'LibAS2 Community',
         id: 'libas2community',
+        url: 'http://whatwhat.example/as2',
         certificate: Helpers_1.AS2_TESTING_CERT,
         verify: true
       }
@@ -492,10 +521,15 @@ should generate outgoing disposition from incoming message.
       fakeAs2Header + Helpers_1.MIME_CONTENT
     ),
     agreement: {
-      host: { name: 'LibAS2 Community', id: 'libas2community' },
+      host: {
+        name: 'LibAS2 Community',
+        id: 'libas2community',
+        url: 'http://whatwhat.example/as2'
+      },
       partner: {
         name: 'LibAS2 Community',
         id: 'libas2community',
+        url: 'http://whatwhat.example/as2',
         certificate: Helpers_1.AS2_TESTING_CERT,
         verify: true
       }
@@ -505,8 +539,16 @@ should generate outgoing disposition from incoming message.
     await core_1.AS2Disposition.outgoing({
       node: null,
       agreement: {
-        host: { name: 'LibAS2 Community', id: 'libas2community' },
-        partner: { name: 'AS2 Testing', id: 'as2testing' }
+        host: {
+          name: 'LibAS2 Community',
+          id: 'libas2community',
+          url: 'http://whatwhat.example/as2'
+        },
+        partner: {
+          name: 'AS2 Testing',
+          id: 'as2testing',
+          url: 'http://whatwhat.example/as2'
+        }
       }
     })
   })
@@ -514,8 +556,16 @@ should generate outgoing disposition from incoming message.
     await core_1.AS2Disposition.outgoing({
       node: await AS2Parser_1.AS2Parser.parse(Helpers_1.SIGNED_CONTENT),
       agreement: {
-        host: { name: 'LibAS2 Community', id: 'libas2community' },
-        partner: { name: 'AS2 Testing', id: 'as2testing' }
+        host: {
+          name: 'LibAS2 Community',
+          id: 'libas2community',
+          url: 'http://whatwhat.example/as2'
+        },
+        partner: {
+          name: 'AS2 Testing',
+          id: 'as2testing',
+          url: 'http://whatwhat.example/as2'
+        }
       }
     })
   })

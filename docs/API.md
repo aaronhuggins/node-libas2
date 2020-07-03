@@ -110,7 +110,7 @@
   - [new AS2Composer(options)](#new_AS2Composer_new)
   - [.setAgreement(agreement)](#AS2Composer+setAgreement)
   - [.compile()](#AS2Composer+compile) ⇒ [<code>Promise.&lt;AS2MimeNode&gt;</code>](#AS2MimeNode)
-  - [.toRequestOptions(url)](#AS2Composer+toRequestOptions) ⇒ <code>Promise.&lt;RequestOptions&gt;</code>
+  - [.toRequestOptions([url])](#AS2Composer+toRequestOptions) ⇒ <code>Promise.&lt;RequestOptions&gt;</code>
 
 <a name="new_AS2Composer_new"></a>
 
@@ -142,16 +142,16 @@
 **Returns**: [<code>Promise.&lt;AS2MimeNode&gt;</code>](#AS2MimeNode) - <p>This composer instance as an AS2MimeNode.</p>  
 <a name="AS2Composer+toRequestOptions"></a>
 
-### aS2Composer.toRequestOptions(url) ⇒ <code>Promise.&lt;RequestOptions&gt;</code>
+### aS2Composer.toRequestOptions([url]) ⇒ <code>Promise.&lt;RequestOptions&gt;</code>
 
 <p>Create a Node.js-compatible RequestOptions object from the composed message.</p>
 
 **Kind**: instance method of [<code>AS2Composer</code>](#AS2Composer)  
 **Returns**: <code>Promise.&lt;RequestOptions&gt;</code> - <p>This composer instance as request options for Node.js.</p>
 
-| Param | Type                | Description                                                    |
-| ----- | ------------------- | -------------------------------------------------------------- |
-| url   | <code>string</code> | <p>The URL of the AS2 endpoint receiving this AS2 message.</p> |
+| Param | Type                | Description                                                                                                              |
+| ----- | ------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| [url] | <code>string</code> | <p>Optional: The URL of the AS2 endpoint receiving this AS2 message; will use agreement partner url if not provided.</p> |
 
 <a name="AS2Crypto"></a>
 
@@ -1151,27 +1151,30 @@ and convenience methods for mime() and json().</p>
 **Kind**: global typedef  
 **Properties**
 
-| Name                | Type                                                                           | Description                                                                              |
-| ------------------- | ------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------- |
-| host                | <code>object</code>                                                            | <p>Options for the AS2 host.</p>                                                         |
-| host.name           | <code>string</code>                                                            | <p>The name of the host.</p>                                                             |
-| host.id             | <code>string</code>                                                            | <p>The id of the host; usually a company's DUNS id.</p>                                  |
-| host.certificate    | <code>string</code> \| <code>Buffer</code> \| [<code>PemFile</code>](#PemFile) | <p>The certificate of the host in PEM format. Required for signing or decrypting.</p>    |
-| host.privateKey     | <code>string</code> \| <code>Buffer</code> \| [<code>PemFile</code>](#PemFile) | <p>The private key of the host in PEM format. Required for signing or decrypting.</p>    |
-| host.decrypt        | <code>boolean</code>                                                           | <p>Host requires partner to encrypt messages sent to the host.</p>                       |
-| host.sign           | [<code>AS2Signing</code>](#AS2Signing) \| <code>boolean</code>                 | <p>Host requires partner to verify messages sent from the host.</p>                      |
-| host.mdn            | <code>object</code>                                                            | <p>Host requests a message disposition notification (MDN).</p>                           |
-| host.mdn.async      | <code>URL</code>                                                               | <p>Host requires MDN to be sent to a separate URL.</p>                                   |
-| host.mdn.signing    | [<code>AS2Signing</code>](#AS2Signing) \| <code>false</code>                   | <p>Host requires MDN to be signed with algorithm if possible.</p>                        |
-| partner             | <code>object</code>                                                            | <p>Options for the AS2 partner.</p>                                                      |
-| partner.name        | <code>string</code>                                                            | <p>The name of the partner.</p>                                                          |
-| partner.id          | <code>string</code>                                                            | <p>The id of the partner; usually a company's DUNS id.</p>                               |
-| partner.certificate | <code>string</code> \| <code>Buffer</code> \| [<code>PemFile</code>](#PemFile) | <p>The certificate of the partner in PEM format. Required for signing or decrypting.</p> |
-| partner.encrypt     | [<code>AS2Encryption</code>](#AS2Encryption) \| <code>boolean</code>           | <p>Partner requires host to encrypt messages sent to the partner.</p>                    |
-| partner.verify      | <code>boolean</code>                                                           | <p>Partner requires host to verify messages sent from the partner.</p>                   |
-| partner.mdn         | <code>object</code>                                                            | <p>Partner may request a message disposition notification (MDN).{</p>                    |
-| partner.mdn.async   | <code>URL</code>                                                               | <p>Partner requires MDN to be sent to a separate URL.</p>                                |
-| partner.mdn.signing | [<code>AS2Signing</code>](#AS2Signing) \| <code>false</code>                   | <p>Partner requires MDN to be signed with algorithm if possible.</p>                     |
+| Name                  | Type                                                                                                                       | Description                                                                              |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| host                  | <code>object</code>                                                                                                        | <p>Options for the AS2 host.</p>                                                         |
+| host.name             | <code>string</code>                                                                                                        | <p>The name of the host.</p>                                                             |
+| host.id               | <code>string</code>                                                                                                        | <p>The id of the host; usually a company's DUNS id.</p>                                  |
+| host.url              | <code>string</code> \| <code>URL</code>                                                                                    | <p>The URL of the host's AS2 endpoint.</p>                                               |
+| [host.certificate]    | <code>string</code> \| <code>Buffer</code> \| [<code>PemFile</code>](#PemFile)                                             | <p>The certificate of the host in PEM format. Required for signing or decrypting.</p>    |
+| [host.privateKey]     | <code>string</code> \| <code>Buffer</code> \| [<code>PemFile</code>](#PemFile)                                             | <p>The private key of the host in PEM format. Required for signing or decrypting.</p>    |
+| host.decrypt          | <code>boolean</code>                                                                                                       | <p>Host requires partner to encrypt messages sent to the host.</p>                       |
+| host.sign             | [<code>AS2Signing</code>](#AS2Signing) \| <code>boolean</code>                                                             | <p>Host requires partner to verify messages sent from the host.</p>                      |
+| [host.mdn]            | <code>object</code>                                                                                                        | <p>Host requests a message disposition notification (MDN).</p>                           |
+| host.mdn.async        | <code>boolean</code>                                                                                                       | <p>Host requires MDN to be sent to a separate URL.</p>                                   |
+| host.mdn.signing      | [<code>AS2Signing</code>](#AS2Signing) \| <code>false</code>                                                               | <p>Host requires MDN to be signed with algorithm if possible.</p>                        |
+| partner               | <code>object</code>                                                                                                        | <p>Options for the AS2 partner.</p>                                                      |
+| partner.name          | <code>string</code>                                                                                                        | <p>The name of the partner.</p>                                                          |
+| partner.id            | <code>string</code>                                                                                                        | <p>The id of the partner; usually a company's DUNS id.</p>                               |
+| partner.url           | <code>string</code> \| <code>URL</code>                                                                                    | <p>The URL of the partner's AS2 endpoint.</p>                                            |
+| partner.file          | <code>&#x27;EDIX12&#x27;</code> \| <code>&#x27;EDIFACT&#x27;</code> \| <code>&#x27;XML&#x27;</code> \| <code>string</code> | <p>The file protocol for trading with the partner.</p>                                   |
+| [partner.certificate] | <code>string</code> \| <code>Buffer</code> \| [<code>PemFile</code>](#PemFile)                                             | <p>The certificate of the partner in PEM format. Required for signing or decrypting.</p> |
+| partner.encrypt       | [<code>AS2Encryption</code>](#AS2Encryption) \| <code>boolean</code>                                                       | <p>Partner requires host to encrypt messages sent to the partner.</p>                    |
+| partner.verify        | <code>boolean</code>                                                                                                       | <p>Partner requires host to verify messages sent from the partner.</p>                   |
+| [partner.mdn]         | <code>object</code>                                                                                                        | <p>Partner may request a message disposition notification (MDN).</p>                     |
+| partner.mdn.async     | <code>boolean</code>                                                                                                       | <p>Partner requires MDN to be sent to a separate URL.</p>                                |
+| partner.mdn.signing   | [<code>AS2Signing</code>](#AS2Signing) \| <code>false</code>                                                               | <p>Partner requires MDN to be signed with algorithm if possible.</p>                     |
 
 <a name="AS2Signing"></a>
 

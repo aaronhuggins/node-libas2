@@ -31,18 +31,21 @@ const options: AS2ComposerOptions = {
     host: {
       name: 'LibAS2 Community',
       id: 'libas2community',
+      url: 'http://whatwhat.example/as2',
       certificate: LIBAS2_CERT,
       privateKey: LIBAS2_KEY,
       decrypt: false,
       sign: true,
       mdn: {
-        async: 'http://whatwhat.example/as2',
+        async: true,
         signing: AS2Constants.SIGNING.SHA256
       }
     },
     partner: {
       name: 'AS2 Testing',
       id: 'as2testing',
+      url: 'http://whatwhat.example/as2',
+      file: 'EDIX12',
       certificate: LIBAS2_CERT,
       encrypt: AS2Constants.ENCRYPTION.AES128_GCM,
       verify: true
@@ -149,6 +152,7 @@ describe('AS2Composer', async () => {
         host: {
           name: 'LibAS2 Community',
           id: 'libas2community',
+          url: 'http://whatwhat.example/as2',
           certificate: LIBAS2_CERT,
           privateKey: LIBAS2_KEY,
           decrypt: false,
@@ -158,17 +162,15 @@ describe('AS2Composer', async () => {
         partner: {
           name: 'AS2 Testing',
           id: 'as2testing',
+          url: 'https://as2testing.centralus.cloudapp.azure.com/pub/Receive.rsb',
+          file: 'EDIX12',
           certificate: AS2_TESTING_CERT,
           encrypt: AS2Constants.ENCRYPTION.AES192_GCM,
           verify: true
         }
       }
     })
-    const result = await request(
-      await composer.toRequestOptions(
-        'https://as2testing.centralus.cloudapp.azure.com/pub/Receive.rsb'
-      )
-    )
+    const result = await request(await composer.toRequestOptions())
     const mdn = await result.mime()
     const message = await mdn.verify({ cert: AS2_TESTING_CERT })
 
