@@ -234,19 +234,22 @@ export class AS2EnvelopedData {
 
           dataBuffer = retBuf
         }
-      } catch (err) {
+      } catch (error) {
         _didIteratorError = true
-        _iteratorError = err
-      } finally {
-        try {
-          if (!_iteratorNormalCompletion && _iterator.return != null) {
-            _iterator.return()
-          }
-        } finally {
-          if (_didIteratorError) {
-            throw _iteratorError
-          }
+        _iteratorError = error
+      }
+
+      try {
+        if (!_iteratorNormalCompletion && _iterator.return != null) {
+          _iterator.return()
         }
+      } catch (error) {
+        _didIteratorError = true
+        _iteratorError = error
+      }
+
+      if (_didIteratorError) {
+        throw _iteratorError
       }
     }
 
