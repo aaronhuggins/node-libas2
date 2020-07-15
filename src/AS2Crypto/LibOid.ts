@@ -30,7 +30,7 @@ export class LibObjectID {
   static init () {
     return new LibObjectID([
       // algorithm OIDs
-      ['1.2.840.113549.1.1.1', 'rsaEncryption'],
+      ['1.2.840.113549.1.1.1', 'RSAES-PKCS1-v1_5'], // a.k.a rsaEncryption
       ['1.2.840.113549.1.1.2', 'md2WithRSAEncryption'],
       ['1.2.840.113549.1.1.3', 'md4WithRSAEncryption'],
       ['1.2.840.113549.1.1.4', 'md5WithRSAEncryption'],

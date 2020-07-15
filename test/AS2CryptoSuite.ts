@@ -14,7 +14,8 @@ import {
   LIBAS2_EDI,
   ENCRYPTED_CONTENT,
   SIGNED_CONTENT,
-  openssl
+  openssl,
+  LIBAS2_CERT_PATH
 } from './Helpers'
 import * as assert from 'assert'
 import { readFileSync, writeFileSync } from 'fs'
@@ -135,8 +136,75 @@ describe('AS2Crypto', async () => {
     const encrypted = new AS2EnvelopedData(Buffer.from('a'))
 
     await assert.rejects(async () => {
-      await encrypted.encrypt(LIBAS2_CERT, 'des3' as any)
+      await encrypted.encrypt(LIBAS2_CERT, 'des' as any)
     })
+  })
+
+  it('should support decrypting DES3 with RSAES-OAEP', async () => {
+    const content = 'Something to Encrypt\r\n'
+    writeFileSync('test/temp-data/payload', content)
+    await openssl({
+      command: 'cms',
+      arguments: {
+        encrypt: true,
+        des3: true,
+        outform: 'DER',
+        recip: LIBAS2_CERT_PATH,
+        out: 'test/temp-data/encrypt-cms.bin',
+        in: 'test/temp-data/payload',
+        keyopt: 'rsa_padding_mode:oaep'
+      }
+    })
+
+    const encryptedBin = readFileSync('test/temp-data/encrypt-cms.bin')
+    const encrypted = new AS2EnvelopedData(encryptedBin, true)
+    const decrypted = await encrypted.decrypt(LIBAS2_CERT, LIBAS2_KEY)
+
+    assert.strictEqual(decrypted.toString('utf8'), content)
+  })
+
+  it('should support decrypting DES3 with RSAES-PKCS1-v1_5', async () => {
+    const content = 'Something to Encrypt\r\n'
+    writeFileSync('test/temp-data/payload', content)
+    await openssl({
+      command: 'cms',
+      arguments: {
+        encrypt: true,
+        des3: true,
+        outform: 'DER',
+        recip: LIBAS2_CERT_PATH,
+        out: 'test/temp-data/encrypt-cms.bin',
+        in: 'test/temp-data/payload'
+      }
+    })
+
+    const encryptedBin = readFileSync('test/temp-data/encrypt-cms.bin')
+    const encrypted = new AS2EnvelopedData(encryptedBin, true)
+    const decrypted = await encrypted.decrypt(LIBAS2_CERT, LIBAS2_KEY)
+
+    assert.strictEqual(decrypted.toString('utf8'), content)
+  })
+
+  it('should support decrypting AES with RSAES-PKCS1-v1_5', async () => {
+    const content = 'Something to Encrypt\r\n'
+    writeFileSync('test/temp-data/payload', content)
+    await openssl({
+      command: 'cms',
+      arguments: {
+        encrypt: true,
+        aes256: true,
+        outform: 'DER',
+        recip: LIBAS2_CERT_PATH,
+        out: 'test/temp-data/encrypt-cms.bin',
+        in: 'test/temp-data/payload'
+      }
+    })
+
+    const encryptedBin = readFileSync('test/temp-data/encrypt-cms.bin')
+    const encrypted = new AS2EnvelopedData(encryptedBin, true)
+    const decrypted = await encrypted.decrypt(LIBAS2_CERT, LIBAS2_KEY)
+
+    assert.strictEqual(decrypted.toString('utf8'), content)
   })
 
   it('should throw error on compression methods', async () => {

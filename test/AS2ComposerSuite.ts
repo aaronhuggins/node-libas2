@@ -20,6 +20,7 @@ import {
 import * as assert from 'assert'
 import { DateTime } from 'luxon'
 import * as nock from 'nock'
+import * as ping from 'ping'
 
 const options: AS2ComposerOptions = {
   message: {
@@ -133,8 +134,9 @@ describe('AS2Composer', async () => {
     const startTime = now.set({ hour: 5, minute: 30, second: 0 })
     const endTime = now.set({ hour: 19, minute: 0, second: 0 })
     const inServiceHours = now > startTime && now < endTime
+    const pingResult = await ping.promise.probe('as2testing.centralus.cloudapp.azure.com', { timeout: 1, min_reply: 2 })
 
-    if (!inServiceHours) {
+    if (!inServiceHours || !pingResult.alive) {
       // If now is outside the service hours, nock is used to provide a pre-defined mdn.
       const [headers, ...body] = SIGNED_MDN.split(
         /(\r\n|\n\r|\n)(\r\n|\n\r|\n)/gu

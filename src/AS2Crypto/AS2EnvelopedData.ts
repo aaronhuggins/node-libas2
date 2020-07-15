@@ -4,8 +4,15 @@ import { Crypto } from '@peculiar/webcrypto'
 import { PemFile } from './PemFile'
 import { ObjectID } from './LibOid'
 import { AS2Encryption } from './Interfaces'
+import { privateDecrypt, createPrivateKey, constants } from 'crypto'
 
 const webcrypto = new Crypto()
+const CRYPTO_MODE = {
+  PKIJS_SUPPORTED: 'PKIJS_SUPPORTED',
+  SUBTLE_CRYPTO: 'SUBTLE_CRYPTO',
+  PKCS1_V1_5: 'PKCS1_V1_5'
+}
+const { RSA_PKCS1_PADDING } = constants
 
 export class AS2EnvelopedData {
   constructor (data: Buffer, enveloped: boolean = false) {
@@ -47,6 +54,7 @@ export class AS2EnvelopedData {
   private _getEncryptionAlgorithm (encryption: AS2Encryption) {
     const CBC = 'AES-CBC'
     const GCM = 'AES-GCM'
+    const DES3 = '3DES'
 
     switch (encryption) {
       case 'aes128-CBC':
@@ -84,6 +92,124 @@ export class AS2EnvelopedData {
     }
   }
 
+  _getCryptoInfo (index: number = 0) {
+    const crypto = pkijs.getCrypto()
+    const algorithmId = this.enveloped.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmId
+    const encryptionId = this.enveloped.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId
+    const encryptionIdParams = crypto.getAlgorithmByOID(encryptionId)
+    let mode = CRYPTO_MODE.PKIJS_SUPPORTED
+    let algorithm = encryptionIdParams.name
+
+    if (algorithmId === '1.2.840.113549.1.1.1') {
+      mode = CRYPTO_MODE.PKCS1_V1_5
+
+      if ('name' in encryptionIdParams === false) {
+        algorithm = new ObjectID({ id: encryptionId }).name
+      }
+    } else {
+      if ('name' in encryptionIdParams === false) {
+        mode = CRYPTO_MODE.SUBTLE_CRYPTO
+        algorithm = new ObjectID({ id: encryptionId }).name
+      }
+    }
+
+    return { mode, algorithm }
+  }
+
+  async _getDecryptionKey (
+    index: number,
+    options: {
+      recipientPrivateKey: ArrayBuffer,
+      algorithm: string,
+      rsaOaep?: boolean
+    }
+  ) {
+    const crypto = pkijs.getCrypto()
+    const schema = this.enveloped.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmParams
+    let encryptedKey
+
+    if (options.rsaOaep) {
+      const rsaOAEPParams = new pkijs.RSAESOAEPParams({ schema })
+      const hashAlgorithm = crypto.getAlgorithmByOID(rsaOAEPParams.hashAlgorithm.algorithmId)
+      const privateKey = await crypto.importKey("pkcs8", options.recipientPrivateKey, {
+        name: "RSA-OAEP",
+        hash: {
+          name: hashAlgorithm.name
+        }
+      }, true, ["decrypt"])
+      encryptedKey = await crypto.decrypt(privateKey.algorithm, privateKey, this.enveloped.recipientInfos[index].value.encryptedKey.valueBlock.valueHex)
+    } else {
+      const decryptedPayload = privateDecrypt({
+        key: createPrivateKey({
+          key: Buffer.from(options.recipientPrivateKey),
+          format: 'der',
+          type: 'pkcs8'
+        }),
+        padding: RSA_PKCS1_PADDING
+      }, Buffer.from(this.enveloped.recipientInfos[index].value.encryptedKey.valueBlock.valueHex))
+      encryptedKey = new Uint8Array(decryptedPayload).buffer
+    }
+
+    return await crypto.importKey("raw", encryptedKey, options.algorithm, true, ["decrypt"])
+  }
+
+  async _extendedDecrypt (decryptionKey: ArrayBuffer, algorithm: string) {
+    const crypto = pkijs.getCrypto()
+    const ivBuffer = this.enveloped.encryptedContentInfo.contentEncryptionAlgorithm.algorithmParams.valueBlock.valueHex
+    const ivView = new Uint8Array(ivBuffer)
+    let dataBuffer = new ArrayBuffer(0)
+
+    if (this.enveloped.encryptedContentInfo.encryptedContent.idBlock.isConstructed === false) {
+      dataBuffer = this.enveloped.encryptedContentInfo.encryptedContent.valueBlock.valueHex
+    } else {
+      let _iteratorNormalCompletion = true;
+      let _didIteratorError = false;
+      let _iteratorError = undefined;
+      let _iterator
+      let _step
+
+      try {
+        for (_iterator = this.enveloped.encryptedContentInfo.encryptedContent.valueBlock.value[Symbol.iterator](); !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+          const content = _step.value;
+          let outputLength = 0 
+          let prevLength = 0
+          
+          for(const buffer of [dataBuffer, content.valueBlock.valueHex]) {
+            outputLength += buffer.byteLength
+          }
+          
+          const retBuf = new ArrayBuffer(outputLength)
+          const retView = new Uint8Array(retBuf)
+          
+          for(const buffer of [dataBuffer, content.valueBlock.valueHex]) {
+            retView.set(new Uint8Array(buffer), prevLength)
+            prevLength += buffer.byteLength
+          }
+
+          dataBuffer = retBuf
+        }
+      } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion && _iterator.return != null) {
+            _iterator.return();
+          }
+        } finally {
+          if (_didIteratorError) {
+            throw _iteratorError;
+          }
+        }
+      }
+    }
+
+    return await crypto.decrypt({
+      name: algorithm,
+      iv: ivView
+    }, decryptionKey, dataBuffer)
+  }
+
   async encrypt (cert: string | Buffer | PemFile, encryption: AS2Encryption) {
     const certificate = this._toCertificate(cert)
 
@@ -109,11 +235,32 @@ export class AS2EnvelopedData {
   ) {
     const certificate = this._toCertificate(cert)
     const privateKey = new PemFile(key).data
-    this.data = await this.enveloped.decrypt(0, {
-      recipientCertificate: certificate,
-      recipientPrivateKey: privateKey
-    })
+    const cryptoInfo = this._getCryptoInfo()
 
-    return Buffer.from(this.data)
+    if (cryptoInfo.mode === CRYPTO_MODE.PKIJS_SUPPORTED) {
+      this.data = await this.enveloped.decrypt(0, {
+        recipientCertificate: certificate,
+        recipientPrivateKey: privateKey
+      })
+    } else {
+      let decryptionKey
+
+      if (cryptoInfo.mode === CRYPTO_MODE.SUBTLE_CRYPTO) {
+        decryptionKey = await this._getDecryptionKey(0, {
+          recipientPrivateKey: privateKey,
+          algorithm: cryptoInfo.algorithm,
+          rsaOaep: true
+        })
+      } else {
+        decryptionKey = await this._getDecryptionKey(0, {
+          recipientPrivateKey: privateKey,
+          algorithm: cryptoInfo.algorithm
+        })
+      }
+
+      this.data = await this._extendedDecrypt(decryptionKey, cryptoInfo.algorithm)
+    }
+
+    return Buffer.from(this.data || '')
   }
 }

@@ -18,7 +18,8 @@
       "mocha",
       "node",
       "nodemailer",
-      "pkijs/build"
+      "pkijs/build",
+      "ping"
     ]
   },
 
