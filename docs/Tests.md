@@ -94,7 +94,11 @@ should make a valid AS2 exchange.
   const startTime = now.set({ hour: 5, minute: 30, second: 0 })
   const endTime = now.set({ hour: 19, minute: 0, second: 0 })
   const inServiceHours = now > startTime && now < endTime
-  if (!inServiceHours) {
+  const pingResult = await ping.promise.probe(
+    'as2testing.centralus.cloudapp.azure.com',
+    { timeout: 1, min_reply: 2 }
+  )
+  if (!inServiceHours || !pingResult.alive) {
     // If now is outside the service hours, nock is used to provide a pre-defined mdn.
     const [headers, ...body] = Helpers_1.SIGNED_MDN.split(
       /(\r\n|\n\r|\n)(\r\n|\n\r|\n)/gu
@@ -221,7 +225,7 @@ should verify cms message produced by openssl.
   const certAsPem = fs_1.readFileSync('test/temp-data/x509.pub')
   const payloadAsBin = fs_1.readFileSync('test/temp-data/payload')
   const sig_as_der = fs_1.readFileSync('test/temp-data/signature-cms.bin')
-  const signedData = new AS2SignedData_1.AS2SignedData(payloadAsBin, sig_as_der)
+  const signedData = new core_1.AS2SignedData(payloadAsBin, sig_as_der)
   const pkijsVerified = await signedData.verify(certAsPem)
   assert.strictEqual(pkijsVerified, true, 'PKIjs verification')
 }
@@ -272,8 +276,120 @@ should throw error on unsupported encryption.
 ;async () => {
   const encrypted = new core_1.AS2EnvelopedData(Buffer.from('a'))
   await assert.rejects(async () => {
-    await encrypted.encrypt(Helpers_1.LIBAS2_CERT, 'des3')
+    await encrypted.encrypt(Helpers_1.LIBAS2_CERT, 'des')
   })
+}
+```
+
+should support decrypting DES3 with RSAES-OAEP.
+
+```js
+;async () => {
+  const content = 'Something to Encrypt\r\n'
+  fs_1.writeFileSync('test/temp-data/payload', content)
+  await Helpers_1.openssl({
+    command: 'cms',
+    arguments: {
+      encrypt: true,
+      des3: true,
+      outform: 'DER',
+      recip: Helpers_1.LIBAS2_CERT_PATH,
+      out: 'test/temp-data/encrypt-cms.bin',
+      in: 'test/temp-data/payload',
+      keyopt: 'rsa_padding_mode:oaep'
+    }
+  })
+  const encryptedBin = fs_1.readFileSync('test/temp-data/encrypt-cms.bin')
+  const encrypted = new core_1.AS2EnvelopedData(encryptedBin, true)
+  const decrypted = await encrypted.decrypt(
+    Helpers_1.LIBAS2_CERT,
+    Helpers_1.LIBAS2_KEY
+  )
+  assert.strictEqual(decrypted.toString('utf8'), content)
+}
+```
+
+should support decrypting DES3 with RSAES-PKCS1-v1_5.
+
+```js
+;async () => {
+  const content = 'Something to Encrypt\r\n'
+  fs_1.writeFileSync('test/temp-data/payload', content)
+  await Helpers_1.openssl({
+    command: 'cms',
+    arguments: {
+      encrypt: true,
+      des3: true,
+      outform: 'DER',
+      recip: Helpers_1.LIBAS2_CERT_PATH,
+      out: 'test/temp-data/encrypt-cms.bin',
+      in: 'test/temp-data/payload'
+    }
+  })
+  const encryptedBin = fs_1.readFileSync('test/temp-data/encrypt-cms.bin')
+  const encrypted = new core_1.AS2EnvelopedData(encryptedBin, true)
+  const decrypted = await encrypted.decrypt(
+    Helpers_1.LIBAS2_CERT,
+    Helpers_1.LIBAS2_KEY
+  )
+  assert.strictEqual(decrypted.toString('utf8'), content)
+}
+```
+
+should support decrypting AES with RSAES-PKCS1-v1_5.
+
+```js
+;async () => {
+  const content = 'Something to Encrypt\r\n'
+  fs_1.writeFileSync('test/temp-data/payload', content)
+  await Helpers_1.openssl({
+    command: 'cms',
+    arguments: {
+      encrypt: true,
+      aes256: true,
+      outform: 'DER',
+      recip: Helpers_1.LIBAS2_CERT_PATH,
+      out: 'test/temp-data/encrypt-cms.bin',
+      in: 'test/temp-data/payload'
+    }
+  })
+  const encryptedBin = fs_1.readFileSync('test/temp-data/encrypt-cms.bin')
+  const encrypted = new core_1.AS2EnvelopedData(encryptedBin, true)
+  const decrypted = await encrypted.decrypt(
+    Helpers_1.LIBAS2_CERT,
+    Helpers_1.LIBAS2_KEY
+  )
+  assert.strictEqual(decrypted.toString('utf8'), content)
+}
+```
+
+should support encrypting DES3 with RSAES-OAEP.
+
+```js
+;async () => {
+  const content = 'Something to Encrypt\r\n'
+  const envelopedData = new core_1.AS2EnvelopedData(Buffer.from(content))
+  const encrypted = await envelopedData.encrypt(
+    Helpers_1.LIBAS2_CERT,
+    'des-EDE3-CBC'
+  )
+  fs_1.writeFileSync('test/temp-data/encrypt-pkijs.bin', encrypted)
+  const decrypted = await Helpers_1.openssl({
+    command: 'cms',
+    arguments: {
+      decrypt: true,
+      recip: Helpers_1.LIBAS2_CERT_PATH,
+      inkey: Helpers_1.LIBAS2_KEY_PATH,
+      inform: 'DER',
+      in: 'test/temp-data/encrypt-cms.bin'
+    }
+  })
+  const decryptedBuf = await envelopedData.decrypt(
+    Helpers_1.LIBAS2_CERT,
+    Helpers_1.LIBAS2_KEY
+  )
+  assert.strictEqual(decrypted, content)
+  assert.strictEqual(decryptedBuf.toString('utf8'), content)
 }
 ```
 

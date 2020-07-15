@@ -64,7 +64,7 @@
 <dd><p>Options for composing an AS2 message.</p></dd>
 <dt><a href="#AS2Signing">AS2Signing</a> : <code>&#x27;sha-1&#x27;</code> | <code>&#x27;sha-256&#x27;</code> | <code>&#x27;sha-384&#x27;</code> | <code>&#x27;sha-512&#x27;</code></dt>
 <dd><p>List of supported signing algorithms.</p></dd>
-<dt><a href="#AS2Encryption">AS2Encryption</a> : <code>&#x27;aes128-CBC&#x27;</code> | <code>&#x27;aes192-CBC&#x27;</code> | <code>&#x27;aes256-CBC&#x27;</code> | <code>&#x27;aes128-GCM&#x27;</code> | <code>&#x27;aes192-GCM&#x27;</code> | <code>&#x27;aes256-GCM&#x27;</code></dt>
+<dt><a href="#AS2Encryption">AS2Encryption</a> : <code>&#x27;des-EDE3-CBC&#x27;</code> | <code>&#x27;aes128-CBC&#x27;</code> | <code>&#x27;aes192-CBC&#x27;</code> | <code>&#x27;aes256-CBC&#x27;</code> | <code>&#x27;aes128-GCM&#x27;</code> | <code>&#x27;aes192-GCM&#x27;</code> | <code>&#x27;aes256-GCM&#x27;</code></dt>
 <dd><p>List of supported encryption algorithms.</p></dd>
 <dt><a href="#EncryptionOptions">EncryptionOptions</a> : <code>object</code></dt>
 <dd><p>Options for encrypting payloads.</p></dd>
@@ -1185,7 +1185,7 @@ and convenience methods for mime() and json().</p>
 **Kind**: global typedef  
 <a name="AS2Encryption"></a>
 
-## AS2Encryption : <code>&#x27;aes128-CBC&#x27;</code> \| <code>&#x27;aes192-CBC&#x27;</code> \| <code>&#x27;aes256-CBC&#x27;</code> \| <code>&#x27;aes128-GCM&#x27;</code> \| <code>&#x27;aes192-GCM&#x27;</code> \| <code>&#x27;aes256-GCM&#x27;</code>
+## AS2Encryption : <code>&#x27;des-EDE3-CBC&#x27;</code> \| <code>&#x27;aes128-CBC&#x27;</code> \| <code>&#x27;aes192-CBC&#x27;</code> \| <code>&#x27;aes256-CBC&#x27;</code> \| <code>&#x27;aes128-GCM&#x27;</code> \| <code>&#x27;aes192-GCM&#x27;</code> \| <code>&#x27;aes256-GCM&#x27;</code>
 
 <p>List of supported encryption algorithms.</p>
 
