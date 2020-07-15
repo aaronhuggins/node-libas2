@@ -6,7 +6,8 @@ import {
   objectIds,
   ObjectID,
   PemFile,
-  AS2EnvelopedData
+  AS2EnvelopedData,
+  AS2SignedData
 } from '../core'
 import {
   LIBAS2_CERT,
@@ -15,11 +16,11 @@ import {
   ENCRYPTED_CONTENT,
   SIGNED_CONTENT,
   openssl,
-  LIBAS2_CERT_PATH
+  LIBAS2_CERT_PATH,
+  LIBAS2_KEY_PATH
 } from './Helpers'
 import * as assert from 'assert'
 import { readFileSync, writeFileSync } from 'fs'
-import { AS2SignedData } from '../src/AS2Crypto/AS2SignedData'
 
 describe('AS2Crypto', async () => {
   it('should decrypt contents of parsed mime message', async () => {
@@ -205,6 +206,29 @@ describe('AS2Crypto', async () => {
     const decrypted = await encrypted.decrypt(LIBAS2_CERT, LIBAS2_KEY)
 
     assert.strictEqual(decrypted.toString('utf8'), content)
+  })
+
+  it('should support encrypting DES3 with RSAES-OAEP', async () => {
+    const content = 'Something to Encrypt\r\n'
+    const envelopedData = new AS2EnvelopedData(Buffer.from(content))
+    const encrypted = await envelopedData.encrypt(LIBAS2_CERT, 'des-EDE3-CBC')
+
+    writeFileSync('test/temp-data/encrypt-pkijs.bin', encrypted)
+
+    const decrypted = await openssl({
+      command: 'cms',
+      arguments: {
+        decrypt: true,
+        recip: LIBAS2_CERT_PATH,
+        inkey: LIBAS2_KEY_PATH,
+        inform: 'DER',
+        in: 'test/temp-data/encrypt-cms.bin'
+      }
+    })
+    const decryptedBuf = await envelopedData.decrypt(LIBAS2_CERT, LIBAS2_KEY)
+
+    assert.strictEqual(decrypted, content)
+    assert.strictEqual(decryptedBuf.toString('utf8'), content)
   })
 
   it('should throw error on compression methods', async () => {

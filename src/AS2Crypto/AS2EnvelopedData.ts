@@ -54,7 +54,6 @@ export class AS2EnvelopedData {
   private _getEncryptionAlgorithm (encryption: AS2Encryption) {
     const CBC = 'AES-CBC'
     const GCM = 'AES-GCM'
-    const DES3 = '3DES'
 
     switch (encryption) {
       case 'aes128-CBC':
@@ -87,12 +86,17 @@ export class AS2EnvelopedData {
           name: GCM,
           length: 256
         }
+      case 'des-EDE3-CBC':
+        return {
+          name: 'des-EDE3-CBC',
+          length: 192
+        }
       default:
         throw new Error('Unsupported algorithm: ' + encryption)
     }
   }
 
-  _getCryptoInfo (index: number = 0) {
+  private _getCryptoInfo (index: number = 0) {
     const crypto = pkijs.getCrypto()
     const algorithmId = this.enveloped.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmId
     const encryptionId = this.enveloped.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId
@@ -116,7 +120,7 @@ export class AS2EnvelopedData {
     return { mode, algorithm }
   }
 
-  async _getDecryptionKey (
+  private async _getDecryptionKey (
     index: number,
     options: {
       recipientPrivateKey: ArrayBuffer,
@@ -153,7 +157,7 @@ export class AS2EnvelopedData {
     return await crypto.importKey("raw", encryptedKey, options.algorithm, true, ["decrypt"])
   }
 
-  async _extendedDecrypt (decryptionKey: ArrayBuffer, algorithm: string) {
+  private async _extendedDecrypt (decryptionKey: ArrayBuffer, algorithm: string) {
     const crypto = pkijs.getCrypto()
     const ivBuffer = this.enveloped.encryptedContentInfo.contentEncryptionAlgorithm.algorithmParams.valueBlock.valueHex
     const ivView = new Uint8Array(ivBuffer)
@@ -210,14 +214,80 @@ export class AS2EnvelopedData {
     }, decryptionKey, dataBuffer)
   }
 
+  private async _extendedEncrypt (content: ArrayBuffer, algorithm: { name: string, length: number }) {
+    const crypto = pkijs.getCrypto()
+    const ivLength = 8
+    const ivBuffer = new ArrayBuffer(ivLength)
+    const ivView = new Uint8Array(ivBuffer)
+    const contentView = new Uint8Array(content)
+    const sessionKey = await crypto.generateKey(algorithm, true, ["encrypt"])
+    const exportedSessionKey = await crypto.exportKey("raw", sessionKey)
+    const contentEncryptionOID = new ObjectID(algorithm).id
+
+    pkijs.getRandomValues(ivView)
+
+    const encryptedContent = await crypto.encrypt({ name: algorithm.name, iv: ivView }, sessionKey, contentView)
+    this.enveloped.version = 2
+    this.enveloped.encryptedContentInfo = new pkijs.EncryptedContentInfo({
+      contentType: new ObjectID({ name: 'data' }).id,
+      contentEncryptionAlgorithm: new pkijs.AlgorithmIdentifier({
+        algorithmId: contentEncryptionOID,
+        algorithmParams: new asn1js.OctetString({
+          valueHex: ivBuffer
+        })
+      }),
+      encryptedContent: new asn1js.OctetString({
+        valueHex: encryptedContent
+      })
+    })
+
+    const oaepOID = crypto.getOIDByAlgorithm({ name: "RSA-OAEP" })
+
+    for (let index = 0; index < this.enveloped.recipientInfos.length; index += 1) {
+      if (this.enveloped.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmId !== oaepOID) {
+        throw new Error("Not supported encryption scheme, only RSA-OAEP is supported for key transport encryption scheme")
+      }
+
+      const schema = this.enveloped.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmParams
+      const rsaOAEPParams = new pkijs.RSAESOAEPParams({ schema })
+      const hashAlgorithm = crypto.getAlgorithmByOID(rsaOAEPParams.hashAlgorithm.algorithmId)
+
+      if ("name" in hashAlgorithm === false) {
+        throw new Error(`Incorrect or unsupported OID for hash algorithm: ${rsaOAEPParams.hashAlgorithm.algorithmId}`)
+      }
+
+      const publicKey = await this.enveloped.recipientInfos[index].value.recipientCertificate.getPublicKey({
+        algorithm: {
+          algorithm: {
+            name: "RSA-OAEP",
+            hash: {
+              name: hashAlgorithm.name
+            }
+          },
+          usages: ["encrypt", "wrapKey"]
+        }
+      })
+      const encryptedKey = await crypto.encrypt(publicKey.algorithm, publicKey, exportedSessionKey)
+      this.enveloped.recipientInfos[index].value.encryptedKey = new asn1js.OctetString({
+        valueHex: encryptedKey
+      })
+    }
+  }
+
   async encrypt (cert: string | Buffer | PemFile, encryption: AS2Encryption) {
     const certificate = this._toCertificate(cert)
+    const encryptionAlgorithm = this._getEncryptionAlgorithm(encryption)
 
     this.enveloped.addRecipientByCertificate(certificate)
-    await this.enveloped.encrypt(
-      this._getEncryptionAlgorithm(encryption),
-      this.data
-    )
+
+    if (encryption === 'des-EDE3-CBC') {
+      await this._extendedEncrypt(this.data, encryptionAlgorithm)
+    } else {
+      await this.enveloped.encrypt(
+        encryptionAlgorithm,
+        this.data
+      )
+    }
 
     const envelopedDataContent = new pkijs.ContentInfo({
       contentType: new ObjectID({ name: 'envelopedData' }).id,

@@ -3,6 +3,7 @@ import { PemFile } from './PemFile'
 export type AS2Signing = 'sha-1' | 'sha-256' | 'sha-384' | 'sha-512'
 
 export type AS2Encryption =
+  | 'des-EDE3-CBC'
   | 'aes128-CBC'
   | 'aes192-CBC'
   | 'aes256-CBC'
