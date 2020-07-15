@@ -223,9 +223,9 @@ export async function request (
                 rawResponse.length > 0
                   ? rawResponse
                   : {
-                    headers: response.rawHeaders,
-                    content: rawBody
-                  }
+                      headers: response.rawHeaders,
+                      content: rawBody
+                    }
               )
             }
             response.json = function json () {

@@ -105,8 +105,16 @@ describe('AS2Disposition', () => {
     const mime = await AS2Parser.parse(fakeAs2Header + SIGNED_CONTENT)
     const dispositionMime = await mime.dispositionOut({
       agreement: {
-        host: { name: 'LibAS2 Community', id: 'libas2community', url: 'http://whatwhat.example/as2' },
-        partner: { name: 'AS2 Testing', id: 'as2testing', url: 'http://whatwhat.example/as2' }
+        host: {
+          name: 'LibAS2 Community',
+          id: 'libas2community',
+          url: 'http://whatwhat.example/as2'
+        },
+        partner: {
+          name: 'AS2 Testing',
+          id: 'as2testing',
+          url: 'http://whatwhat.example/as2'
+        }
       },
       returnNode: true
     })
@@ -133,22 +141,30 @@ describe('AS2Disposition', () => {
 
     assert.strictEqual(
       dispositionMime.contentNode instanceof AS2MimeNode &&
-      dispositionMime.dispositionNode instanceof AS2MimeNode &&
-      dispositionMime.disposition instanceof AS2Disposition,
+        dispositionMime.dispositionNode instanceof AS2MimeNode &&
+        dispositionMime.disposition instanceof AS2Disposition,
       true
     )
     assert.strictEqual(
       dispositionSignedMime.contentNode instanceof AS2MimeNode &&
-      dispositionSignedMime.dispositionNode instanceof AS2MimeNode &&
-      dispositionSignedMime.disposition instanceof AS2Disposition,
+        dispositionSignedMime.dispositionNode instanceof AS2MimeNode &&
+        dispositionSignedMime.disposition instanceof AS2Disposition,
       true
     )
 
     await AS2Disposition.outgoing({
       node: await AS2Parser.parse(fakeAs2Header + MIME_CONTENT),
       agreement: {
-        host: { name: 'LibAS2 Community', id: 'libas2community', url: 'http://whatwhat.example/as2' },
-        partner: { name: 'AS2 Testing', id: 'as2testing', url: 'http://whatwhat.example/as2' }
+        host: {
+          name: 'LibAS2 Community',
+          id: 'libas2community',
+          url: 'http://whatwhat.example/as2'
+        },
+        partner: {
+          name: 'AS2 Testing',
+          id: 'as2testing',
+          url: 'http://whatwhat.example/as2'
+        }
       }
     })
     await AS2Disposition.outgoing({
@@ -162,7 +178,11 @@ describe('AS2Disposition', () => {
           privateKey: LIBAS2_KEY,
           decrypt: true
         },
-        partner: { name: 'AS2 Testing', id: 'as2testing', url: 'http://whatwhat.example/as2' }
+        partner: {
+          name: 'AS2 Testing',
+          id: 'as2testing',
+          url: 'http://whatwhat.example/as2'
+        }
       }
     })
     // Force a disposition decryption failure message
@@ -177,14 +197,22 @@ describe('AS2Disposition', () => {
           privateKey: LIBAS2_CERT,
           decrypt: true
         },
-        partner: { name: 'AS2 Testing', id: 'as2testing', url: 'http://whatwhat.example/as2' }
+        partner: {
+          name: 'AS2 Testing',
+          id: 'as2testing',
+          url: 'http://whatwhat.example/as2'
+        }
       }
     })
     // Force a disposition verification failure message
     await AS2Disposition.outgoing({
       node: await AS2Parser.parse(fakeAs2Header + SIGNED_CONTENT),
       agreement: {
-        host: { name: 'LibAS2 Community', id: 'libas2community', url: 'http://whatwhat.example/as2' },
+        host: {
+          name: 'LibAS2 Community',
+          id: 'libas2community',
+          url: 'http://whatwhat.example/as2'
+        },
         partner: {
           name: 'LibAS2 Community',
           id: 'libas2community',
@@ -198,7 +226,11 @@ describe('AS2Disposition', () => {
     await AS2Disposition.outgoing({
       node: await AS2Parser.parse(fakeAs2Header + MIME_CONTENT),
       agreement: {
-        host: { name: 'LibAS2 Community', id: 'libas2community', url: 'http://whatwhat.example/as2' },
+        host: {
+          name: 'LibAS2 Community',
+          id: 'libas2community',
+          url: 'http://whatwhat.example/as2'
+        },
         partner: {
           name: 'LibAS2 Community',
           id: 'libas2community',
@@ -213,8 +245,16 @@ describe('AS2Disposition', () => {
       await AS2Disposition.outgoing({
         node: null,
         agreement: {
-          host: { name: 'LibAS2 Community', id: 'libas2community', url: 'http://whatwhat.example/as2' },
-          partner: { name: 'AS2 Testing', id: 'as2testing', url: 'http://whatwhat.example/as2' }
+          host: {
+            name: 'LibAS2 Community',
+            id: 'libas2community',
+            url: 'http://whatwhat.example/as2'
+          },
+          partner: {
+            name: 'AS2 Testing',
+            id: 'as2testing',
+            url: 'http://whatwhat.example/as2'
+          }
         }
       })
     })
@@ -222,8 +262,16 @@ describe('AS2Disposition', () => {
       await AS2Disposition.outgoing({
         node: await AS2Parser.parse(SIGNED_CONTENT),
         agreement: {
-          host: { name: 'LibAS2 Community', id: 'libas2community', url: 'http://whatwhat.example/as2' },
-          partner: { name: 'AS2 Testing', id: 'as2testing', url: 'http://whatwhat.example/as2' }
+          host: {
+            name: 'LibAS2 Community',
+            id: 'libas2community',
+            url: 'http://whatwhat.example/as2'
+          },
+          partner: {
+            name: 'AS2 Testing',
+            id: 'as2testing',
+            url: 'http://whatwhat.example/as2'
+          }
         }
       })
     })

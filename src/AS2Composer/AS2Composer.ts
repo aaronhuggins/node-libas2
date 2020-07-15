@@ -118,7 +118,10 @@ export class AS2Composer {
       this.message.setHeader(STANDARD_HEADER.MDN_OPTIONS, options)
 
       if (mdn.async) {
-        this.message.setHeader(STANDARD_HEADER.MDN_URL, this._agreement.host.url.toString())
+        this.message.setHeader(
+          STANDARD_HEADER.MDN_URL,
+          this._agreement.host.url.toString()
+        )
       }
     }
 

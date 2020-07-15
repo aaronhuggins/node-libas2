@@ -134,7 +134,10 @@ describe('AS2Composer', async () => {
     const startTime = now.set({ hour: 5, minute: 30, second: 0 })
     const endTime = now.set({ hour: 19, minute: 0, second: 0 })
     const inServiceHours = now > startTime && now < endTime
-    const pingResult = await ping.promise.probe('as2testing.centralus.cloudapp.azure.com', { timeout: 1, min_reply: 2 })
+    const pingResult = await ping.promise.probe(
+      'as2testing.centralus.cloudapp.azure.com',
+      { timeout: 1, min_reply: 2 }
+    )
 
     if (!inServiceHours || !pingResult.alive) {
       // If now is outside the service hours, nock is used to provide a pre-defined mdn.
@@ -164,7 +167,8 @@ describe('AS2Composer', async () => {
         partner: {
           name: 'AS2 Testing',
           id: 'as2testing',
-          url: 'https://as2testing.centralus.cloudapp.azure.com/pub/Receive.rsb',
+          url:
+            'https://as2testing.centralus.cloudapp.azure.com/pub/Receive.rsb',
           file: 'EDIX12',
           certificate: AS2_TESTING_CERT,
           encrypt: AS2Constants.ENCRYPTION.AES192_GCM,
