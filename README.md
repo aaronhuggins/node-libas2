@@ -71,3 +71,9 @@ See the [API document](/docs/API.md) for complete information.
 Contributions, especially from those familiar with the AS2 protocol, are welcome. If you can improve the code, please fork it and fire off a pull request.
 
 This project uses Standard JS, specifically through `prettier-standard`; please format pull requests before submitting to avoid having your contributions incorrectly attributed in the pull request by a code formatting.
+
+## Cryptography Notice
+
+This distribution includes cryptographic software. The country in which you currently reside may have restrictions on the import, possession, use, and/or re-export to another country, of encryption software.
+BEFORE using any encryption software, please check your country's laws, regulations and policies concerning the import, possession, or use, and re-export of encryption software, to see if this is permitted.
+See **<http://www.wassenaar.org/>** for more information.
