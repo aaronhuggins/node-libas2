@@ -1,0 +1,362 @@
+<!doctype html>
+<html class="default no-js">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>libas2</title>
+	<meta name="description" content="Documentation for libas2">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body>
+<header>
+	<div class="tsd-page-toolbar">
+		<div class="container">
+			<div class="table-wrap">
+				<div class="table-cell" id="tsd-search" data-index="assets/js/search.json" data-base=".">
+					<div class="field">
+						<label for="tsd-search-field" class="tsd-widget search no-caption">Search</label>
+						<input id="tsd-search-field" type="text" />
+					</div>
+					<ul class="results">
+						<li class="state loading">Preparing search index...</li>
+						<li class="state failure">The search index is not available</li>
+					</ul>
+					<a href="index.html" class="title">libas2</a>
+				</div>
+				<div class="table-cell" id="tsd-widgets">
+					<div id="tsd-filter">
+						<a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a>
+						<div class="tsd-filter-group">
+							<div class="tsd-select" id="tsd-filter-visibility">
+								<span class="tsd-select-label">All</span>
+								<ul class="tsd-select-list">
+									<li data-value="public">Public</li>
+									<li data-value="protected">Public/Protected</li>
+									<li data-value="private" class="selected">All</li>
+								</ul>
+							</div>
+							<input type="checkbox" id="tsd-filter-inherited" checked />
+							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
+							<input type="checkbox" id="tsd-filter-externals" checked />
+							<label class="tsd-widget" for="tsd-filter-externals">Externals</label>
+							<input type="checkbox" id="tsd-filter-only-exported" />
+							<label class="tsd-widget" for="tsd-filter-only-exported">Only exported</label>
+						</div>
+					</div>
+					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="tsd-page-title">
+		<div class="container">
+			<ul class="tsd-breadcrumb">
+				<li>
+					<a href="globals.html">Globals</a>
+				</li>
+			</ul>
+			<h1>libas2</h1>
+		</div>
+	</div>
+</header>
+<div class="container container-main">
+	<div class="row">
+		<div class="col-8 col-content">
+			<div class="tsd-panel tsd-typography">
+				<a href="#libas2" id="libas2" style="color: inherit; text-decoration: none;">
+					<h1>libas2</h1>
+				</a>
+				<p>A pure Javascript/Typescript implementation of the AS2 protocol. This project assumes that it fully implements Applicability Statement 2 (AS2) version 1.0 per RFC 4130. Best effort has been made to achieve tests which cover the different aspects of the RFC, but <strong>this is not a certified library</strong>. The project does not have access to Drummond certification, which is considered to be the standards body in certifying compatibility with AS2, so good sense should be used when using this library as the AS2 layer in an application.</p>
+				<p><a href="https://github.com/standard/eslint-config-standard-with-typescript"><img src="https://img.shields.io/badge/code_style-standard-brightgreen.svg" alt="JavaScript Style Guide"></a>
+					<a href="https://codecov.io/gh/ahuggins-nhs/node-libas2"><img src="https://codecov.io/gh/ahuggins-nhs/node-libas2/branch/master/graph/badge.svg" alt="codecov"></a>
+					<img src="https://img.shields.io/github/last-commit/ahuggins-nhs/node-libas2" alt="GitHub last commit">
+					<img src="https://img.shields.io/github/contributors/ahuggins-nhs/node-libas2" alt="GitHub contributors">
+					<img src="https://img.shields.io/npm/collaborators/libas2" alt="npm collaborators"><br />
+					<img src="https://img.shields.io/github/languages/top/ahuggins-nhs/node-libas2" alt="GitHub top language">
+					<img src="https://img.shields.io/bundlephobia/min/libas2" alt="npm bundle size">
+					<img src="https://img.shields.io/github/languages/code-size/ahuggins-nhs/node-libas2" alt="GitHub code size in bytes">
+					<img src="https://img.shields.io/npm/dw/libas2" alt="npm">
+					<img src="https://img.shields.io/npm/l/libas2" alt="NPM"><br />
+					<a href="https://sonarcloud.io/dashboard?id=ahuggins-nhs_node-libas2"><img src="https://sonarcloud.io/api/project_badges/measure?project=ahuggins-nhs_node-libas2&metric=alert_status" alt="Quality Gate Status"></a>
+					<a href="https://sonarcloud.io/dashboard?id=ahuggins-nhs_node-libas2"><img src="https://sonarcloud.io/api/project_badges/measure?project=ahuggins-nhs_node-libas2&metric=sqale_rating" alt="Maintainability Rating"></a>
+					<a href="https://sonarcloud.io/dashboard?id=ahuggins-nhs_node-libas2"><img src="https://sonarcloud.io/api/project_badges/measure?project=ahuggins-nhs_node-libas2&metric=security_rating" alt="Security Rating"></a>
+				<a href="https://sonarcloud.io/dashboard?id=ahuggins-nhs_node-libas2"><img src="https://sonarcloud.io/api/project_badges/measure?project=ahuggins-nhs_node-libas2&metric=ncloc" alt="Lines of Code"></a></p>
+				<a href="#warning" id="warning" style="color: inherit; text-decoration: none;">
+					<h2><strong>WARNING</strong></h2>
+				</a>
+				<p><strong>BETA SOFTWARE</strong></p>
+				<p>This library is not quite yet ready for production use. The API is still in flux, but nearly finished. This will be settled soon to allow for a production version 1.0.0 release. Documentation of the API is complete and work is being done to keep the documentation up-to-date.</p>
+				<a href="#usage" id="usage" style="color: inherit; text-decoration: none;">
+					<h2>Usage</h2>
+				</a>
+				<p>Install it from the <a href="https://www.npmjs.com/package/libas2">npm repository</a>:</p>
+				<pre><code class="language-console">npm install --save libas2</code></pre>
+				<p>Then require it in your project:</p>
+				<pre><code class="language-js"><span class="hljs-keyword">const</span> { AS2Composer } = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;libas2&#x27;</span>)</code></pre>
+				<p>The TypeScript code is compiled to JavaScript and distributed via NPM. If you wish to use the TypeScript code directly you can <a href="https://github.com/ahuggins-nhs/libas2/releases/latest">download the zip</a> and unpack it locally.</p>
+				<p>Then import it in your project:</p>
+				<pre><code class="language-typescript"><span class="hljs-keyword">import</span> { AS2Composer } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./libas2/core.ts&#x27;</span></code></pre>
+				<a href="#features" id="features" style="color: inherit; text-decoration: none;">
+					<h2>Features</h2>
+				</a>
+				<ul>
+					<li>Compose AS2 messages to send, including signing and encrypting</li>
+					<li>Parse received AS2 messages, including decrypting and verifying</li>
+					<li>Generate and consume Message Disposition Notifications; includes convenience methods for incoming and outgoing dispositions</li>
+					<li>Complete support for AS2 protocol 1.0 <a href="https://tools.ietf.org/html/rfc4130">per RFC 4130</a>; see roadmap</li>
+					<li>Rich cryptography support based on <a href="https://github.com/PeculiarVentures/PKI.js">PKIjs</a></li>
+					<li>Rich MIME support based on <a href="https://github.com/nodemailer/nodemailer">Nodemailer</a> and <a href="https://github.com/emailjs/emailjs-mime-parser">Emailjs</a></li>
+				</ul>
+				<a href="#roadmap" id="roadmap" style="color: inherit; text-decoration: none;">
+					<h2>Roadmap</h2>
+				</a>
+				<ul>
+					<li>Finish README for libas2 1.x release</li>
+					<li>Write implementation of CMS compression to support AS2 version 1.1 (see rfc4130 section 6.1)</li>
+					<li>Support versions of AS2 greater than 1.1</li>
+				</ul>
+				<a href="#api" id="api" style="color: inherit; text-decoration: none;">
+					<h2>API</h2>
+				</a>
+				<p>See the <a href="/docs/API.md">API document</a> for complete information.</p>
+				<a href="#contribute" id="contribute" style="color: inherit; text-decoration: none;">
+					<h2>Contribute</h2>
+				</a>
+				<blockquote>
+					<p><strong>Help Wanted:</strong> Any experience writing test suites for AS2 would be welcome.</p>
+				</blockquote>
+				<p>Contributions, especially from those familiar with the AS2 protocol, are welcome. If you can improve the code, please fork it and fire off a pull request.</p>
+				<p>This project uses Standard JS, specifically through <code>prettier-standard</code>; please format pull requests before submitting to avoid having your contributions incorrectly attributed in the pull request by a code formatting.</p>
+				<a href="#cryptography-notice" id="cryptography-notice" style="color: inherit; text-decoration: none;">
+					<h2>Cryptography Notice</h2>
+				</a>
+				<p>This distribution includes cryptographic software. The country in which you currently reside may have restrictions on the import, possession, use, and/or re-export to another country, of encryption software.
+					BEFORE using any encryption software, please check your country&#39;s laws, regulations and policies concerning the import, possession, or use, and re-export of encryption software, to see if this is permitted.
+				See <strong><a href="http://www.wassenaar.org/">http://www.wassenaar.org/</a></strong> for more information.</p>
+			</div>
+		</div>
+		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
+			<nav class="tsd-navigation primary">
+				<ul>
+					<li class="globals  ">
+						<a href="globals.html"><em>Globals</em></a>
+					</li>
+				</ul>
+			</nav>
+			<nav class="tsd-navigation secondary menu-sticky">
+				<ul class="before-current">
+					<li class=" tsd-kind-class tsd-is-external">
+						<a href="classes/as2agreement.html" class="tsd-kind-icon">AS2<wbr>Agreement</a>
+					</li>
+					<li class=" tsd-kind-class tsd-is-external">
+						<a href="classes/as2composer.html" class="tsd-kind-icon">AS2<wbr>Composer</a>
+					</li>
+					<li class=" tsd-kind-class tsd-is-external">
+						<a href="classes/as2crypto.html" class="tsd-kind-icon">AS2<wbr>Crypto</a>
+					</li>
+					<li class=" tsd-kind-class tsd-is-external">
+						<a href="classes/as2disposition.html" class="tsd-kind-icon">AS2<wbr>Disposition</a>
+					</li>
+					<li class=" tsd-kind-class tsd-is-external">
+						<a href="classes/as2dispositionnotification.html" class="tsd-kind-icon">AS2<wbr>Disposition<wbr>Notification</a>
+					</li>
+					<li class=" tsd-kind-class tsd-is-external">
+						<a href="classes/as2envelopeddata.html" class="tsd-kind-icon">AS2<wbr>Enveloped<wbr>Data</a>
+					</li>
+					<li class=" tsd-kind-class tsd-is-external">
+						<a href="classes/as2host.html" class="tsd-kind-icon">AS2<wbr>Host</a>
+					</li>
+					<li class=" tsd-kind-class tsd-is-external">
+						<a href="classes/as2mimenode.html" class="tsd-kind-icon">AS2<wbr>Mime<wbr>Node</a>
+					</li>
+					<li class=" tsd-kind-class tsd-is-external">
+						<a href="classes/as2parser.html" class="tsd-kind-icon">AS2<wbr>Parser</a>
+					</li>
+					<li class=" tsd-kind-class tsd-is-external">
+						<a href="classes/as2partner.html" class="tsd-kind-icon">AS2<wbr>Partner</a>
+					</li>
+					<li class=" tsd-kind-class tsd-is-external">
+						<a href="classes/as2signeddata.html" class="tsd-kind-icon">AS2<wbr>Signed<wbr>Data</a>
+					</li>
+					<li class=" tsd-kind-class tsd-is-external">
+						<a href="classes/as2trading.html" class="tsd-kind-icon">AS2<wbr>Trading</a>
+					</li>
+					<li class=" tsd-kind-class tsd-is-external">
+						<a href="classes/libobjectid.html" class="tsd-kind-icon">Lib<wbr>ObjectID</a>
+					</li>
+					<li class=" tsd-kind-class tsd-is-external">
+						<a href="classes/objectid.html" class="tsd-kind-icon">ObjectID</a>
+					</li>
+					<li class=" tsd-kind-class tsd-is-external">
+						<a href="classes/pemfile.html" class="tsd-kind-icon">Pem<wbr>File</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-is-external">
+						<a href="interfaces/as2composeroptions.html" class="tsd-kind-icon">AS2<wbr>Composer<wbr>Options</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-is-external">
+						<a href="interfaces/as2dispositionoptions.html" class="tsd-kind-icon">AS2<wbr>Disposition<wbr>Options</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-is-external">
+						<a href="interfaces/as2mimenodeoptions.html" class="tsd-kind-icon">AS2<wbr>Mime<wbr>Node<wbr>Options</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-is-external">
+						<a href="interfaces/agreementoptions.html" class="tsd-kind-icon">Agreement<wbr>Options</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-is-external">
+						<a href="interfaces/decryptionoptions.html" class="tsd-kind-icon">Decryption<wbr>Options</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-is-external">
+						<a href="interfaces/dispositionoutoptions.html" class="tsd-kind-icon">Disposition<wbr>Out<wbr>Options</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-is-external">
+						<a href="interfaces/encryptionoptions.html" class="tsd-kind-icon">Encryption<wbr>Options</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-is-external">
+						<a href="interfaces/incomingmessage.html" class="tsd-kind-icon">Incoming<wbr>Message</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-is-external">
+						<a href="interfaces/outgoingdispositionoptions.html" class="tsd-kind-icon">Outgoing<wbr>Disposition<wbr>Options</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-is-external">
+						<a href="interfaces/parseoptions.html" class="tsd-kind-icon">Parse<wbr>Options</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-is-external">
+						<a href="interfaces/requestoptions.html" class="tsd-kind-icon">Request<wbr>Options</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-is-external">
+						<a href="interfaces/signmethodoptions.html" class="tsd-kind-icon">Sign<wbr>Method<wbr>Options</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-is-external">
+						<a href="interfaces/signingoptions.html" class="tsd-kind-icon">Signing<wbr>Options</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-is-external">
+						<a href="interfaces/verificationoptions.html" class="tsd-kind-icon">Verification<wbr>Options</a>
+					</li>
+					<li class=" tsd-kind-type-alias tsd-is-external">
+						<a href="globals.html#as2encryption" class="tsd-kind-icon">AS2<wbr>Encryption</a>
+					</li>
+					<li class=" tsd-kind-type-alias tsd-is-external">
+						<a href="globals.html#as2headers" class="tsd-kind-icon">AS2<wbr>Headers</a>
+					</li>
+					<li class=" tsd-kind-type-alias tsd-is-external">
+						<a href="globals.html#as2signing" class="tsd-kind-icon">AS2<wbr>Signing</a>
+					</li>
+					<li class=" tsd-kind-type-alias tsd-is-external">
+						<a href="globals.html#partnerfiletype" class="tsd-kind-icon">Partner<wbr>File<wbr>Type</a>
+					</li>
+					<li class=" tsd-kind-type-alias tsd-is-external">
+						<a href="globals.html#pemfiletype" class="tsd-kind-icon">Pem<wbr>File<wbr>Type</a>
+					</li>
+					<li class=" tsd-kind-variable tsd-is-external">
+						<a href="globals.html#as2_version" class="tsd-kind-icon">AS2_<wbr>VERSION</a>
+					</li>
+					<li class=" tsd-kind-variable tsd-is-external">
+						<a href="globals.html#crlf" class="tsd-kind-icon">CRLF</a>
+					</li>
+					<li class=" tsd-kind-variable tsd-is-external">
+						<a href="globals.html#encryption" class="tsd-kind-icon">ENCRYPTION</a>
+					</li>
+					<li class=" tsd-kind-variable tsd-is-external">
+						<a href="globals.html#encryption_filename" class="tsd-kind-icon">ENCRYPTION_<wbr>FILENAME</a>
+					</li>
+					<li class=" tsd-kind-variable tsd-is-external">
+						<a href="globals.html#error" class="tsd-kind-icon">ERROR</a>
+					</li>
+					<li class=" tsd-kind-variable tsd-is-external">
+						<a href="globals.html#explanation" class="tsd-kind-icon">EXPLANATION</a>
+					</li>
+					<li class=" tsd-kind-variable tsd-is-external">
+						<a href="globals.html#libray_name_version" class="tsd-kind-icon">LIBRAY_<wbr>NAME_<wbr>VERSION</a>
+					</li>
+					<li class=" tsd-kind-variable tsd-is-external">
+						<a href="globals.html#rsa_pkcs1_padding" class="tsd-kind-icon">RSA_<wbr>PKCS1_<wbr>PADDING</a>
+					</li>
+					<li class=" tsd-kind-variable tsd-is-external">
+						<a href="globals.html#signature_filename" class="tsd-kind-icon">SIGNATURE_<wbr>FILENAME</a>
+					</li>
+					<li class=" tsd-kind-variable tsd-is-external">
+						<a href="globals.html#signing" class="tsd-kind-icon">SIGNING</a>
+					</li>
+					<li class=" tsd-kind-variable tsd-is-external">
+						<a href="globals.html#standard_header" class="tsd-kind-icon">STANDARD_<wbr>HEADER</a>
+					</li>
+					<li class=" tsd-kind-variable tsd-is-external">
+						<a href="globals.html#alternatename" class="tsd-kind-icon">alternate<wbr>Name</a>
+					</li>
+					<li class=" tsd-kind-variable tsd-is-external">
+						<a href="globals.html#objectids" class="tsd-kind-icon">object<wbr>Ids</a>
+					</li>
+					<li class=" tsd-kind-variable tsd-is-external">
+						<a href="globals.html#version" class="tsd-kind-icon">version</a>
+					</li>
+					<li class=" tsd-kind-variable tsd-is-external">
+						<a href="globals.html#webcrypto" class="tsd-kind-icon">webcrypto</a>
+					</li>
+					<li class=" tsd-kind-function tsd-is-external">
+						<a href="globals.html#canonicaltransform" class="tsd-kind-icon">canonical<wbr>Transform</a>
+					</li>
+					<li class=" tsd-kind-function tsd-is-external">
+						<a href="globals.html#getagreementoptions" class="tsd-kind-icon">get<wbr>Agreement<wbr>Options</a>
+					</li>
+					<li class=" tsd-kind-function tsd-is-external">
+						<a href="globals.html#getencryptionoptions" class="tsd-kind-icon">get<wbr>Encryption<wbr>Options</a>
+					</li>
+					<li class=" tsd-kind-function tsd-is-external">
+						<a href="globals.html#getpackagejson" class="tsd-kind-icon">get<wbr>Package<wbr>Json</a>
+					</li>
+					<li class=" tsd-kind-function tsd-is-external">
+						<a href="globals.html#getprotocol" class="tsd-kind-icon">get<wbr>Protocol</a>
+					</li>
+					<li class=" tsd-kind-function tsd-is-external">
+						<a href="globals.html#getreportnode" class="tsd-kind-icon">get<wbr>Report<wbr>Node</a>
+					</li>
+					<li class=" tsd-kind-function tsd-is-external">
+						<a href="globals.html#getsigningoptions" class="tsd-kind-icon">get<wbr>Signing<wbr>Options</a>
+					</li>
+					<li class=" tsd-kind-function tsd-is-external">
+						<a href="globals.html#ismdn" class="tsd-kind-icon">is<wbr>Mdn</a>
+					</li>
+					<li class=" tsd-kind-function tsd-is-external">
+						<a href="globals.html#isnullorundefined" class="tsd-kind-icon">is<wbr>Null<wbr>OrUndefined</a>
+					</li>
+					<li class=" tsd-kind-function tsd-is-external">
+						<a href="globals.html#issmime" class="tsd-kind-icon">isSMime</a>
+					</li>
+					<li class=" tsd-kind-function tsd-is-external">
+						<a href="globals.html#parseheaderstring" class="tsd-kind-icon">parse<wbr>Header<wbr>String</a>
+					</li>
+					<li class=" tsd-kind-function tsd-is-external">
+						<a href="globals.html#request" class="tsd-kind-icon">request</a>
+					</li>
+					<li class=" tsd-kind-function tsd-is-external">
+						<a href="globals.html#tonotification" class="tsd-kind-icon">to<wbr>Notification</a>
+					</li>
+					<li class=" tsd-kind-object-literal tsd-is-external">
+						<a href="globals.html#as2constants" class="tsd-kind-icon">AS2<wbr>Constants</a>
+					</li>
+					<li class=" tsd-kind-object-literal tsd-is-external">
+						<a href="globals.html#crypto_mode" class="tsd-kind-icon">CRYPTO_<wbr>MODE</a>
+					</li>
+					<li class=" tsd-kind-object-literal tsd-is-external">
+						<a href="globals.html#pem_filetype" class="tsd-kind-icon">PEM_<wbr>FILETYPE</a>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</div>
+</div>
+<footer class="with-border-bottom">
+	<div class="container">
+		<h2>Legend</h2>
+		<div class="tsd-legend-group">
+		</div>
+	</div>
+</footer>
+<div class="container tsd-generator">
+	<p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p>
+</div>
+<div class="overlay"></div>
+<script src="assets/js/main.js"></script>
+</body>
+</html>
