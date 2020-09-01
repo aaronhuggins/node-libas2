@@ -1,7 +1,7 @@
 {
   "name": "libas2",
   "alternateName": "node-libas2",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "Implementation of the AS2 protocol as presented in RFC 4130 and related RFCs",
   "main": "dist/core.js",
   "types": "dist/core.d.ts",
@@ -25,7 +25,7 @@
     "type": "git",
     "url": "https://github.com/ahuggins-nhs/node-libas2"
   },
-  "homepage": "https://github.com/ahuggins-nhs/node-libas2#readme",
+  "homepage": "https://ahuggins-nhs.github.io/node-libas2/",
   "license": "MIT",
   "dependencies": {
     "@nhs-llc/emailjs-mime-parser": "^2.1.0",

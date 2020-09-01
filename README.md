@@ -62,7 +62,7 @@ import { AS2Composer } from './libas2/core.ts'
 
 ## API
 
-See the [API document](/docs/API.md) for complete information.
+See the [API documentation](https://ahuggins-nhs.github.io/node-libas2/globals.html) for complete information.
 
 ## Contribute
 
