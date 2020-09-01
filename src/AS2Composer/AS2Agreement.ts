@@ -67,40 +67,25 @@ export class AS2Host extends AS2Trading {
   ) {
     super(host)
     this.role = 'host'
-    this.sign =
-      typeof host.sign === 'boolean' && host.sign ? SIGNING.SHA256 : host.sign
+    this.sign = typeof host.sign === 'boolean' && host.sign ? SIGNING.SHA256 : host.sign
     this.decrypt = host.decrypt
 
     if ((!isNullOrUndefined(host.sign) && host.sign) || host.decrypt) {
       if (host.certificate) {
-        this.certificate =
-          host.certificate instanceof PemFile
-            ? host.certificate
-            : new PemFile(host.certificate)
+        this.certificate = host.certificate instanceof PemFile ? host.certificate : new PemFile(host.certificate)
 
         if (this.certificate.type !== 'CERTIFICATE') {
-          throw new Error(
-            ERROR.WRONG_PEM_FILE +
-              ' expected CERTIFICATE, but received ' +
-              this.certificate.type
-          )
+          throw new Error(ERROR.WRONG_PEM_FILE + ' expected CERTIFICATE, but received ' + this.certificate.type)
         }
       } else {
         throw new Error(ERROR.MISSING_PARTNER_CERT)
       }
 
       if (host.privateKey) {
-        this.privateKey =
-          host.privateKey instanceof PemFile
-            ? host.privateKey
-            : new PemFile(host.privateKey)
+        this.privateKey = host.privateKey instanceof PemFile ? host.privateKey : new PemFile(host.privateKey)
 
         if (this.privateKey.type !== 'PRIVATE_KEY') {
-          throw new Error(
-            ERROR.WRONG_PEM_FILE +
-              ' expected PRIVATE_KEY, but received ' +
-              this.certificate.type
-          )
+          throw new Error(ERROR.WRONG_PEM_FILE + ' expected PRIVATE_KEY, but received ' + this.certificate.type)
         }
       } else {
         throw new Error(ERROR.MISSING_PARTNER_KEY)
@@ -125,28 +110,16 @@ export class AS2Partner extends AS2Trading {
     super(partner)
     this.role = 'partner'
     this.file = partner.file
-    this.encrypt =
-      typeof partner.encrypt === 'boolean' && partner.encrypt
-        ? ENCRYPTION.AES128_CBC
-        : partner.encrypt
+    this.encrypt = typeof partner.encrypt === 'boolean' && partner.encrypt ? ENCRYPTION.AES128_CBC : partner.encrypt
     this.verify = partner.verify
 
-    if (
-      (!isNullOrUndefined(partner.encrypt) && partner.encrypt) ||
-      partner.verify
-    ) {
+    if ((!isNullOrUndefined(partner.encrypt) && partner.encrypt) || partner.verify) {
       if (partner.certificate) {
         this.certificate =
-          partner.certificate instanceof PemFile
-            ? partner.certificate
-            : new PemFile(partner.certificate)
+          partner.certificate instanceof PemFile ? partner.certificate : new PemFile(partner.certificate)
 
         if (this.certificate.type !== 'CERTIFICATE') {
-          throw new Error(
-            ERROR.WRONG_PEM_FILE +
-              ' expected CERTIFICATE, but received ' +
-              this.certificate.type
-          )
+          throw new Error(ERROR.WRONG_PEM_FILE + ' expected CERTIFICATE, but received ' + this.certificate.type)
         }
       } else {
         throw new Error(ERROR.MISSING_PARTNER_CERT)

@@ -2,17 +2,12 @@ import { AS2Encryption, AS2Signing } from './AS2Crypto'
 import { dirname, resolve } from 'path'
 import { readFileSync } from 'fs'
 
-export const getPackageJson = function getPackageJson (
-  filename?: string,
-  index: number = 0
-): any {
+export const getPackageJson = function getPackageJson (filename?: string, index: number = 0): any {
   filename = filename === undefined ? module.filename : filename
   let pkg
 
   try {
-    pkg = JSON.parse(
-      readFileSync(resolve(dirname(filename), 'package.json'), 'utf8')
-    )
+    pkg = JSON.parse(readFileSync(resolve(dirname(filename), 'package.json'), 'utf8'))
   } catch (err) {}
 
   if (pkg) {
@@ -124,8 +119,7 @@ export const AS2Constants = {
      * @type {string}
      * @default
      */
-    DISPOSITION_NODE:
-      'Mime node must be provided in order to create outgoing disposition.',
+    DISPOSITION_NODE: 'Mime node must be provided in order to create outgoing disposition.',
     /**
      * @constant
      * @type {string}
@@ -149,8 +143,7 @@ export const AS2Constants = {
      * @type {string}
      * @default
      */
-    FAILED_DECRYPTION:
-      'The message was received, but could not be decrypted; the contents cannot be processed.',
+    FAILED_DECRYPTION: 'The message was received, but could not be decrypted; the contents cannot be processed.',
     /**
      * @constant
      * @type {string}

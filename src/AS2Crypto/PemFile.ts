@@ -34,11 +34,7 @@ export class PemFile {
 
     for (let line of lines) {
       line = line.trim()
-      if (
-        line.length > 0 &&
-        !line.toLowerCase().includes('-begin') &&
-        !line.toLowerCase().includes('-end')
-      ) {
+      if (line.length > 0 && !line.toLowerCase().includes('-begin') && !line.toLowerCase().includes('-end')) {
         contents += line + '\r\n'
       }
     }

@@ -21,10 +21,7 @@ const { AS2_VERSION, EXPLANATION, ERROR, STANDARD_HEADER } = AS2Constants
  * @property {boolean} [returnNode] - Whether to attach the mime node to the disposition as the returned payload.
  */
 
-const toNotification = function toNotification (
-  key: string,
-  value: string
-): [string, any] {
+const toNotification = function toNotification (key: string, value: string): [string, any] {
   let result: any = {}
   const parts = value.split(/;/gu).map(part => part.trim())
   const newKey = (str: string) =>
@@ -32,9 +29,7 @@ const toNotification = function toNotification (
       .toLowerCase()
       .split('-')
       .map((chars, index) =>
-        index === 0
-          ? chars.toLowerCase()
-          : chars.charAt(0).toUpperCase() + chars.toLowerCase().substring(1)
+        index === 0 ? chars.toLowerCase() : chars.charAt(0).toUpperCase() + chars.toLowerCase().substring(1)
       )
       .join('')
 
@@ -120,10 +115,7 @@ export class AS2Disposition {
         this.explanation = mdn.childNodes[0].content.toString('utf8').trim()
         // Get the message/disposition-notification and parse, which is the second part.
         this.notification = new AS2DispositionNotification(
-          parseHeaderString(
-            mdn.childNodes[1].content.toString('utf8'),
-            toNotification
-          ) as any,
+          parseHeaderString(mdn.childNodes[1].content.toString('utf8'), toNotification) as any,
           'incoming'
         )
         // Get the optional thid part, if present; it is the returned message content.
@@ -135,8 +127,7 @@ export class AS2Disposition {
         mdn.notification instanceof AS2DispositionNotification
           ? mdn.notification
           : new AS2DispositionNotification(mdn.notification)
-      this.returned =
-        typeof mdn.returned === 'boolean' ? undefined : mdn.returned
+      this.returned = typeof mdn.returned === 'boolean' ? undefined : mdn.returned
       this.messageId = AS2MimeNode.generateMessageId()
     } else {
       throw new Error(
@@ -269,10 +260,7 @@ export class AS2Disposition {
     })
     let mdnMime = mdn.toMimeNode()
 
-    if (
-      options.agreement.partner.mdn &&
-      options.agreement.partner.mdn.signing
-    ) {
+    if (options.agreement.partner.mdn && options.agreement.partner.mdn.signing) {
       mdnMime = await mdnMime.sign({
         cert: options.agreement.host.certificate,
         key: options.agreement.host.privateKey
@@ -299,10 +287,7 @@ export class AS2Disposition {
    * @param {VerificationOptions} [signed] - Options for verifying the MDN if necessary.
    * @returns {Promise<AS2Disposition>} The incoming message disposition notification.
    */
-  static async incoming (
-    node: AS2MimeNode,
-    signed?: VerificationOptions
-  ): Promise<AS2Disposition> {
+  static async incoming (node: AS2MimeNode, signed?: VerificationOptions): Promise<AS2Disposition> {
     let rootNode: AS2MimeNode = node
 
     if (isNullOrUndefined(node)) {

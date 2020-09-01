@@ -1,20 +1,6 @@
 import 'mocha'
-import {
-  AS2Constants,
-  AS2MimeNode,
-  AS2Parser,
-  getReportNode,
-  parseHeaderString,
-  getProtocol
-} from '../core'
-import {
-  openssl,
-  LIBAS2_CERT,
-  LIBAS2_KEY,
-  LIBAS2_EDI,
-  LIBAS2_CERT_PATH,
-  LIBAS2_KEY_PATH
-} from './Helpers'
+import { AS2Constants, AS2MimeNode, AS2Parser, getReportNode, parseHeaderString, getProtocol } from '../core'
+import { openssl, LIBAS2_CERT, LIBAS2_KEY, LIBAS2_EDI, LIBAS2_CERT_PATH, LIBAS2_KEY_PATH } from './Helpers'
 import * as assert from 'assert'
 
 describe('AS2MimeNode', async () => {

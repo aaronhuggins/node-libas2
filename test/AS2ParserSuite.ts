@@ -1,10 +1,5 @@
 import 'mocha'
-import {
-  AS2MimeNode,
-  AS2Parser,
-  AS2Disposition,
-  parseHeaderString
-} from '../core'
+import { AS2MimeNode, AS2Parser, AS2Disposition, parseHeaderString } from '../core'
 import { ENCRYPTED_CONTENT, SIGNED_MDN } from './Helpers'
 import { Duplex } from 'stream'
 import * as assert from 'assert'
@@ -14,9 +9,7 @@ describe('AS2Parser', async () => {
     const result = await AS2Parser.parse(ENCRYPTED_CONTENT)
     if (!(result instanceof AS2MimeNode)) {
       throw new Error(
-        `Result was not an AS2MimeNode.\nExpected: 'AS2MimeNode'\nReceived: '${
-          (result as any).constructor.name
-        }'`
+        `Result was not an AS2MimeNode.\nExpected: 'AS2MimeNode'\nReceived: '${(result as any).constructor.name}'`
       )
     }
 
@@ -32,16 +25,12 @@ describe('AS2Parser', async () => {
     assert.strictEqual(
       result instanceof AS2MimeNode,
       true,
-      `Result was not an AS2MimeNode.\nExpected: 'AS2MimeNode'\nReceived: '${
-        (result as any).constructor.name
-      }'`
+      `Result was not an AS2MimeNode.\nExpected: 'AS2MimeNode'\nReceived: '${(result as any).constructor.name}'`
     )
   })
 
   it('should parse options to AS2MimeNode', async () => {
-    const [headers, ...body] = ENCRYPTED_CONTENT.split(
-      /(\r\n|\n\r|\n)(\r\n|\n\r|\n)/gu
-    )
+    const [headers, ...body] = ENCRYPTED_CONTENT.split(/(\r\n|\n\r|\n)(\r\n|\n\r|\n)/gu)
     const stream = new Duplex()
     stream.push(body.join('').trimLeft())
     stream.push(null)
@@ -70,9 +59,7 @@ describe('AS2Parser', async () => {
     assert.strictEqual(
       result instanceof AS2MimeNode,
       true,
-      `Result was not an AS2MimeNode.\nExpected: 'AS2MimeNode'\nReceived: '${
-        (result as any).constructor.name
-      }'`
+      `Result was not an AS2MimeNode.\nExpected: 'AS2MimeNode'\nReceived: '${(result as any).constructor.name}'`
     )
 
     const mdn = new AS2Disposition(result)

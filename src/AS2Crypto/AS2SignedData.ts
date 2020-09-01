@@ -71,10 +71,7 @@ export class AS2SignedData {
     return new pkijs.Certificate({ schema: certAsn1.result })
   }
 
-  private _addSignerInfo (
-    certificate: any,
-    messageDigest: ArrayBuffer
-  ): number {
+  private _addSignerInfo (certificate: any, messageDigest: ArrayBuffer): number {
     this.signed.certificates.push(certificate)
     const position = this.signed.signerInfos.push(
       new pkijs.SignerInfo({
@@ -128,22 +125,14 @@ export class AS2SignedData {
     const crypto = pkijs.getCrypto()
     const certificate = this._toCertificate(cert)
     const messageDigest = await crypto.digest({ name: algorithm }, this.data)
-    const privateKeyOptions = crypto.getAlgorithmByOID(
-      this._getCertAlgorithmId(certificate)
-    )
+    const privateKeyOptions = crypto.getAlgorithmByOID(this._getCertAlgorithmId(certificate))
 
     if ('hash' in privateKeyOptions) {
       privateKeyOptions.hash.name = algorithm
     }
 
     const keyPemFile = new PemFile(key)
-    const privateKey = await webcrypto.subtle.importKey(
-      'pkcs8',
-      keyPemFile.data,
-      privateKeyOptions,
-      true,
-      ['sign']
-    )
+    const privateKey = await webcrypto.subtle.importKey('pkcs8', keyPemFile.data, privateKeyOptions, true, ['sign'])
     const index = this._addSignerInfo(certificate, messageDigest)
 
     this.digestInfo = {
@@ -175,15 +164,11 @@ export class AS2SignedData {
 
   private async _calculateMessageDigest (index: number) {
     const crypto = pkijs.getCrypto()
-    const algorithmId = this.signed.signerInfos[index].digestAlgorithm
-      .algorithmId
+    const algorithmId = this.signed.signerInfos[index].digestAlgorithm.algorithmId
     const hashAlgorithm = crypto.getAlgorithmByOID(algorithmId)
 
     this.digestInfo = {
-      digest: await crypto.digest(
-        hashAlgorithm.name,
-        new Uint8Array(this.data)
-      ),
+      digest: await crypto.digest(hashAlgorithm.name, new Uint8Array(this.data)),
       algorithm: hashAlgorithm.name
     }
   }
@@ -202,12 +187,7 @@ export class AS2SignedData {
     throw new Error('Message digest not yet calculated.')
   }
 
-  async sign ({
-    cert,
-    key,
-    algorithm,
-    addSigners
-  }: SignMethodOptions): Promise<Buffer> {
+  async sign ({ cert, key, algorithm, addSigners }: SignMethodOptions): Promise<Buffer> {
     await this._addSigner({ cert, key, algorithm })
 
     if (Array.isArray(addSigners)) {
@@ -226,10 +206,7 @@ export class AS2SignedData {
     return Buffer.from(signedDataBuffer)
   }
 
-  async verify (
-    cert?: string | Buffer | PemFile,
-    debugMode?: boolean
-  ): Promise<boolean> {
+  async verify (cert?: string | Buffer | PemFile, debugMode?: boolean): Promise<boolean> {
     const index = this._findSigner(cert)
 
     if (!isNullOrUndefined(cert) && index === -1) {

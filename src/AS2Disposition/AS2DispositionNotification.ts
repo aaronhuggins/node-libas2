@@ -10,14 +10,9 @@ const { LIBRAY_NAME_VERSION, CRLF } = AS2Constants
  * @param {'incoming'|'outgoing'} [notificationType='outgoing'] - The type of notification; default is 'outgoing'.
  */
 export class AS2DispositionNotification {
-  constructor (
-    notification?: AS2DispositionNotification,
-    notificationType: 'incoming' | 'outgoing' = 'outgoing'
-  ) {
+  constructor (notification?: AS2DispositionNotification, notificationType: 'incoming' | 'outgoing' = 'outgoing') {
     Object.assign(this, notification, {
-      headers: Array.isArray(notification.headers)
-        ? Object.assign({}, ...notification.headers)
-        : notification.headers
+      headers: Array.isArray(notification.headers) ? Object.assign({}, ...notification.headers) : notification.headers
     })
 
     if (isNullOrUndefined(notificationType)) {
@@ -89,27 +84,20 @@ export class AS2DispositionNotification {
         ? 'rfc822; ' + this.finalRecipient
         : this.finalRecipient.type + '; ' + this.finalRecipient.value
 
-    if (this.originalMessageId)
-      result['Original-Message-ID'] = this.originalMessageId
+    if (this.originalMessageId) result['Original-Message-ID'] = this.originalMessageId
 
     result['Disposition'] =
       this.disposition.type +
       '/' +
-      (this.disposition.type === 'automatic-action'
-        ? 'MDN-sent-automatically'
-        : 'MDN-sent-manually') +
+      (this.disposition.type === 'automatic-action' ? 'MDN-sent-automatically' : 'MDN-sent-manually') +
       '; ' +
       (this.disposition.processed ? 'processed' : 'failed') +
       (this.disposition.description
-        ? '/' +
-          this.disposition.description.type +
-          '=' +
-          this.disposition.description.text
+        ? '/' + this.disposition.description.type + '=' + this.disposition.description.text
         : '')
 
     if (this.receivedContentMic) {
-      result['Received-Content-MIC'] =
-        this.receivedContentMic.mic + ', ' + this.receivedContentMic.algorithm
+      result['Received-Content-MIC'] = this.receivedContentMic.mic + ', ' + this.receivedContentMic.algorithm
     }
 
     return result

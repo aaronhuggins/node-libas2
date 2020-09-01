@@ -44,13 +44,8 @@ export function isMdn (node: AS2MimeNode): boolean {
  * @param {Function} [callback] - A callback to manipulate values as they are parsed; only use if second argument is a boolean.
  * @returns {object} The headers as an object of key/value pairs.
  */
-export function parseHeaderString (
-  headers: string
-): { [key: string]: string | string[] }
-export function parseHeaderString (
-  headers: string,
-  keyToLowerCase: boolean
-): { [key: string]: string | string[] }
+export function parseHeaderString (headers: string): { [key: string]: string | string[] }
+export function parseHeaderString (headers: string, keyToLowerCase: boolean): { [key: string]: string | string[] }
 export function parseHeaderString (
   headers: string,
   callback: (key: string, value: string) => [string, any]
@@ -84,10 +79,7 @@ export function parseHeaderString (
   // Assign one or more values to each header key.
   for (const line of lines) {
     const index = line.indexOf(':')
-    let [key, value] = callback(
-      line.slice(0, index).trim(),
-      line.slice(index + 1).trim()
-    )
+    let [key, value] = callback(line.slice(0, index).trim(), line.slice(index + 1).trim())
 
     if (keyToLowerCase) key = key.toLowerCase()
 
@@ -129,10 +121,7 @@ export function isNullOrUndefined (value: any): boolean {
  * @returns {boolean} True if a valid pkcs7 value.
  */
 export function isSMime (value: string) {
-  return (
-    value.toLowerCase().startsWith('application/pkcs7') ||
-    value.toLowerCase().startsWith('application/x-pkcs7')
-  )
+  return value.toLowerCase().startsWith('application/pkcs7') || value.toLowerCase().startsWith('application/x-pkcs7')
 }
 
 /** Transforms a payload into a canonical text format per RFC 5751 section 3.1.1.
@@ -141,10 +130,7 @@ export function isSMime (value: string) {
 export function canonicalTransform (node: AS2MimeNode): void {
   const newline = /\r\n|\r|\n/gu
 
-  if (
-    node.getHeader('content-type').slice(0, 5) === 'text/' &&
-    !isNullOrUndefined(node.content)
-  ) {
+  if (node.getHeader('content-type').slice(0, 5) === 'text/' && !isNullOrUndefined(node.content)) {
     node.content = (node.content as string).replace(newline, CRLF)
   }
 
@@ -163,9 +149,7 @@ export function getSigningOptions (sign: SigningOptions): SigningOptions {
  * @param {EncryptionOptions} encrypt - Options for encryption.
  * @returns {EncryptionOptions} A normalized option object.
  */
-export function getEncryptionOptions (
-  encrypt: EncryptionOptions
-): EncryptionOptions {
+export function getEncryptionOptions (encrypt: EncryptionOptions): EncryptionOptions {
   return { cert: '', encryption: ENCRYPTION.AES256_CBC, ...encrypt }
 }
 
@@ -173,9 +157,7 @@ export function getEncryptionOptions (
  * @param {AgreementOptions} agreement - Options for partner agreement.
  * @returns {AS2Agreement} A normalized option object.
  */
-export function getAgreementOptions (
-  agreement: AgreementOptions
-): AS2Agreement {
+export function getAgreementOptions (agreement: AgreementOptions): AS2Agreement {
   return new AS2Agreement(agreement as any)
 }
 
@@ -186,9 +168,7 @@ export function getAgreementOptions (
  * @returns {IncomingMessage} The incoming message, including Buffer properties rawBody and rawResponse,
  * and convenience methods for mime() and json().
  */
-export async function request (
-  options: RequestOptions
-): Promise<IncomingMessage> {
+export async function request (options: RequestOptions): Promise<IncomingMessage> {
   return new Promise((resolve, reject) => {
     try {
       const { body, params, url } = options
@@ -205,40 +185,36 @@ export async function request (
         }
       })
       const responseBufs: Buffer[] = []
-      const req = protocol.request(
-        internalUrl,
-        options,
-        (response: IncomingMessage) => {
-          const bodyBufs: Buffer[] = []
+      const req = protocol.request(internalUrl, options, (response: IncomingMessage) => {
+        const bodyBufs: Buffer[] = []
 
-          response.on('data', (data: Buffer) => bodyBufs.push(data))
-          response.on('error', error => reject(error))
-          response.on('end', () => {
-            const rawResponse = Buffer.concat(responseBufs)
-            const rawBody = Buffer.concat(bodyBufs)
-            response.rawBody = rawBody
-            response.rawResponse = rawResponse
-            response.mime = async () => {
-              return await AS2Parser.parse(
-                rawResponse.length > 0
-                  ? rawResponse
-                  : {
-                      headers: response.rawHeaders,
-                      content: rawBody
-                    }
-              )
+        response.on('data', (data: Buffer) => bodyBufs.push(data))
+        response.on('error', error => reject(error))
+        response.on('end', () => {
+          const rawResponse = Buffer.concat(responseBufs)
+          const rawBody = Buffer.concat(bodyBufs)
+          response.rawBody = rawBody
+          response.rawResponse = rawResponse
+          response.mime = async () => {
+            return await AS2Parser.parse(
+              rawResponse.length > 0
+                ? rawResponse
+                : {
+                    headers: response.rawHeaders,
+                    content: rawBody
+                  }
+            )
+          }
+          response.json = function json () {
+            try {
+              return JSON.parse(rawBody.toString('utf8'))
+            } catch (err) {
+              return err
             }
-            response.json = function json () {
-              try {
-                return JSON.parse(rawBody.toString('utf8'))
-              } catch (err) {
-                return err
-              }
-            }
-            resolve(response)
-          })
-        }
-      )
+          }
+          resolve(response)
+        })
+      })
       req.on('error', error => reject(error))
       req.on('socket', (socket: Socket) => {
         socket.on('data', (data: Buffer) => responseBufs.push(data))

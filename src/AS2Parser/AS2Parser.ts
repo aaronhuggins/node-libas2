@@ -45,11 +45,7 @@ export class AS2Parser {
     return headers
   }
 
-  private static transformNodeLike (
-    nodeLike: any,
-    rootNode?: AS2MimeNode,
-    parentNode?: AS2MimeNode
-  ): AS2MimeNode {
+  private static transformNodeLike (nodeLike: any, rootNode?: AS2MimeNode, parentNode?: AS2MimeNode): AS2MimeNode {
     const currentNode = new AS2MimeNode({
       filename:
         nodeLike.headers['content-disposition'] !== undefined
@@ -61,10 +57,7 @@ export class AS2Parser {
         nodeLike.content === undefined || this.isStream(nodeLike.content)
           ? nodeLike.content
           : Buffer.from(nodeLike.content),
-      boundary:
-        nodeLike._multipartBoundary === false
-          ? undefined
-          : nodeLike._multipartBoundary,
+      boundary: nodeLike._multipartBoundary === false ? undefined : nodeLike._multipartBoundary,
       boundaryPrefix: false
     })
 
@@ -73,9 +66,7 @@ export class AS2Parser {
     currentNode.rootNode = rootNode
     currentNode.parentNode = parentNode
     currentNode.nodeCounter =
-      typeof nodeLike.nodeCounter === 'object'
-        ? nodeLike.nodeCounter.count
-        : nodeLike.nodeCounter
+      typeof nodeLike.nodeCounter === 'object' ? nodeLike.nodeCounter.count : nodeLike.nodeCounter
     currentNode.parsed = true
     currentNode.raw = nodeLike.raw
 
@@ -94,14 +85,9 @@ export class AS2Parser {
    * @param {Buffer|Stream|string|ParseOptions} content - A raw MIME message or ParseOptions object.
    * @returns {Promise<AS2MimeNode>} The MIME document as an AS2MimeNode.
    */
-  static async parse (
-    content: Buffer | Stream | string | ParseOptions
-  ): Promise<AS2MimeNode> {
+  static async parse (content: Buffer | Stream | string | ParseOptions): Promise<AS2MimeNode> {
     const options: ParseOptions = content as ParseOptions
-    if (
-      typeof options.headers !== 'undefined' &&
-      typeof options.content !== 'undefined'
-    ) {
+    if (typeof options.headers !== 'undefined' && typeof options.content !== 'undefined') {
       if (this.isStream(options.content)) {
         options.content = await this.streamToBuffer(options.content as Stream)
       }

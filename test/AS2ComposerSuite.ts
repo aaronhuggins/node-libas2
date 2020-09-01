@@ -10,13 +10,7 @@ import {
   parseHeaderString,
   request
 } from '../core'
-import {
-  AS2_TESTING_CERT,
-  LIBAS2_EDI,
-  LIBAS2_CERT,
-  LIBAS2_KEY,
-  SIGNED_MDN
-} from './Helpers'
+import { AS2_TESTING_CERT, LIBAS2_EDI, LIBAS2_CERT, LIBAS2_KEY, SIGNED_MDN } from './Helpers'
 import * as assert from 'assert'
 import { DateTime } from 'luxon'
 import * as nock from 'nock'
@@ -134,16 +128,11 @@ describe('AS2Composer', async () => {
     const startTime = now.set({ hour: 5, minute: 30, second: 0 })
     const endTime = now.set({ hour: 19, minute: 0, second: 0 })
     const inServiceHours = now > startTime && now < endTime
-    const pingResult = await ping.promise.probe(
-      'as2testing.centralus.cloudapp.azure.com',
-      { timeout: 1, min_reply: 2 }
-    )
+    const pingResult = await ping.promise.probe('as2testing.centralus.cloudapp.azure.com', { timeout: 1, min_reply: 2 })
 
     if (!inServiceHours || !pingResult.alive) {
       // If now is outside the service hours, nock is used to provide a pre-defined mdn.
-      const [headers, ...body] = SIGNED_MDN.split(
-        /(\r\n|\n\r|\n)(\r\n|\n\r|\n)/gu
-      )
+      const [headers, ...body] = SIGNED_MDN.split(/(\r\n|\n\r|\n)(\r\n|\n\r|\n)/gu)
 
       nock('https://as2testing.centralus.cloudapp.azure.com')
         .post('/pub/Receive.rsb')
@@ -167,8 +156,7 @@ describe('AS2Composer', async () => {
         partner: {
           name: 'AS2 Testing',
           id: 'as2testing',
-          url:
-            'https://as2testing.centralus.cloudapp.azure.com/pub/Receive.rsb',
+          url: 'https://as2testing.centralus.cloudapp.azure.com/pub/Receive.rsb',
           file: 'EDIX12',
           certificate: AS2_TESTING_CERT,
           encrypt: AS2Constants.ENCRYPTION.AES192_GCM,
@@ -180,10 +168,6 @@ describe('AS2Composer', async () => {
     const mdn = await result.mime()
     const message = await mdn.verify({ cert: AS2_TESTING_CERT })
 
-    assert.strictEqual(
-      message instanceof AS2MimeNode,
-      true,
-      'Signed MDN could not be verified.'
-    )
+    assert.strictEqual(message instanceof AS2MimeNode, true, 'Signed MDN could not be verified.')
   }).timeout(5000)
 })

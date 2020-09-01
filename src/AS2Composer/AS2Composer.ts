@@ -51,9 +51,7 @@ export class AS2Composer {
     if (Array.isArray(options.additionalHeaders)) {
       this._headers.push(...options.additionalHeaders)
     } else {
-      for (const [key, value] of Object.entries(
-        options.additionalHeaders || {}
-      )) {
+      for (const [key, value] of Object.entries(options.additionalHeaders || {})) {
         this._headers.push({ key, value })
       }
     }
@@ -107,8 +105,7 @@ export class AS2Composer {
     // Set MDN headers.
     if (this._agreement.host.mdn) {
       const mdn = this._agreement.host.mdn
-      let options =
-        'signed-receipt-protocol=optional,pkcs7-signature; signed-receipt-micalg=optional,sha-256'
+      let options = 'signed-receipt-protocol=optional,pkcs7-signature; signed-receipt-micalg=optional,sha-256'
 
       if (mdn.signing) {
         options = `signed-receipt-protocol=required,pkcs7-signature; signed-receipt-micalg=required,${mdn.signing.toLowerCase()}`
@@ -118,10 +115,7 @@ export class AS2Composer {
       this.message.setHeader(STANDARD_HEADER.MDN_OPTIONS, options)
 
       if (mdn.async) {
-        this.message.setHeader(
-          STANDARD_HEADER.MDN_URL,
-          this._agreement.host.url.toString()
-        )
+        this.message.setHeader(STANDARD_HEADER.MDN_URL, this._agreement.host.url.toString())
       }
     }
 

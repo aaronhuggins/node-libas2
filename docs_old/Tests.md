@@ -94,15 +94,10 @@ should make a valid AS2 exchange.
   const startTime = now.set({ hour: 5, minute: 30, second: 0 })
   const endTime = now.set({ hour: 19, minute: 0, second: 0 })
   const inServiceHours = now > startTime && now < endTime
-  const pingResult = await ping.promise.probe(
-    'as2testing.centralus.cloudapp.azure.com',
-    { timeout: 1, min_reply: 2 }
-  )
+  const pingResult = await ping.promise.probe('as2testing.centralus.cloudapp.azure.com', { timeout: 1, min_reply: 2 })
   if (!inServiceHours || !pingResult.alive) {
     // If now is outside the service hours, nock is used to provide a pre-defined mdn.
-    const [headers, ...body] = Helpers_1.SIGNED_MDN.split(
-      /(\r\n|\n\r|\n)(\r\n|\n\r|\n)/gu
-    )
+    const [headers, ...body] = Helpers_1.SIGNED_MDN.split(/(\r\n|\n\r|\n)(\r\n|\n\r|\n)/gu)
     nock('https://as2testing.centralus.cloudapp.azure.com')
       .post('/pub/Receive.rsb')
       .reply(200, body.join('').trimLeft(), core_1.parseHeaderString(headers))
@@ -135,11 +130,7 @@ should make a valid AS2 exchange.
   const result = await core_1.request(await composer.toRequestOptions())
   const mdn = await result.mime()
   const message = await mdn.verify({ cert: Helpers_1.AS2_TESTING_CERT })
-  assert.strictEqual(
-    message instanceof core_1.AS2MimeNode,
-    true,
-    'Signed MDN could not be verified.'
-  )
+  assert.strictEqual(message instanceof core_1.AS2MimeNode, true, 'Signed MDN could not be verified.')
 }
 ```
 
@@ -251,9 +242,7 @@ should parse a pem file to der and infer type.
 
 ```js
 const undefinedOrNullPem = new core_1.PemFile(null)
-const keyPem = new core_1.PemFile(
-  Helpers_1.LIBAS2_KEY.replace('PRIVATE KEY', 'PUBLIC KEY')
-)
+const keyPem = new core_1.PemFile(Helpers_1.LIBAS2_KEY.replace('PRIVATE KEY', 'PUBLIC KEY'))
 const certificateDerPem = Buffer.from(
   Helpers_1.LIBAS2_CERT.split('\n') // Split on new line
     .filter(line => !line.includes('-BEGIN') && !line.includes('-END')) // Remove header/trailer
@@ -301,10 +290,7 @@ should support decrypting DES3 with RSAES-OAEP.
   })
   const encryptedBin = fs_1.readFileSync('test/temp-data/encrypt-cms.bin')
   const encrypted = new core_1.AS2EnvelopedData(encryptedBin, true)
-  const decrypted = await encrypted.decrypt(
-    Helpers_1.LIBAS2_CERT,
-    Helpers_1.LIBAS2_KEY
-  )
+  const decrypted = await encrypted.decrypt(Helpers_1.LIBAS2_CERT, Helpers_1.LIBAS2_KEY)
   assert.strictEqual(decrypted.toString('utf8'), content)
 }
 ```
@@ -328,10 +314,7 @@ should support decrypting DES3 with RSAES-PKCS1-v1_5.
   })
   const encryptedBin = fs_1.readFileSync('test/temp-data/encrypt-cms.bin')
   const encrypted = new core_1.AS2EnvelopedData(encryptedBin, true)
-  const decrypted = await encrypted.decrypt(
-    Helpers_1.LIBAS2_CERT,
-    Helpers_1.LIBAS2_KEY
-  )
+  const decrypted = await encrypted.decrypt(Helpers_1.LIBAS2_CERT, Helpers_1.LIBAS2_KEY)
   assert.strictEqual(decrypted.toString('utf8'), content)
 }
 ```
@@ -355,10 +338,7 @@ should support decrypting AES with RSAES-PKCS1-v1_5.
   })
   const encryptedBin = fs_1.readFileSync('test/temp-data/encrypt-cms.bin')
   const encrypted = new core_1.AS2EnvelopedData(encryptedBin, true)
-  const decrypted = await encrypted.decrypt(
-    Helpers_1.LIBAS2_CERT,
-    Helpers_1.LIBAS2_KEY
-  )
+  const decrypted = await encrypted.decrypt(Helpers_1.LIBAS2_CERT, Helpers_1.LIBAS2_KEY)
   assert.strictEqual(decrypted.toString('utf8'), content)
 }
 ```
@@ -369,10 +349,7 @@ should support encrypting DES3 with RSAES-OAEP.
 ;async () => {
   const content = 'Something to Encrypt\r\n'
   const envelopedData = new core_1.AS2EnvelopedData(Buffer.from(content))
-  const encrypted = await envelopedData.encrypt(
-    Helpers_1.LIBAS2_CERT,
-    'des-EDE3-CBC'
-  )
+  const encrypted = await envelopedData.encrypt(Helpers_1.LIBAS2_CERT, 'des-EDE3-CBC')
   fs_1.writeFileSync('test/temp-data/encrypt-pkijs.bin', encrypted)
   const decrypted = await Helpers_1.openssl({
     command: 'cms',
@@ -384,10 +361,7 @@ should support encrypting DES3 with RSAES-OAEP.
       in: 'test/temp-data/encrypt-cms.bin'
     }
   })
-  const decryptedBuf = await envelopedData.decrypt(
-    Helpers_1.LIBAS2_CERT,
-    Helpers_1.LIBAS2_KEY
-  )
+  const decryptedBuf = await envelopedData.decrypt(Helpers_1.LIBAS2_CERT, Helpers_1.LIBAS2_KEY)
   assert.strictEqual(decrypted, content)
   assert.strictEqual(decryptedBuf.toString('utf8'), content)
 }
@@ -415,8 +389,7 @@ should construct disposition from plain object options..
 ```js
 ;async () => {
   const opts = {
-    explanation:
-      'Sample explanation. An error or a success message in human readable form might go here.',
+    explanation: 'Sample explanation. An error or a success message in human readable form might go here.',
     notification: {
       disposition: {
         type: 'automatic-action',
@@ -437,8 +410,7 @@ should construct disposition from complete options..
 ```js
 ;async () => {
   const opts = {
-    explanation:
-      'Sample explanation. An error or a success message in human readable form might go here.',
+    explanation: 'Sample explanation. An error or a success message in human readable form might go here.',
     notification: new core_1.AS2DispositionNotification({
       disposition: {
         type: 'automatic-action',
@@ -448,8 +420,7 @@ should construct disposition from complete options..
       originalMessageId: core_1.AS2MimeNode.generateMessageId(),
       mdnGateway: 'NOPE.FAKE.NOTREAL',
       receivedContentMic: {
-        mic:
-          'VGhlc2UgYXJlIHRoZSB2b3lhZ2VzIG9mIHRoZSBzdGFyc2hpcCBFbnRlcnByaXNlLg==',
+        mic: 'VGhlc2UgYXJlIHRoZSB2b3lhZ2VzIG9mIHRoZSBzdGFyc2hpcCBFbnRlcnByaXNlLg==',
         algorithm: core_1.AS2Constants.SIGNING.SHA256
       },
       headers: {
@@ -476,15 +447,11 @@ should derive disposition from incoming disposition.
     cert: Helpers_1.AS2_TESTING_CERT
   })
   const disposition = await mime.dispositionIn()
-  mime.childNodes[0].childNodes[1].content =
-    'X-CUSTOM-DATA: Some MDNs might have custom headers.'
+  mime.childNodes[0].childNodes[1].content = 'X-CUSTOM-DATA: Some MDNs might have custom headers.'
   const customDisposition = new core_1.AS2Disposition(mime)
   assert.strictEqual(dispositionSigned instanceof core_1.AS2Disposition, true)
   assert.strictEqual(disposition instanceof core_1.AS2Disposition, true)
-  assert.strictEqual(
-    customDisposition.notification.headers['X-CUSTOM-DATA'],
-    'Some MDNs might have custom headers.'
-  )
+  assert.strictEqual(customDisposition.notification.headers['X-CUSTOM-DATA'], 'Some MDNs might have custom headers.')
   assert.throws(() => {
     new core_1.AS2Disposition({})
   })
@@ -503,9 +470,7 @@ should generate outgoing disposition from incoming message.
 ;async () => {
   // Fake header is only for testing purposes; real AS2 messages should already posess this header.
   const fakeAs2Header = 'AS2-To: fake.recipient.unreal\r\n'
-  const mime = await AS2Parser_1.AS2Parser.parse(
-    fakeAs2Header + Helpers_1.SIGNED_CONTENT
-  )
+  const mime = await AS2Parser_1.AS2Parser.parse(fakeAs2Header + Helpers_1.SIGNED_CONTENT)
   const dispositionMime = await mime.dispositionOut({
     agreement: {
       host: {
@@ -554,9 +519,7 @@ should generate outgoing disposition from incoming message.
     true
   )
   await core_1.AS2Disposition.outgoing({
-    node: await AS2Parser_1.AS2Parser.parse(
-      fakeAs2Header + Helpers_1.MIME_CONTENT
-    ),
+    node: await AS2Parser_1.AS2Parser.parse(fakeAs2Header + Helpers_1.MIME_CONTENT),
     agreement: {
       host: {
         name: 'LibAS2 Community',
@@ -571,9 +534,7 @@ should generate outgoing disposition from incoming message.
     }
   })
   await core_1.AS2Disposition.outgoing({
-    node: await AS2Parser_1.AS2Parser.parse(
-      fakeAs2Header + Helpers_1.ENCRYPTED_CONTENT
-    ),
+    node: await AS2Parser_1.AS2Parser.parse(fakeAs2Header + Helpers_1.ENCRYPTED_CONTENT),
     agreement: {
       host: {
         name: 'LibAS2 Community',
@@ -592,9 +553,7 @@ should generate outgoing disposition from incoming message.
   })
   // Force a disposition decryption failure message
   await core_1.AS2Disposition.outgoing({
-    node: await AS2Parser_1.AS2Parser.parse(
-      fakeAs2Header + Helpers_1.ENCRYPTED_CONTENT
-    ),
+    node: await AS2Parser_1.AS2Parser.parse(fakeAs2Header + Helpers_1.ENCRYPTED_CONTENT),
     agreement: {
       host: {
         name: 'LibAS2 Community',
@@ -613,9 +572,7 @@ should generate outgoing disposition from incoming message.
   })
   // Force a disposition verification failure message
   await core_1.AS2Disposition.outgoing({
-    node: await AS2Parser_1.AS2Parser.parse(
-      fakeAs2Header + Helpers_1.SIGNED_CONTENT
-    ),
+    node: await AS2Parser_1.AS2Parser.parse(fakeAs2Header + Helpers_1.SIGNED_CONTENT),
     agreement: {
       host: {
         name: 'LibAS2 Community',
@@ -633,9 +590,7 @@ should generate outgoing disposition from incoming message.
   })
   // Force a disposition generic failure message
   await core_1.AS2Disposition.outgoing({
-    node: await AS2Parser_1.AS2Parser.parse(
-      fakeAs2Header + Helpers_1.MIME_CONTENT
-    ),
+    node: await AS2Parser_1.AS2Parser.parse(fakeAs2Header + Helpers_1.MIME_CONTENT),
     agreement: {
       host: {
         name: 'LibAS2 Community',
@@ -703,10 +658,7 @@ should return empty package json.
 
 ```js
 ;async () => {
-  const mockManager = ts_mock_imports_1.ImportMock.mockFunction(
-    fs,
-    'readFileSync'
-  )
+  const mockManager = ts_mock_imports_1.ImportMock.mockFunction(fs, 'readFileSync')
   const pkg = core_1.getPackageJson()
   mockManager.restore()
   assert.deepStrictEqual(pkg, {})
@@ -872,9 +824,7 @@ should parse mime message to AS2MimeNode and match parsed contents.
 ;async () => {
   const result = await core_1.AS2Parser.parse(Helpers_1.ENCRYPTED_CONTENT)
   if (!(result instanceof core_1.AS2MimeNode)) {
-    throw new Error(
-      `Result was not an AS2MimeNode.\nExpected: 'AS2MimeNode'\nReceived: '${result.constructor.name}'`
-    )
+    throw new Error(`Result was not an AS2MimeNode.\nExpected: 'AS2MimeNode'\nReceived: '${result.constructor.name}'`)
   }
   assert.strictEqual(result.raw, Helpers_1.ENCRYPTED_CONTENT)
 }
@@ -900,9 +850,7 @@ should parse options to AS2MimeNode.
 
 ```js
 ;async () => {
-  const [headers, ...body] = Helpers_1.ENCRYPTED_CONTENT.split(
-    /(\r\n|\n\r|\n)(\r\n|\n\r|\n)/gu
-  )
+  const [headers, ...body] = Helpers_1.ENCRYPTED_CONTENT.split(/(\r\n|\n\r|\n)(\r\n|\n\r|\n)/gu)
   const stream = new stream_1.Duplex()
   stream.push(body.join('').trimLeft())
   stream.push(null)

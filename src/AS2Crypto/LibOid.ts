@@ -122,10 +122,7 @@ export class LibObjectID {
       ['2.5.4.13', 'description'],
       ['2.5.4.15', 'businessCategory'],
       ['2.5.4.17', 'postalCode'],
-      [
-        '1.3.6.1.4.1.311.60.2.1.2',
-        'jurisdictionOfIncorporationStateOrProvinceName'
-      ],
+      ['1.3.6.1.4.1.311.60.2.1.2', 'jurisdictionOfIncorporationStateOrProvinceName'],
       ['1.3.6.1.4.1.311.60.2.1.3', 'jurisdictionOfIncorporationCountryName'],
 
       // X.509 extension OIDs

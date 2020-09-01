@@ -3,9 +3,7 @@ import * as cp from 'child_process'
 import { readFileSync } from 'fs'
 import { format } from 'util'
 
-export const normalizeLineBreaks = function normalizeLineBreaks (
-  input: string
-) {
+export const normalizeLineBreaks = function normalizeLineBreaks (input: string) {
   const lines = input.split(/\r\n|\n\r|\n/gu)
   const output = []
 
@@ -19,11 +17,7 @@ export const normalizeLineBreaks = function normalizeLineBreaks (
   return output.length > 0 ? output.join(AS2Constants.CRLF) : input
 }
 
-export const run = async function run (
-  command: string,
-  args?: string[] | Buffer,
-  input?: Buffer
-): Promise<string> {
+export const run = async function run (command: string, args?: string[] | Buffer, input?: Buffer): Promise<string> {
   if (Buffer.isBuffer(args) && input === undefined) {
     input = args
     args = undefined
@@ -99,20 +93,9 @@ export const LIBAS2_KEY_PATH = 'test/test-data/libas2community.key'
 export const LIBAS2_EDI = readFileSync(LIBAS2_EDI_PATH, 'utf8')
 export const LIBAS2_CERT = readFileSync(LIBAS2_CERT_PATH, 'utf8')
 export const LIBAS2_KEY = readFileSync(LIBAS2_KEY_PATH, 'utf8')
-export const AS2_TESTING_CERT = readFileSync(
-  'test/test-data/as2testing.cer',
-  'utf8'
-)
+export const AS2_TESTING_CERT = readFileSync('test/test-data/as2testing.cer', 'utf8')
 // Normalize line breaks for test files; original environment saved the files as crlf.
-export const ENCRYPTED_CONTENT = normalizeLineBreaks(
-  readFileSync('test/test-data/content.encrypted.txt', 'utf8')
-)
-export const SIGNED_CONTENT = normalizeLineBreaks(
-  readFileSync('test/test-data/content.signed.txt', 'utf8')
-)
-export const MIME_CONTENT = normalizeLineBreaks(
-  readFileSync('test/test-data/content.mime.txt', 'utf8')
-)
-export const SIGNED_MDN = normalizeLineBreaks(
-  readFileSync('test/test-data/mdn.signed.txt', 'utf8')
-)
+export const ENCRYPTED_CONTENT = normalizeLineBreaks(readFileSync('test/test-data/content.encrypted.txt', 'utf8'))
+export const SIGNED_CONTENT = normalizeLineBreaks(readFileSync('test/test-data/content.signed.txt', 'utf8'))
+export const MIME_CONTENT = normalizeLineBreaks(readFileSync('test/test-data/content.mime.txt', 'utf8'))
+export const SIGNED_MDN = normalizeLineBreaks(readFileSync('test/test-data/mdn.signed.txt', 'utf8'))

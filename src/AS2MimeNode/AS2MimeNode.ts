@@ -1,20 +1,8 @@
 import { Readable } from 'stream'
 import * as MimeNode from 'nodemailer/lib/mime-node'
 import { AS2MimeNodeOptions, DispositionOutOptions } from './Interfaces'
-import {
-  isNullOrUndefined,
-  getSigningOptions,
-  getEncryptionOptions,
-  isSMime,
-  parseHeaderString
-} from '../Helpers'
-import {
-  AS2Crypto,
-  SigningOptions,
-  EncryptionOptions,
-  DecryptionOptions,
-  VerificationOptions
-} from '../AS2Crypto'
+import { isNullOrUndefined, getSigningOptions, getEncryptionOptions, isSMime, parseHeaderString } from '../Helpers'
+import { AS2Crypto, SigningOptions, EncryptionOptions, DecryptionOptions, VerificationOptions } from '../AS2Crypto'
 import { AS2Disposition } from '../AS2Disposition'
 import { hostname } from 'os'
 
@@ -83,10 +71,7 @@ export class AS2MimeNode extends MimeNode {
 
     super(contentType, {
       filename,
-      baseBoundary:
-        !isNullOrUndefined(boundaryPrefix) && isNullOrUndefined(boundary)
-          ? baseBoundary
-          : undefined
+      baseBoundary: !isNullOrUndefined(boundaryPrefix) && isNullOrUndefined(boundary) ? baseBoundary : undefined
     })
 
     this.contentType = contentType
@@ -103,20 +88,12 @@ export class AS2MimeNode extends MimeNode {
     if (!isNullOrUndefined(sign)) this.setSigning(sign)
     if (!isNullOrUndefined(encrypt)) this.setEncryption(encrypt)
     if (!isNullOrUndefined(messageId)) this.setHeader('Message-ID', messageId)
-    if (
-      !isNullOrUndefined(contentDisposition) &&
-      contentDisposition !== false
-    ) {
-      this.setHeader(
-        'Content-Disposition',
-        contentDisposition === true ? 'attachment' : contentDisposition
-      )
+    if (!isNullOrUndefined(contentDisposition) && contentDisposition !== false) {
+      this.setHeader('Content-Disposition', contentDisposition === true ? 'attachment' : contentDisposition)
     }
     if (this.contentType) {
       this.signed = contentType.toLowerCase().startsWith('multipart/signed')
-      this.encrypted = contentType
-        .toLowerCase()
-        .startsWith('multipart/encrypted')
+      this.encrypted = contentType.toLowerCase().startsWith('multipart/encrypted')
       this.smime = isSMime(contentType)
       this.compressed = false
       if (this.smime) {
@@ -244,9 +221,7 @@ export class AS2MimeNode extends MimeNode {
    * @returns {Promise<AS2MimeNode>} The content part of this signed message as an AS2MimeNode.
    */
   async verify (options: VerificationOptions): Promise<AS2MimeNode> {
-    return (await AS2Crypto.verify(this, options))
-      ? this.childNodes[0]
-      : undefined
+    return (await AS2Crypto.verify(this, options)) ? this.childNodes[0] : undefined
   }
 
   /** Convenience method for decrypting this instance.
@@ -303,9 +278,7 @@ export class AS2MimeNode extends MimeNode {
     body: string
   }> {
     const buffer = await this.build()
-    const [headers, ...body] = buffer
-      .toString('utf8')
-      .split(/(\r\n|\n\r|\n)(\r\n|\n\r|\n)/gu)
+    const [headers, ...body] = buffer.toString('utf8').split(/(\r\n|\n\r|\n)(\r\n|\n\r|\n)/gu)
 
     return {
       headers: parseHeaderString(headers),
@@ -319,9 +292,7 @@ export class AS2MimeNode extends MimeNode {
    * @returns {string} A valid message ID for use with MIME.
    */
   static generateMessageId (sender?: string, uniqueId?: string): string {
-    uniqueId = isNullOrUndefined(uniqueId)
-      ? AS2Crypto.generateUniqueId()
-      : uniqueId
+    uniqueId = isNullOrUndefined(uniqueId) ? AS2Crypto.generateUniqueId() : uniqueId
     sender = isNullOrUndefined(sender) ? hostname() || 'localhost' : sender
 
     return '<' + uniqueId + '@' + sender + '>'

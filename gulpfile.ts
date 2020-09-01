@@ -18,21 +18,13 @@ gulp.task('clean', gulp.parallel('clean:dist', 'clean:index'))
 
 gulp.task('compile', shell.task(['tsc']))
 
-gulp.task(
-  'docs',
-  shell.task(['typedoc'])
-)
+gulp.task('docs', shell.task(['typedoc']))
 
 gulp.task('mocha', shell.task(['mocha']))
 
 gulp.task('mocha:coverage', shell.task(['nyc mocha']))
 
-gulp.task(
-  'mocha:xunit',
-  shell.task([
-    'nyc mocha --reporter=xunit --reporter-options output=./coverage/mocha.xml'
-  ])
-)
+gulp.task('mocha:xunit', shell.task(['nyc mocha --reporter=xunit --reporter-options output=./coverage/mocha.xml']))
 
 gulp.task('eslint', shell.task(['prettier-standard --check --lint'], { ignoreErrors: true }))
 
@@ -45,14 +37,8 @@ gulp.task(
   })
 )
 
-gulp.task(
-  'codecov',
-  shell.task(['codecov -t 7f3b18f1-5a06-49da-be74-b71410c39432'])
-)
+gulp.task('codecov', shell.task(['codecov -t 7f3b18f1-5a06-49da-be74-b71410c39432']))
 
-gulp.task(
-  'test',
-  gulp.series(/* gulp.series('mkdir', 'eslint:xunit'), */ 'mocha:xunit')
-)
+gulp.task('test', gulp.series(/* gulp.series('mkdir', 'eslint:xunit'), */ 'mocha:xunit'))
 
 gulp.task('test:local', gulp.series('eslint', 'mocha:coverage'))

@@ -2,12 +2,7 @@ import { AS2Constants } from '../Constants'
 import { AS2MimeNode } from '../AS2MimeNode'
 import { getEncryptionOptions, canonicalTransform } from '../Helpers'
 import * as MimeNode from 'nodemailer/lib/mime-node'
-import {
-  EncryptionOptions,
-  SigningOptions,
-  DecryptionOptions,
-  VerificationOptions
-} from './Interfaces'
+import { EncryptionOptions, SigningOptions, DecryptionOptions, VerificationOptions } from './Interfaces'
 import { AS2Parser } from '../AS2Parser'
 import { randomBytes } from 'crypto'
 import { AS2SignedData } from './AS2SignedData'
@@ -50,9 +45,7 @@ const { CRLF, ENCRYPTION_FILENAME, SIGNATURE_FILENAME, ERROR } = AS2Constants
 /** Class for cryptography methods supported by AS2. */
 export class AS2Crypto {
   private static async buildNode (node: AS2MimeNode): Promise<Buffer> {
-    return node.parsed
-      ? await node.build()
-      : await MimeNode.prototype.build.bind(node)()
+    return node.parsed ? await node.build() : await MimeNode.prototype.build.bind(node)()
   }
 
   /** A fix for signing with Nodemailer to produce verifiable SMIME;
@@ -63,9 +56,7 @@ export class AS2Crypto {
   private static removeTrailingCrLf (buffer: Buffer): Buffer {
     const trailingBytes = buffer.slice(buffer.length - 2, buffer.length)
 
-    return trailingBytes.toString('utf8') === CRLF
-      ? buffer.slice(0, buffer.length - 2)
-      : buffer
+    return trailingBytes.toString('utf8') === CRLF ? buffer.slice(0, buffer.length - 2) : buffer
   }
 
   /** Crux to generate UUID-like random strings
@@ -74,9 +65,7 @@ export class AS2Crypto {
   static generateUniqueId (): string {
     const byteLengths = [4, 2, 2, 2, 6]
 
-    return byteLengths
-      .map(byteLength => randomBytes(byteLength).toString('hex'))
-      .join('-')
+    return byteLengths.map(byteLength => randomBytes(byteLength).toString('hex')).join('-')
   }
 
   /** Method to decrypt an AS2MimeNode from a PKCS7 encrypted AS2MimeNode.
@@ -84,13 +73,8 @@ export class AS2Crypto {
    * @param {DecryptionOptions} options - Options to decrypt the MIME message.
    * @returns {Promise<AS2MimeNode>} The decrypted MIME as an AS2MimeNode.
    */
-  static async decrypt (
-    node: AS2MimeNode,
-    options: DecryptionOptions
-  ): Promise<AS2MimeNode> {
-    const data: Buffer = Buffer.isBuffer(node.content)
-      ? node.content
-      : Buffer.from(node.content as string, 'base64')
+  static async decrypt (node: AS2MimeNode, options: DecryptionOptions): Promise<AS2MimeNode> {
+    const data: Buffer = Buffer.isBuffer(node.content) ? node.content : Buffer.from(node.content as string, 'base64')
     const envelopedData = new AS2EnvelopedData(data, true)
     const buffer = await envelopedData.decrypt(options.cert, options.key)
     const revivedNode = await AS2Parser.parse(buffer)
@@ -103,10 +87,7 @@ export class AS2Crypto {
    * @param {EncryptionOptions} options - Options to encrypt the MIME message.
    * @returns {Promise<AS2MimeNode>} The encrypted MIME as an AS2MimeNode.
    */
-  static async encrypt (
-    node: AS2MimeNode,
-    options: EncryptionOptions
-  ): Promise<AS2MimeNode> {
+  static async encrypt (node: AS2MimeNode, options: EncryptionOptions): Promise<AS2MimeNode> {
     options = getEncryptionOptions(options)
     const rootNode = new AS2MimeNode({
       filename: ENCRYPTION_FILENAME,
@@ -117,10 +98,7 @@ export class AS2Crypto {
 
     const buffer = await AS2Crypto.buildNode(node)
     const envelopedData = new AS2EnvelopedData(buffer)
-    const derBuffer = await envelopedData.encrypt(
-      options.cert,
-      options.encryption
-    )
+    const derBuffer = await envelopedData.encrypt(options.cert, options.encryption)
 
     rootNode.setContent(derBuffer)
 
@@ -133,10 +111,7 @@ export class AS2Crypto {
    * @param {boolean} [getDigest] - Optional argument to return a message digest if verified instead of a boolean.
    * @returns {Promise<boolean|object>} A boolean or digest object indicating if the message was verified.
    */
-  static async verify (
-    node: AS2MimeNode,
-    options: VerificationOptions
-  ): Promise<boolean>
+  static async verify (node: AS2MimeNode, options: VerificationOptions): Promise<boolean>
   static async verify (
     node: AS2MimeNode,
     options: VerificationOptions,
@@ -179,10 +154,7 @@ export class AS2Crypto {
    * @param {EncryptionOptions} options - Options to sign the MIME message.
    * @returns {Promise<AS2MimeNode>} The signed MIME as a multipart AS2MimeNode.
    */
-  static async sign (
-    node: AS2MimeNode,
-    options: SigningOptions
-  ): Promise<AS2MimeNode> {
+  static async sign (node: AS2MimeNode, options: SigningOptions): Promise<AS2MimeNode> {
     const rootNode = new AS2MimeNode({
       contentType: `multipart/signed; protocol="application/pkcs7-signature"; micalg=${options.algorithm};`,
       encrypt: (node as any)._encrypt
@@ -206,9 +178,7 @@ export class AS2Crypto {
 
     canonicalTransform(contentNode)
 
-    const canonical = AS2Crypto.removeTrailingCrLf(
-      await AS2Crypto.buildNode(contentNode)
-    )
+    const canonical = AS2Crypto.removeTrailingCrLf(await AS2Crypto.buildNode(contentNode))
 
     const signedData = new AS2SignedData(canonical)
     const derBuffer = await signedData.sign({
@@ -231,20 +201,14 @@ export class AS2Crypto {
   /** Not yet implemented; do not use.
    * @throws ERROR.NOT_IMPLEMENTED
    */
-  static async compress (
-    node: AS2MimeNode,
-    options: any
-  ): Promise<AS2MimeNode> {
+  static async compress (node: AS2MimeNode, options: any): Promise<AS2MimeNode> {
     throw new Error(ERROR.NOT_IMPLEMENTED)
   }
 
   /** Not yet implemented; do not use.
    * @throws ERROR.NOT_IMPLEMENTED
    */
-  static async decompress (
-    node: AS2MimeNode,
-    options: any
-  ): Promise<AS2MimeNode> {
+  static async decompress (node: AS2MimeNode, options: any): Promise<AS2MimeNode> {
     throw new Error(ERROR.NOT_IMPLEMENTED)
   }
 }

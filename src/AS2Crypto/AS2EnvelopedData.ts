@@ -98,10 +98,8 @@ export class AS2EnvelopedData {
 
   private _getCryptoInfo (index: number = 0) {
     const crypto = pkijs.getCrypto()
-    const algorithmId = this.enveloped.recipientInfos[index].value
-      .keyEncryptionAlgorithm.algorithmId
-    const encryptionId = this.enveloped.encryptedContentInfo
-      .contentEncryptionAlgorithm.algorithmId
+    const algorithmId = this.enveloped.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmId
+    const encryptionId = this.enveloped.encryptedContentInfo.contentEncryptionAlgorithm.algorithmId
     const encryptionIdParams = crypto.getAlgorithmByOID(encryptionId)
     let mode = CRYPTO_MODE.PKIJS_SUPPORTED
     let algorithm = encryptionIdParams.name
@@ -131,15 +129,12 @@ export class AS2EnvelopedData {
     }
   ) {
     const crypto = pkijs.getCrypto()
-    const schema = this.enveloped.recipientInfos[index].value
-      .keyEncryptionAlgorithm.algorithmParams
+    const schema = this.enveloped.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmParams
     let encryptedKey
 
     if (options.rsaOaep) {
       const rsaOAEPParams = new pkijs.RSAESOAEPParams({ schema })
-      const hashAlgorithm = crypto.getAlgorithmByOID(
-        rsaOAEPParams.hashAlgorithm.algorithmId
-      )
+      const hashAlgorithm = crypto.getAlgorithmByOID(rsaOAEPParams.hashAlgorithm.algorithmId)
       const privateKey = await crypto.importKey(
         'pkcs8',
         options.recipientPrivateKey,
@@ -155,8 +150,7 @@ export class AS2EnvelopedData {
       encryptedKey = await crypto.decrypt(
         privateKey.algorithm,
         privateKey,
-        this.enveloped.recipientInfos[index].value.encryptedKey.valueBlock
-          .valueHex
+        this.enveloped.recipientInfos[index].value.encryptedKey.valueBlock.valueHex
       )
     } else {
       const decryptedPayload = privateDecrypt(
@@ -168,39 +162,22 @@ export class AS2EnvelopedData {
           }),
           padding: RSA_PKCS1_PADDING
         },
-        Buffer.from(
-          this.enveloped.recipientInfos[index].value.encryptedKey.valueBlock
-            .valueHex
-        )
+        Buffer.from(this.enveloped.recipientInfos[index].value.encryptedKey.valueBlock.valueHex)
       )
       encryptedKey = new Uint8Array(decryptedPayload).buffer
     }
 
-    return await crypto.importKey(
-      'raw',
-      encryptedKey,
-      options.algorithm,
-      true,
-      ['decrypt']
-    )
+    return await crypto.importKey('raw', encryptedKey, options.algorithm, true, ['decrypt'])
   }
 
-  private async _extendedDecrypt (
-    decryptionKey: ArrayBuffer,
-    algorithm: string
-  ) {
+  private async _extendedDecrypt (decryptionKey: ArrayBuffer, algorithm: string) {
     const crypto = pkijs.getCrypto()
-    const ivBuffer = this.enveloped.encryptedContentInfo
-      .contentEncryptionAlgorithm.algorithmParams.valueBlock.valueHex
+    const ivBuffer = this.enveloped.encryptedContentInfo.contentEncryptionAlgorithm.algorithmParams.valueBlock.valueHex
     const ivView = new Uint8Array(ivBuffer)
     let dataBuffer = new ArrayBuffer(0)
 
-    if (
-      this.enveloped.encryptedContentInfo.encryptedContent.idBlock
-        .isConstructed === false
-    ) {
-      dataBuffer = this.enveloped.encryptedContentInfo.encryptedContent
-        .valueBlock.valueHex
+    if (this.enveloped.encryptedContentInfo.encryptedContent.idBlock.isConstructed === false) {
+      dataBuffer = this.enveloped.encryptedContentInfo.encryptedContent.valueBlock.valueHex
     } else {
       let _iteratorNormalCompletion = true
       let _didIteratorError = false
@@ -210,9 +187,7 @@ export class AS2EnvelopedData {
 
       try {
         for (
-          _iterator = this.enveloped.encryptedContentInfo.encryptedContent.valueBlock.value[
-            Symbol.iterator
-          ]();
+          _iterator = this.enveloped.encryptedContentInfo.encryptedContent.valueBlock.value[Symbol.iterator]();
           !(_iteratorNormalCompletion = (_step = _iterator.next()).done);
           _iteratorNormalCompletion = true
         ) {
@@ -263,10 +238,7 @@ export class AS2EnvelopedData {
     )
   }
 
-  private async _extendedEncrypt (
-    content: ArrayBuffer,
-    algorithm: { name: string; length: number }
-  ) {
+  private async _extendedEncrypt (content: ArrayBuffer, algorithm: { name: string; length: number }) {
     const crypto = pkijs.getCrypto()
     const ivLength = 8
     const ivBuffer = new ArrayBuffer(ivLength)
@@ -278,11 +250,7 @@ export class AS2EnvelopedData {
 
     pkijs.getRandomValues(ivView)
 
-    const encryptedContent = await crypto.encrypt(
-      { name: algorithm.name, iv: ivView },
-      sessionKey,
-      contentView
-    )
+    const encryptedContent = await crypto.encrypt({ name: algorithm.name, iv: ivView }, sessionKey, contentView)
     this.enveloped.version = 2
     this.enveloped.encryptedContentInfo = new pkijs.EncryptedContentInfo({
       contentType: new ObjectID({ name: 'data' }).id,
@@ -299,36 +267,22 @@ export class AS2EnvelopedData {
 
     const oaepOID = crypto.getOIDByAlgorithm({ name: 'RSA-OAEP' })
 
-    for (
-      let index = 0;
-      index < this.enveloped.recipientInfos.length;
-      index += 1
-    ) {
-      if (
-        this.enveloped.recipientInfos[index].value.keyEncryptionAlgorithm
-          .algorithmId !== oaepOID
-      ) {
+    for (let index = 0; index < this.enveloped.recipientInfos.length; index += 1) {
+      if (this.enveloped.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmId !== oaepOID) {
         throw new Error(
           'Not supported encryption scheme, only RSA-OAEP is supported for key transport encryption scheme'
         )
       }
 
-      const schema = this.enveloped.recipientInfos[index].value
-        .keyEncryptionAlgorithm.algorithmParams
+      const schema = this.enveloped.recipientInfos[index].value.keyEncryptionAlgorithm.algorithmParams
       const rsaOAEPParams = new pkijs.RSAESOAEPParams({ schema })
-      const hashAlgorithm = crypto.getAlgorithmByOID(
-        rsaOAEPParams.hashAlgorithm.algorithmId
-      )
+      const hashAlgorithm = crypto.getAlgorithmByOID(rsaOAEPParams.hashAlgorithm.algorithmId)
 
       if ('name' in hashAlgorithm === false) {
-        throw new Error(
-          `Incorrect or unsupported OID for hash algorithm: ${rsaOAEPParams.hashAlgorithm.algorithmId}`
-        )
+        throw new Error(`Incorrect or unsupported OID for hash algorithm: ${rsaOAEPParams.hashAlgorithm.algorithmId}`)
       }
 
-      const publicKey = await this.enveloped.recipientInfos[
-        index
-      ].value.recipientCertificate.getPublicKey({
+      const publicKey = await this.enveloped.recipientInfos[index].value.recipientCertificate.getPublicKey({
         algorithm: {
           algorithm: {
             name: 'RSA-OAEP',
@@ -339,14 +293,8 @@ export class AS2EnvelopedData {
           usages: ['encrypt', 'wrapKey']
         }
       })
-      const encryptedKey = await crypto.encrypt(
-        publicKey.algorithm,
-        publicKey,
-        exportedSessionKey
-      )
-      this.enveloped.recipientInfos[
-        index
-      ].value.encryptedKey = new asn1js.OctetString({
+      const encryptedKey = await crypto.encrypt(publicKey.algorithm, publicKey, exportedSessionKey)
+      this.enveloped.recipientInfos[index].value.encryptedKey = new asn1js.OctetString({
         valueHex: encryptedKey
       })
     }
@@ -374,10 +322,7 @@ export class AS2EnvelopedData {
     return Buffer.from(envelopedDataBuffer)
   }
 
-  async decrypt (
-    cert: string | Buffer | PemFile,
-    key: string | Buffer | PemFile
-  ) {
+  async decrypt (cert: string | Buffer | PemFile, key: string | Buffer | PemFile) {
     const certificate = this._toCertificate(cert)
     const privateKey = new PemFile(key).data
     const cryptoInfo = this._getCryptoInfo()
@@ -403,10 +348,7 @@ export class AS2EnvelopedData {
         })
       }
 
-      this.data = await this._extendedDecrypt(
-        decryptionKey,
-        cryptoInfo.algorithm
-      )
+      this.data = await this._extendedDecrypt(decryptionKey, cryptoInfo.algorithm)
     }
 
     return Buffer.from(this.data || '')

@@ -1,10 +1,4 @@
-import {
-  AS2Disposition,
-  AS2DispositionOptions,
-  AS2DispositionNotification,
-  AS2MimeNode,
-  AS2Constants
-} from '../core'
+import { AS2Disposition, AS2DispositionOptions, AS2DispositionNotification, AS2MimeNode, AS2Constants } from '../core'
 import * as assert from 'assert'
 import { AS2Parser } from '../src/AS2Parser'
 import {
@@ -20,8 +14,7 @@ import {
 describe('AS2Disposition', () => {
   it('should construct disposition from plain object options.', async () => {
     const opts: AS2DispositionOptions = {
-      explanation:
-        'Sample explanation. An error or a success message in human readable form might go here.',
+      explanation: 'Sample explanation. An error or a success message in human readable form might go here.',
       notification: {
         disposition: {
           type: 'automatic-action',
@@ -40,8 +33,7 @@ describe('AS2Disposition', () => {
 
   it('should construct disposition from complete options.', async () => {
     const opts: AS2DispositionOptions = {
-      explanation:
-        'Sample explanation. An error or a success message in human readable form might go here.',
+      explanation: 'Sample explanation. An error or a success message in human readable form might go here.',
       notification: new AS2DispositionNotification({
         disposition: {
           type: 'automatic-action',
@@ -51,8 +43,7 @@ describe('AS2Disposition', () => {
         originalMessageId: AS2MimeNode.generateMessageId(),
         mdnGateway: 'NOPE.FAKE.NOTREAL',
         receivedContentMic: {
-          mic:
-            'VGhlc2UgYXJlIHRoZSB2b3lhZ2VzIG9mIHRoZSBzdGFyc2hpcCBFbnRlcnByaXNlLg==',
+          mic: 'VGhlc2UgYXJlIHRoZSB2b3lhZ2VzIG9mIHRoZSBzdGFyc2hpcCBFbnRlcnByaXNlLg==',
           algorithm: AS2Constants.SIGNING.SHA256
         },
         headers: {
@@ -78,16 +69,12 @@ describe('AS2Disposition', () => {
     })
     const disposition = await mime.dispositionIn()
 
-    mime.childNodes[0].childNodes[1].content =
-      'X-CUSTOM-DATA: Some MDNs might have custom headers.'
+    mime.childNodes[0].childNodes[1].content = 'X-CUSTOM-DATA: Some MDNs might have custom headers.'
     const customDisposition = new AS2Disposition(mime)
 
     assert.strictEqual(dispositionSigned instanceof AS2Disposition, true)
     assert.strictEqual(disposition instanceof AS2Disposition, true)
-    assert.strictEqual(
-      customDisposition.notification.headers['X-CUSTOM-DATA'],
-      'Some MDNs might have custom headers.'
-    )
+    assert.strictEqual(customDisposition.notification.headers['X-CUSTOM-DATA'], 'Some MDNs might have custom headers.')
     assert.throws(() => {
       new AS2Disposition({} as any)
     })
