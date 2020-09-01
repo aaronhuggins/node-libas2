@@ -1,8 +1,8 @@
-const fs = require('fs')
-const gulp = require('gulp')
-const shell = require('gulp-shell')
+import * as fs from 'fs'
+import * as gulp from 'gulp'
+import * as shell from 'gulp-shell'
 
-gulp.task('mkdir', async done => {
+gulp.task('mkdir', async (done: Function) => {
   if (!fs.existsSync('coverage')) {
     fs.mkdirSync('coverage')
   }
