@@ -1,1 +1,3 @@
 docs/lcov-report/**
+dist/**
+webpack.config.js
