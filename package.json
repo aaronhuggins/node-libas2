@@ -10,7 +10,7 @@
   ],
   "scripts": {
     "prepack": "gulp compile",
-    "postpack": "gulp clean",
+    "postpack": "gulp clean:dist",
     "test": "gulp mocha:coverage"
   },
   "keywords": [
@@ -50,6 +50,7 @@
     "@types/nodemailer": "^6.4.0",
     "@types/ping": "^0.2.0",
     "@types/pkijs": "0.0.4",
+    "del-cli": "^3.0.1",
     "dts-bundle-webpack": "^1.0.2",
     "gulp": "^4.0.2",
     "gulp-shell": "^0.8.0",
