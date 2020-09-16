@@ -85,7 +85,7 @@ export class AS2Host extends AS2Trading {
         this.privateKey = host.privateKey instanceof PemFile ? host.privateKey : new PemFile(host.privateKey)
 
         if (this.privateKey.type !== 'PRIVATE_KEY') {
-          throw new Error(ERROR.WRONG_PEM_FILE + ' expected PRIVATE_KEY, but received ' + this.certificate.type)
+          throw new Error(ERROR.WRONG_PEM_FILE + ' expected PRIVATE_KEY, but received ' + this.privateKey.type)
         }
       } else {
         throw new Error(ERROR.MISSING_PARTNER_KEY)
