@@ -263,7 +263,8 @@ export class AS2Disposition {
     if (options.agreement.partner.mdn && options.agreement.partner.mdn.signing) {
       mdnMime = await mdnMime.sign({
         cert: options.agreement.host.certificate,
-        key: options.agreement.host.privateKey
+        key: options.agreement.host.privateKey,
+        algorithm: options.agreement.partner.mdn.signing
       })
     }
 
