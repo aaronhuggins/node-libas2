@@ -111,13 +111,7 @@ export class AS2SignedData {
   }
 
   private _getCertAlgorithmId (certificate: any) {
-    const rsaPssId = new ObjectID({ name: 'RSA-PSS' }).id
-
-    if (certificate.signatureAlgorithm.algorithmId === rsaPssId) {
-      return rsaPssId
-    }
-
-    return certificate.subjectPublicKeyInfo.algorithm.algorithmId
+    return certificate.signatureAlgorithm.algorithmId;
   }
 
   private async _addSigner ({ cert, key, algorithm }: SignMethodOptions) {
